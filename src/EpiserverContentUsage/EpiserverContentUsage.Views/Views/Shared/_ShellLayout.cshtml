@@ -11,13 +11,16 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>Content Security Policy Management</title>
+        <title>Optimizely Content Usage</title>
 
         <!-- Shell -->
         @ClientResources.RenderResources("ShellCore")
 
         <!-- LightTheme -->
         @ClientResources.RenderResources("ShellCoreLightTheme")
+
+        <!-- Admin -->
+        @ClientResources.RenderResources("Admin")
     </head>
     <body>
         @Html.CreatePlatformNavigationMenu()
