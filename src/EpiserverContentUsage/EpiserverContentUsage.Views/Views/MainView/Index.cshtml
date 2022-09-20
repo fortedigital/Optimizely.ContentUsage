@@ -1,0 +1,18 @@
+@using EpiserverContentUsage.Extensions
+@using EpiserverContentUsage.ViewModels
+@model MainViewViewModel
+
+@{
+    Layout = "_ShellLayout";
+}
+
+<noscript>You need to enable JavaScript to run this app.</noscript>
+<div id="react-app"></div>
+<script type="text/javascript">const appModel = @Html.Serialized(Model.FrontendAppModel);</script>
+<script src="/_content/EpiserverContentUsage/react-app.js"></script>
+
+
+
+        
+
+

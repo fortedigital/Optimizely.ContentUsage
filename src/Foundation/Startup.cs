@@ -35,6 +35,7 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.Linq;
 using UNRVLD.ODP.VisitorGroups.Initilization;
+using EpiserverContentUsage.Api.Extensions;
 
 namespace Foundation
 {
@@ -200,6 +201,8 @@ namespace Foundation
 
             // Add Welcome DAM
             services.AddDAMUi();
+            
+            services.AddEpiContentUsageSwagger();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -209,6 +212,8 @@ namespace Foundation
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseSwagger();
+                app.UseSwaggerUI();
             }
 
             app.UseGetaCategories();
