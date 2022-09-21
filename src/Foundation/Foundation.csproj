@@ -67,7 +67,6 @@
 		<Folder Include="wwwroot\" />
 	</ItemGroup>
 	<ItemGroup>
-	  <ProjectReference Include="..\EpiserverContentUsage.Api\EpiserverContentUsage.Api.csproj" />
 	  <ProjectReference Include="..\EpiserverContentUsage\EpiserverContentUsage.csproj" />
 	</ItemGroup>
 </Project>
