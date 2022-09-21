@@ -15,11 +15,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 		setup.cmd = setup.cmd
 		setup.sh = setup.sh
+		src\pack.proj = src\pack.proj
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EpiserverContentUsage", "src\EpiserverContentUsage\EpiserverContentUsage.csproj", "{690D27B2-8356-428C-9F59-116DDE623D13}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EpiserverContentUsage.Api", "src\EpiserverContentUsage.Api\EpiserverContentUsage.Api.csproj", "{D6E06298-682C-4F22-98DC-E72474CE02B7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
