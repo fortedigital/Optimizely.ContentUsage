@@ -33,7 +33,7 @@ module.exports = (env, argv) => {
         },
         output: {
             filename: '[name].js',
-            path: path.resolve(__dirname, 'wwwroot')
+            path: path.resolve(__dirname, 'module/ClientResources')
         },
         resolve: {
             extensions: ['.ts', '.tsx', '.js']

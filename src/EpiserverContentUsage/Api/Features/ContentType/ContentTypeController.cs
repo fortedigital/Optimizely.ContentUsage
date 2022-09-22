@@ -1,4 +1,6 @@
-﻿using EPiServer.Core;
+﻿using System.Collections.Generic;
+using System.Linq;
+using EPiServer.Core;
 using EpiserverContentUsage.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;

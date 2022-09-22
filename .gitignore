@@ -93,5 +93,5 @@ src/Foundation/modules/
 /src/Foundation/wwwroot/scss/main.min.css.map
 /log.txt
 
-/src/EpiserverContentUsage/wwwroot
+/src/EpiserverContentUsage/module/ClientResources/
 /src/EpiserverContentUsage/Frontend/dtos.ts

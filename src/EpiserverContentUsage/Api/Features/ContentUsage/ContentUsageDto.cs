@@ -1,4 +1,7 @@
-﻿namespace EpiserverContentUsage.Api.Features.ContentUsage;
+﻿using System;
+using System.Collections.Generic;
+
+namespace EpiserverContentUsage.Api.Features.ContentUsage;
 
 public class ContentUsageDto
 {
