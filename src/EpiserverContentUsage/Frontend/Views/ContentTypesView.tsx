@@ -1,41 +1,49 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  ContentArea,
-  DataTable,
-  DataTableBody,
-  DataTableCell,
-  DataTableColumnHeaderCell,
-  DataTableColumnManageButton,
-  DataTableContent,
-  DataTableHeaderRow,
-  DataTablePagination,
-  DataTableRow,
-  DataTableToolbar,
-  Search,
-  SortDirection,
-  Typography,
-  Workspace,
-} from "@episerver/ui-framework";
-import { ContentType, TableColumn } from "../types";
+import { ContentArea, Workspace } from "@episerver/ui-framework";
+import { ContentType } from "../types";
 import { useDataLoading } from "../Lib/hooks/useDataLoading";
+import {
+  Dropdown,
+  Grid,
+  GridCell,
+  GridContainer,
+  Input,
+  PaginationControls,
+  Spinner,
+  Table,
+  Typography,
+} from "optimizely-oui";
+
+type TableColumn = "guid" | "name" | "displayName" | "type" | "usageCount";
+
+enum SortDirection {
+  Ascending = "asc",
+  Descending = "desc",
+}
 
 const ROWS_PER_PAGE_OPTIONS = [10, 20, 30];
 
-const ContentTypesView = ({ endpointUrl }: { endpointUrl: string }) => {
+interface ContentTypesViewProps {
+  endpointUrl: string;
+}
+
+const ContentTypesView = ({ endpointUrl }: ContentTypesViewProps) => {
   const [contentTypes, setContentTypes] = useState<ContentType[]>([]);
   const [searchValue, setSearchValue] = useState<string>("");
   const [sortBy, setSortBy] = useState<TableColumn | null>(null);
-  const [sortDirection, setSortDirection] = useState<SortDirection>(0);
-  const [startRow, setStartRow] = useState<number>(0);
+  const [sortDirection, setSortDirection] = useState<SortDirection>(
+    SortDirection.Ascending
+  );
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const [rowsPerPage, setRowsPerPage] = useState<number>(
     ROWS_PER_PAGE_OPTIONS[0]
   );
   const [tableColumns, setTableColumns] = useState([
-    { name: "guid", value: "GUID", width: "auto", show: false },
-    { name: "name", value: "Name", width: "auto", show: false },
-    { name: "displayName", value: "Display name", width: "55%", show: true },
-    { name: "type", value: "Type", width: "30%", show: true },
-    { name: "usageCount", value: "Usage count", width: "15%", show: true },
+    { name: "guid", value: "GUID", show: true, width: "320px" },
+    { name: "displayName", value: "Display name", show: true },
+    { name: "name", value: "Name", show: true },
+    { name: "type", value: "Type", show: true },
+    { name: "usageCount", value: "Usage count", show: true },
   ]);
 
   const [loaded, response] = useDataLoading<ContentType[]>(endpointUrl);
@@ -44,28 +52,46 @@ const ContentTypesView = ({ endpointUrl }: { endpointUrl: string }) => {
     if (loaded) setContentTypes(response.data);
   }, [loaded, response]);
 
-  const onTableSort = useCallback(
-    (column: TableColumn, direction: SortDirection) => {
-      setStartRow(0);
+  const handleTableSort = useCallback(
+    (column: TableColumn) => {
+      // If the user isn't switching sort columns, toggle the sort direction
+      const sortToggleMap = {
+        [SortDirection.Ascending]: SortDirection.Descending,
+        [SortDirection.Descending]: SortDirection.Ascending,
+      };
+      let newOrder = SortDirection.Ascending;
+
+      if (sortBy === column) {
+        newOrder = sortToggleMap[sortDirection];
+      }
+
+      setCurrentPage(1);
       setSortBy(column);
-      setSortDirection(direction);
+      setSortDirection(newOrder);
     },
-    [setStartRow, setSortBy, setSortDirection]
+    [setCurrentPage, setSortBy, setSortDirection, sortBy, sortDirection]
   );
 
-  const onTableSearch = useCallback(
+  const handleSearch = useCallback(
     (value: string) => {
-      setStartRow(0);
+      setCurrentPage(1);
       setSearchValue(value);
     },
-    [setStartRow, setSearchValue]
+    [setCurrentPage, setSearchValue]
   );
 
+  const onSearchValueChange: React.KeyboardEventHandler<HTMLInputElement> =
+    useCallback((event) => {
+      event.persist();
+      // @ts-ignore
+      handleSearch(event.target.value);
+    }, []);
+
   const changeColumnVisibility = useCallback(
-    (displayName: string, show: boolean) => {
+    (name: string, show: boolean) => {
       const newTableColumns = tableColumns.slice(0);
       const columnIndex = newTableColumns.findIndex(
-        (column) => column.value === displayName
+        (column) => column.name === name
       );
       newTableColumns[columnIndex].show = show;
       if (!show && newTableColumns[columnIndex].name === sortBy)
@@ -75,20 +101,17 @@ const ContentTypesView = ({ endpointUrl }: { endpointUrl: string }) => {
     [tableColumns, setTableColumns, setSortBy, sortBy]
   );
 
-  const onTableColumnManageSelectChange = useCallback(
-    (column: string, checked: boolean) =>
-      changeColumnVisibility(column, checked),
-    [changeColumnVisibility]
+  const onColumnVisiblityChange = useCallback(
+    (name: string, show: boolean) => {
+      if (tableColumns.filter((column) => column.show).length > 1 || show)
+        changeColumnVisibility(name, show);
+      return;
+    },
+    [tableColumns, changeColumnVisibility]
   );
-
-  const visibleColumns = tableColumns.map((column) => ({
-    name: column.value,
-    visible: column.show,
-  }));
 
   const filteredItems = useMemo(() => {
     return contentTypes
-      .slice(0)
       .filter((value) => {
         if (!searchValue) return true;
 
@@ -120,104 +143,196 @@ const ContentTypesView = ({ endpointUrl }: { endpointUrl: string }) => {
         if (!sortBy) return 0;
         const sortField =
           sortBy === "displayName" && !prevValue[sortBy] ? "name" : sortBy;
-        if (sortDirection === 1)
+        if (sortDirection === SortDirection.Descending)
           return prevValue[sortField] > nextValue[sortField] ? -1 : 1;
-        else if (sortDirection === 2)
+        else if (sortDirection === SortDirection.Ascending)
           return prevValue[sortField] > nextValue[sortField] ? 1 : -1;
         else return 0;
       });
   }, [contentTypes, sortDirection, sortBy, searchValue]);
 
   const tableItems = useMemo(
-    () => filteredItems.slice(startRow, startRow + rowsPerPage),
-    [filteredItems, startRow, rowsPerPage]
+    () =>
+      filteredItems.slice(
+        (currentPage - 1) * rowsPerPage,
+        (currentPage - 1) * rowsPerPage + rowsPerPage
+      ),
+    [filteredItems, currentPage, rowsPerPage]
   );
 
-  return loaded ? (
+  const totalPages = useMemo(
+    () => Math.ceil(filteredItems.length / rowsPerPage),
+    [filteredItems, rowsPerPage]
+  );
+
+  return (
     <div className="content-area-container">
       <ContentArea>
         <Workspace>
-          <div className="epi-main-header">
-            <Typography tag="h2" use="headline4">
-              Content Usage
-            </Typography>
-          </div>
+          <GridContainer className="content-types-list">
+            <Grid>
+              <GridCell large={12} medium={8} small={4}>
+                <div className="epi-main-header">
+                  <Typography type="header4" tag="h2">
+                    Content Usage
+                  </Typography>
+                </div>
+              </GridCell>
 
-          <DataTable>
-            <DataTableToolbar>
-              <Search
-                value={searchValue}
-                onValueChange={onTableSearch}
-                onSearch={onTableSearch}
-              />
-            </DataTableToolbar>
-            <DataTableContent>
-              <DataTableHeaderRow>
-                <>
-                  {tableColumns
-                    .filter((column) => column.show)
-                    .map(({ name, value, width }) => (
-                      <DataTableColumnHeaderCell
-                        key={name}
-                        sortDirection={sortBy === name && sortDirection}
-                        onSort={(_, sortDirection) =>
-                          onTableSort(name as TableColumn, sortDirection)
-                        }
-                        style={{ width: width }}
-                      >
-                        {value}
-                      </DataTableColumnHeaderCell>
+              <GridCell
+                large={8}
+                medium={6}
+                small={2}
+                className="content-types-list-filters"
+              >
+                <Input
+                  displayError={false}
+                  hasClearButton={searchValue.length !== 0}
+                  hasSpellCheck={false}
+                  isFilter={false}
+                  isRequired={false}
+                  leftIconName="search"
+                  onChange={onSearchValueChange}
+                  onClearButtonClick={() => handleSearch("")}
+                  placeholder="Search"
+                  type="text"
+                  isDisabled={!loaded}
+                  value={searchValue}
+                />
+
+                <Dropdown
+                  arrowIcon="down"
+                  buttonContent={{
+                    label: `Show columns`,
+                    content:
+                      tableColumns.filter((column) => !column.show).length === 0
+                        ? `All`
+                        : `Mixed`,
+                  }}
+                  isDisabled={!loaded}
+                  style="plain"
+                  shouldHideChildrenOnClick={false}
+                >
+                  <Dropdown.Contents>
+                    {tableColumns.map(({ name, value, show }) => (
+                      <Dropdown.ListItem key={name}>
+                        <Dropdown.BlockLink
+                          isItemSelected={show}
+                          isMultiSelect={true}
+                          onClick={() => onColumnVisiblityChange(name, !show)}
+                        >
+                          <Dropdown.BlockLinkText text={value} />
+                        </Dropdown.BlockLink>
+                      </Dropdown.ListItem>
                     ))}
+                  </Dropdown.Contents>
+                </Dropdown>
 
-                  <DataTableColumnManageButton
-                    columns={visibleColumns}
-                    onSelectChange={onTableColumnManageSelectChange}
+                <Dropdown
+                  arrowIcon="down"
+                  buttonContent={{
+                    label: `Row count`,
+                    content: rowsPerPage.toString(),
+                  }}
+                  isDisabled={!loaded}
+                  style="plain"
+                >
+                  <Dropdown.Contents>
+                    {ROWS_PER_PAGE_OPTIONS.map((option) => (
+                      <Dropdown.ListItem key={option}>
+                        <Dropdown.BlockLink
+                          onClick={() => setRowsPerPage(option)}
+                        >
+                          <Dropdown.BlockLinkText
+                            isItemSelected={option === rowsPerPage}
+                            text={option}
+                          />
+                        </Dropdown.BlockLink>
+                      </Dropdown.ListItem>
+                    ))}
+                  </Dropdown.Contents>
+                </Dropdown>
+              </GridCell>
+
+              <GridCell large={12}>
+                <Table shouldAddHover>
+                  <Table.THead>
+                    <Table.TR>
+                      {tableColumns
+                        .filter((column) => column.show)
+                        .map(({ name, value, width }) => (
+                          <Table.TH
+                            width={width}
+                            sorting={{
+                              canSort: true,
+                              handleSort: () =>
+                                handleTableSort(name as TableColumn),
+                              order: sortDirection,
+                            }}
+                            key={name}
+                          >
+                            {value}
+                          </Table.TH>
+                        ))}
+                    </Table.TR>
+                  </Table.THead>
+
+                  <Table.TBody>
+                    {tableItems.length > 0 ? (
+                      tableItems.map(
+                        ({ guid, name, displayName, type, usageCount }) => (
+                          <Table.TR key={guid} onClick={() => {}}>
+                            {tableColumns
+                              .filter((column) => column.show)
+                              .map((column) => (
+                                <Table.TD key={column.name}>
+                                  <>
+                                    {column.name === "guid" ? guid : ""}
+                                    {column.name === "name" ? name : ""}
+                                    {column.name === "displayName"
+                                      ? displayName || name
+                                      : ""}
+                                    {column.name === "type" ? type : ""}
+                                    {column.name === "usageCount"
+                                      ? usageCount
+                                      : ""}
+                                  </>
+                                </Table.TD>
+                              ))}
+                          </Table.TR>
+                        )
+                      )
+                    ) : loaded ? (
+                      <Table.TR>
+                        <Table.TD>No matching results</Table.TD>
+                      </Table.TR>
+                    ) : (
+                      <Table.TR>
+                        <Table.TD>
+                          <Spinner />
+                        </Table.TD>
+                      </Table.TR>
+                    )}
+                  </Table.TBody>
+                </Table>
+              </GridCell>
+
+              {filteredItems.length > rowsPerPage && (
+                <GridCell large={12} medium={8} small={4}>
+                  <PaginationControls
+                    currentPage={currentPage}
+                    goToPage={(page: number) => setCurrentPage(page)}
+                    isLoading={!loaded}
+                    totalPages={totalPages}
                   />
-                </>
-              </DataTableHeaderRow>
-              <DataTableBody>
-                {tableItems.length > 0 ? (
-                  tableItems.map(
-                    ({ guid, name, displayName, type, usageCount }) => (
-                      <DataTableRow key={guid} rowId={guid} onClick={() => {}}>
-                        {tableColumns
-                          .filter((column) => column.show)
-                          .map((column) => (
-                            <DataTableCell key={column.name}>
-                              <>
-                                {column.name === "guid" ? guid : ""}
-                                {column.name === "name" ? name : ""}
-                                {column.name === "displayName"
-                                  ? displayName || name
-                                  : ""}
-                                {column.name === "type" ? type : ""}
-                                {column.name === "usageCount" ? usageCount : ""}
-                              </>
-                            </DataTableCell>
-                          ))}
-                      </DataTableRow>
-                    )
-                  )
-                ) : (
-                  <DataTableRow rowId="noResults">
-                    <DataTableCell>No matching results</DataTableCell>
-                  </DataTableRow>
-                )}
-              </DataTableBody>
-            </DataTableContent>
-            <DataTablePagination
-              startRow={startRow}
-              totalRowCount={filteredItems.length}
-              rowsPerPage={rowsPerPage}
-              rowsPerPageOptions={ROWS_PER_PAGE_OPTIONS}
-              onChangePage={(startRow) => setStartRow(startRow)}
-              onChangeRowsPerPage={(rowsPerPage) => setRowsPerPage(rowsPerPage)}
-            />
-          </DataTable>
+                </GridCell>
+              )}
+            </Grid>
+          </GridContainer>
         </Workspace>
       </ContentArea>
     </div>
-  ) : null;
+  );
 };
 
 export default ContentTypesView;

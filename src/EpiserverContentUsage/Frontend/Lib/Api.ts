@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from "axios";
+import axios from "axios";
 
 export class Api {
   public async get<ResponseSchema>(url: string) {

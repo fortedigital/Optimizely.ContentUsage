@@ -8,12 +8,13 @@
     "watch": "webpack --mode=development --watch"
   },
   "dependencies": {
+    "@episerver/ui-framework": "^0.17.1",
     "axios": "^0.27.2",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "optimizely-oui": "^49.0.0",
+    "react": "^16.11.0",
+    "react-dom": "^16.11.0"
   },
   "devDependencies": {
-    "@episerver/ui-framework": "^0.17.1",
     "@types/react": "^18.0.17",
     "@types/react-dom": "^18.0.6",
     "css-loader": "^6.7.1",
