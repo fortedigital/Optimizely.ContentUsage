@@ -9,4 +9,16 @@
       margin-left: 8px;
     }
   }
+
+  .content-types-list-table {
+    tr.hover--disabled:hover {
+      td {
+        background: inherit;
+      }
+    }
+
+    .oui-spinner {
+      margin: 30px;
+    }
+  }
 }

@@ -21,7 +21,7 @@ enum SortDirection {
   Descending = "desc",
 }
 
-const ROWS_PER_PAGE_OPTIONS = [10, 20, 30];
+const ROWS_PER_PAGE_OPTIONS = [15, 30, 60];
 
 interface ContentTypesViewProps {
   endpointUrl: string;
@@ -255,7 +255,10 @@ const ContentTypesView = ({ endpointUrl }: ContentTypesViewProps) => {
               </GridCell>
 
               <GridCell large={12}>
-                <Table shouldAddHover>
+                <Table
+                  className="content-types-list-table"
+                  shouldAddHover={loaded}
+                >
                   <Table.THead>
                     <Table.TR>
                       {tableColumns
@@ -281,7 +284,7 @@ const ContentTypesView = ({ endpointUrl }: ContentTypesViewProps) => {
                     {tableItems.length > 0 ? (
                       tableItems.map(
                         ({ guid, name, displayName, type, usageCount }) => (
-                          <Table.TR key={guid} onClick={() => {}}>
+                          <Table.TR key={guid} onRowClick={() => {}}>
                             {tableColumns
                               .filter((column) => column.show)
                               .map((column) => (
@@ -303,12 +306,12 @@ const ContentTypesView = ({ endpointUrl }: ContentTypesViewProps) => {
                         )
                       )
                     ) : loaded ? (
-                      <Table.TR>
+                      <Table.TR noHover>
                         <Table.TD>No matching results</Table.TD>
                       </Table.TR>
                     ) : (
-                      <Table.TR>
-                        <Table.TD>
+                      <Table.TR noHover>
+                        <Table.TD colSpan={5} textAlign="center">
                           <Spinner />
                         </Table.TD>
                       </Table.TR>
