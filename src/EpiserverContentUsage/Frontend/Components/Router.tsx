@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { RouterContext } from "../router";
+import { RouterContext } from "../router-context";
 
 type RouterContextFunction = (
   guid?: string | null,
   setGuid?: (guid: string | null) => void,
   goBack?: () => void,
-  viewContentTypeUsage?: (guid: string) => void,
+  viewContentTypeUsage?: (guid: string) => void
 ) => React.ReactNode;
 
 const Router = ({ children }: { children: RouterContextFunction }) => {
@@ -14,7 +14,9 @@ const Router = ({ children }: { children: RouterContextFunction }) => {
   const viewContentTypeUsage = (guid: string) => setGuid(guid);
 
   return (
-    <RouterContext.Provider value={{ guid, setGuid, goBack, viewContentTypeUsage }}>
+    <RouterContext.Provider
+      value={{ guid, setGuid, goBack, viewContentTypeUsage }}
+    >
       {children(guid, setGuid, goBack, viewContentTypeUsage)}
     </RouterContext.Provider>
   );

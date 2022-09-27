@@ -1,28 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import axios from "axios";
-import {
-  Card,
-  ContentArea,
-  DataTable,
-  DataTableBody,
-  DataTableCell,
-  DataTableColumnHeaderCell,
-  DataTableContent,
-  DataTableHeaderRow,
-  DataTableRow,
-  DataTableToolbar,
-  Grid,
-  TextButton,
-  TextField,
-  Typography,
-  Workspace,
-  ClearIcon,
-  Search,
-  Breadcrumb,
-  SortDirection,
-  DataTablePagination,
-  DataTableColumnManageButton,
-} from "@episerver/ui-framework";
+import React from "react";
 import "@episerver/ui-framework/dist/main.css";
 import { AppModel } from "./dtos";
 
