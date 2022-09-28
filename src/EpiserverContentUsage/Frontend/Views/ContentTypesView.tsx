@@ -1,6 +1,12 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { ContentArea, Workspace } from "@episerver/ui-framework";
-import { ContentType } from "../types";
+import { ContentType, SortDirection } from "../types";
 import { useDataLoading } from "../Lib/hooks/useDataLoading";
 import {
   Dropdown,
@@ -13,13 +19,9 @@ import {
   Table,
   Typography,
 } from "optimizely-oui";
+import { RouterContext } from "../router-context";
 
 type TableColumn = "guid" | "name" | "displayName" | "type" | "usageCount";
-
-enum SortDirection {
-  Ascending = "asc",
-  Descending = "desc",
-}
 
 const ROWS_PER_PAGE_OPTIONS = [15, 30, 60];
 
@@ -45,6 +47,7 @@ const ContentTypesView = ({ endpointUrl }: ContentTypesViewProps) => {
     { name: "type", value: "Type", show: true },
     { name: "usageCount", value: "Usage count", show: true },
   ]);
+  const { viewContentTypeUsage } = useContext(RouterContext);
 
   const [loaded, response] = useDataLoading<ContentType[]>(endpointUrl);
 
@@ -163,6 +166,11 @@ const ContentTypesView = ({ endpointUrl }: ContentTypesViewProps) => {
   const totalPages = useMemo(
     () => Math.ceil(filteredItems.length / rowsPerPage),
     [filteredItems, rowsPerPage]
+  );
+
+  const onTableRowClick = useCallback(
+    (guid: string, name: string) => viewContentTypeUsage(guid, name),
+    [viewContentTypeUsage]
   );
 
   return (
@@ -284,7 +292,10 @@ const ContentTypesView = ({ endpointUrl }: ContentTypesViewProps) => {
                     {tableItems.length > 0 ? (
                       tableItems.map(
                         ({ guid, name, displayName, type, usageCount }) => (
-                          <Table.TR key={guid} onRowClick={() => {}}>
+                          <Table.TR
+                            key={guid}
+                            onRowClick={() => onTableRowClick(guid, name)}
+                          >
                             {tableColumns
                               .filter((column) => column.show)
                               .map((column) => (
@@ -307,7 +318,7 @@ const ContentTypesView = ({ endpointUrl }: ContentTypesViewProps) => {
                       )
                     ) : loaded ? (
                       <Table.TR noHover>
-                        <Table.TD>No matching results</Table.TD>
+                        <Table.TD colSpan={5}>No matching results</Table.TD>
                       </Table.TR>
                     ) : (
                       <Table.TR noHover>

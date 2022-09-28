@@ -17,9 +17,13 @@ export const App = ({
 }: AppProps) => {
   return (
     <Router>
-      {(guid) =>
+      {(guid, contentTypeName) =>
         guid ? (
-          <ContentTypeUsageView endpointUrl={getContentUsagesEndpointUrl} />
+          <ContentTypeUsageView
+            endpointUrl={getContentUsagesEndpointUrl}
+            guid={guid}
+            contentTypeName={contentTypeName}
+          />
         ) : (
           <ContentTypesView endpointUrl={getContentTypesEndpointUrl} />
         )

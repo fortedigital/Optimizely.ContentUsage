@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import { Api } from "../Api";
 
 export const useDataLoading = <ResponseSchema>(
-  url: string
+  url: string,
+  params?: Record<string, string>
 ): [boolean, AxiosResponse<ResponseSchema>] => {
   const api = new Api();
   const [loaded, setLoaded] = useState<boolean>(false);
@@ -11,7 +12,11 @@ export const useDataLoading = <ResponseSchema>(
     useState<AxiosResponse<ResponseSchema> | null>(null);
 
   const loadData = async () => {
-    const response = await api.get<ResponseSchema>(url);
+    let queryParams;
+    if (params) queryParams = new URLSearchParams(params).toString();
+    const response = await api.get<ResponseSchema>(
+      queryParams ? `${url}?${queryParams}` : url
+    );
     return response;
   };
 
