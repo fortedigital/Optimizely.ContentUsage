@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using EpiserverContentUsage.Api.Features.ContentUsage;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,6 +17,7 @@ public static class WebApplicationBuilderExtensions
 {
     public static void AddEpiContentUsageSwagger(this IServiceCollection services)
     {
+        services.AddControllers().AddApplicationPart(typeof(ContentUsageController).Assembly);
         services.AddEndpointsApiExplorer();
         services.ConfigureOptions<MyConfigureOptions>();
         services.AddSwaggerGen(options => options.SchemaFilter<EnumSchemaFilter>());

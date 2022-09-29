@@ -11,6 +11,9 @@
         <PackageLicenseUrl>https://github.com/fortedigital/EpiContentUsage/blob/master/LICENSE</PackageLicenseUrl>
         <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
         <NuspecProperties>version=$(Version)</NuspecProperties>
+
+        <!-- Include symbol files (*.pdb) in the built .nupkg -->
+        <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
         
         <TargetFramework>net6.0</TargetFramework>
         <AddRazorSupportForMvc>true</AddRazorSupportForMvc>
