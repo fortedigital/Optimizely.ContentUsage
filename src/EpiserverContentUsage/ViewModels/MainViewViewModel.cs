@@ -4,12 +4,13 @@ namespace EpiserverContentUsage.ViewModels;
 
 public class MainViewViewModel
 {
-    public MainViewViewModel(string getContentTypesEndpointUrl, string getContentUsagesEndpointUrl) =>
+    public MainViewViewModel(string moduleBaseUrl, string contentTypesEndpointUrl, string contentUsagesEndpointUrl) =>
         FrontendAppModel =
             new AppModel
             {
-                GetContentTypesEndpointUrl = getContentTypesEndpointUrl,
-                GetContentUsagesEndpointUrl = getContentUsagesEndpointUrl
+                ModuleBaseUrl = moduleBaseUrl,
+                ContentTypesEndpointUrl = contentTypesEndpointUrl,
+                ContentUsagesEndpointUrl = contentUsagesEndpointUrl
             };
 
     public AppModel FrontendAppModel { get; set; }
@@ -18,6 +19,7 @@ public class MainViewViewModel
 [TsInterface]
 public class AppModel
 {
-    public string GetContentTypesEndpointUrl { get; set; }
-    public string GetContentUsagesEndpointUrl { get; set; }
+    public string ModuleBaseUrl { get; set; }
+    public string ContentTypesEndpointUrl { get; set; }
+    public string ContentUsagesEndpointUrl { get; set; }
 }
