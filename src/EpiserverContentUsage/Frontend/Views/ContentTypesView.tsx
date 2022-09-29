@@ -32,13 +32,72 @@ const ContentTypesView = () => {
     ROWS_PER_PAGE_OPTIONS[0]
   );
   const [tableColumns, setTableColumns] = useState([
-    { name: "guid", value: "GUID", show: true, width: "320px" },
+    { name: "guid", value: "GUID", show: true },
     { name: "displayName", value: "Display name", show: true },
     { name: "name", value: "Name", show: true },
     { name: "type", value: "Type", show: true },
     { name: "usageCount", value: "Usage count", show: true },
   ]);
   const navigate = useNavigate();
+
+  type TableColumnWidthCallbackFunction = (
+    guid: boolean,
+    displayName: boolean,
+    name: boolean,
+    type: boolean,
+    usageCount: boolean
+  ) => string;
+
+  const tableColumnWidth = useCallback(
+    (callbackFn: TableColumnWidthCallbackFunction) => {
+      const columns = tableColumns.map((column) => column.show);
+      const [guid, displayName, name, type, usageCount] = columns;
+      return callbackFn(guid, displayName, name, type, usageCount);
+    },
+    [tableColumns]
+  );
+
+  const tableColumnsWidthMap = useMemo(
+    () =>
+      new Map([
+        [
+          "guid",
+          tableColumnWidth((guid, displayName, name, type, usageCount) => {
+            if (!displayName && !name) return "auto";
+            return "320px";
+          }),
+        ],
+        [
+          "displayName",
+          tableColumnWidth((guid, displayName, name, type, usageCount) => {
+            if (!guid) return "auto";
+            return "200px";
+          }),
+        ],
+        ["name", "auto"],
+        [
+          "type",
+          tableColumnWidth((guid, displayName, name, type, usageCount) => {
+            if (!guid || !displayName) return "auto";
+            return "150px";
+          }),
+        ],
+        [
+          "usageCount",
+          tableColumnWidth((guid, displayName, name, type, usageCount) => {
+            if (!guid || !displayName) return "auto";
+            return "120px";
+          }),
+        ],
+        [
+          "actions",
+          tableColumnWidth((guid, displayName, name, type, usageCount) => {
+            return "100px";
+          }),
+        ],
+      ]),
+    [tableColumnWidth]
+  );
 
   const handleTableSort = useCallback(
     (column: TableColumn) => {
@@ -251,9 +310,9 @@ const ContentTypesView = () => {
                 <Table.TR>
                   {tableColumns
                     .filter((column) => column.show)
-                    .map(({ name, value, width }) => (
+                    .map(({ name, value }) => (
                       <Table.TH
-                        width={width}
+                        width={tableColumnsWidthMap.get(name)}
                         sorting={{
                           canSort: true,
                           handleSort: () =>
@@ -265,7 +324,9 @@ const ContentTypesView = () => {
                         {value}
                       </Table.TH>
                     ))}
-                  <Table.TH width="100px"></Table.TH>
+                  <Table.TH
+                    width={tableColumnsWidthMap.get("actions")}
+                  ></Table.TH>
                 </Table.TR>
               </Table.THead>
 
