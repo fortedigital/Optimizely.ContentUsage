@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ContentType, SortDirection } from "../types";
 import {
+  Button,
   Dropdown,
   Grid,
   GridCell,
@@ -10,7 +11,7 @@ import {
   Table,
   Typography,
 } from "optimizely-oui";
-import { useLoaderData, useNavigate } from "react-router-dom";
+import { Link, useLoaderData, useNavigate } from "react-router-dom";
 import { AxiosResponse } from "axios";
 import Layout from "../Components/Layout";
 import { viewContentTypeUsages } from "../routes";
@@ -264,6 +265,7 @@ const ContentTypesView = () => {
                         {value}
                       </Table.TH>
                     ))}
+                  <Table.TH width="100px"></Table.TH>
                 </Table.TR>
               </Table.THead>
 
@@ -290,12 +292,19 @@ const ContentTypesView = () => {
                               </>
                             </Table.TD>
                           ))}
+                        <Table.TD>
+                          <Link to={viewContentTypeUsages(guid)}>
+                            <Button size="small" width="default" isLink>
+                              View usages
+                            </Button>
+                          </Link>
+                        </Table.TD>
                       </Table.TR>
                     )
                   )
                 ) : (
                   <Table.TR noHover>
-                    <Table.TD colSpan={5}>No matching results</Table.TD>
+                    <Table.TD colSpan={6}>No matching results</Table.TD>
                   </Table.TR>
                 )}
               </Table.TBody>

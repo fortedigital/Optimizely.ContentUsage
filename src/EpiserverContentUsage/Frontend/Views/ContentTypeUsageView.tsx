@@ -217,6 +217,11 @@ const ContentTypeUsageView = () => {
     [filteredItems, rowsPerPage]
   );
 
+  const onTableRowClick = useCallback(
+    (editUrl: string) => window.location.assign(editUrl),
+    []
+  );
+
   const response = useLoaderData() as AxiosResponse<ContentTypeUsage[], any>;
   useEffect(() => {
     if (response && response.data) setContentTypeUsages(response.data);
@@ -324,7 +329,7 @@ const ContentTypeUsageView = () => {
           </GridCell>
 
           <GridCell large={12}>
-            <Table className="content-types-list-table" shouldAddHover={false}>
+            <Table className="content-types-list-table" shouldAddHover={true}>
               <Table.THead>
                 <Table.TR>
                   {tableColumns
@@ -360,7 +365,10 @@ const ContentTypeUsageView = () => {
                       pageUrls,
                       editUrl,
                     }) => (
-                      <Table.TR key={id}>
+                      <Table.TR
+                        onRowClick={() => onTableRowClick(editUrl)}
+                        key={id}
+                      >
                         {tableColumns
                           .filter((column) => column.show)
                           .map((column) => (
