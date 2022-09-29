@@ -10,8 +10,9 @@ interface AppProps {
 export const App = ({model}: AppProps) => (
     <Workspace>
         <Card>
-            <TextButton href={model.getContentTypesEndpointUrl}>Content Types Endpoint</TextButton>
-            <TextButton href={model.getContentUsagesEndpointUrl}>Content Usages Endpoint</TextButton>
+            <h1>{model.moduleBaseUrl}</h1>
+            <TextButton href={model.contentTypesEndpointUrl}>Content Types Endpoint</TextButton>
+            <TextButton href={model.contentUsagesEndpointUrl}>Content Usages Endpoint</TextButton>
         </Card>
     </Workspace>
 );
