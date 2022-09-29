@@ -1,18 +1,6 @@
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-import {
-  Breadcrumb,
-  ContentArea,
-  Icon,
-  Workspace,
-} from "@episerver/ui-framework";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { Breadcrumb } from "@episerver/ui-framework";
 import { ContentTypeUsage, SortDirection } from "../types";
-import { useDataLoading } from "../Lib/hooks/useDataLoading";
 import {
   Button,
   Dropdown,
@@ -22,27 +10,18 @@ import {
   Input,
   Link,
   PaginationControls,
-  Spinner,
   Table,
   Typography,
 } from "optimizely-oui";
-import { RouterContext } from "../router-context";
+import { useLoaderData, useNavigate, useParams } from "react-router-dom";
+import { AxiosResponse } from "axios";
+import Layout from "../Components/Layout";
 
 type TableColumn = "guid" | "id" | "name" | "languageBrach" | "pageUrl";
 
 const ROWS_PER_PAGE_OPTIONS = [15, 30, 60];
 
-interface ContentTypeUsageViewProps {
-  endpointUrl: string;
-  guid: string;
-  contentTypeName: string;
-}
-
-const ContentTypeUsageView = ({
-  endpointUrl,
-  guid,
-  contentTypeName,
-}: ContentTypeUsageViewProps) => {
+const ContentTypeUsageView = () => {
   const [contentTypeUsages, setContentTypeUsages] = useState<
     ContentTypeUsage[]
   >([]);
@@ -122,15 +101,9 @@ const ContentTypeUsageView = ({
     [tableColumnWidth]
   );
 
-  const { goBack } = useContext(RouterContext);
-
-  const [loaded, response] = useDataLoading<ContentTypeUsage[]>(endpointUrl, {
-    guid: guid,
-  });
-
-  useEffect(() => {
-    if (loaded) setContentTypeUsages(response.data);
-  }, [loaded, response]);
+  const navigate = useNavigate();
+  const { guid } = useParams();
+  if (!guid) navigate(`/`);
 
   const handleTableSort = useCallback(
     (column: TableColumn) => {
@@ -247,212 +220,198 @@ const ContentTypeUsageView = ({
     [filteredItems, rowsPerPage]
   );
 
+  const response = useLoaderData() as AxiosResponse<ContentTypeUsage[], any>;
+  useEffect(() => {
+    if (response && response.data) setContentTypeUsages(response.data);
+  }, [response]);
+
   return (
-    <div className="content-area-container">
-      <ContentArea>
-        <Workspace>
-          <GridContainer className="content-types-list">
-            <Grid>
-              <GridCell large={12} medium={8} small={4}>
-                <div className="epi-main-header">
-                  <Typography type="header4" tag="h2">
-                    Content Usage
-                  </Typography>
-                </div>
-              </GridCell>
-              <GridCell large={12} medium={8} small={4}>
-                <Breadcrumb
-                  items={[
-                    { title: `Content Usage`, link: ``, level: 1 },
-                    {
-                      title: contentTypeName,
-                      link: ``,
-                      level: 2,
-                      active: true,
-                    },
-                  ]}
-                />
-              </GridCell>
+    <Layout>
+      <GridContainer className="content-types-list">
+        <Grid>
+          <GridCell large={12} medium={8} small={4}>
+            <div className="epi-main-header">
+              <Typography type="header4" tag="h2">
+                Content Usage
+              </Typography>
+            </div>
+          </GridCell>
+          <GridCell large={12} medium={8} small={4}>
+            <Breadcrumb
+              items={[
+                { title: `Content Usage`, link: ``, level: 1 },
+                {
+                  title: "",
+                  link: ``,
+                  level: 2,
+                  active: true,
+                },
+              ]}
+            />
+          </GridCell>
 
-              <GridCell
-                large={8}
-                medium={6}
-                small={2}
-                className="content-types-list-filters"
-              >
-                <Input
-                  displayError={false}
-                  hasClearButton={searchValue.length !== 0}
-                  hasSpellCheck={false}
-                  isFilter={false}
-                  isRequired={false}
-                  leftIconName="search"
-                  onChange={onSearchValueChange}
-                  onClearButtonClick={() => handleSearch("")}
-                  placeholder="Search"
-                  type="text"
-                  isDisabled={!loaded}
-                  value={searchValue}
-                />
+          <GridCell
+            large={8}
+            medium={6}
+            small={2}
+            className="content-types-list-filters"
+          >
+            <Input
+              displayError={false}
+              hasClearButton={searchValue.length !== 0}
+              hasSpellCheck={false}
+              isFilter={false}
+              isRequired={false}
+              leftIconName="search"
+              onChange={onSearchValueChange}
+              onClearButtonClick={() => handleSearch("")}
+              placeholder="Search"
+              type="text"
+              value={searchValue}
+            />
 
-                <Dropdown
-                  arrowIcon="down"
-                  buttonContent={{
-                    label: `Show columns`,
-                    content:
-                      tableColumns.filter((column) => !column.show).length === 0
-                        ? `All`
-                        : `Mixed`,
-                  }}
-                  isDisabled={!loaded}
-                  style="plain"
-                  shouldHideChildrenOnClick={false}
-                >
-                  <Dropdown.Contents>
-                    {tableColumns.map(({ name, value, show }) => (
-                      <Dropdown.ListItem key={name}>
-                        <Dropdown.BlockLink
-                          isItemSelected={show}
-                          isMultiSelect={true}
-                          onClick={() => onColumnVisiblityChange(name, !show)}
-                        >
-                          <Dropdown.BlockLinkText text={value} />
-                        </Dropdown.BlockLink>
-                      </Dropdown.ListItem>
-                    ))}
-                  </Dropdown.Contents>
-                </Dropdown>
+            <Dropdown
+              arrowIcon="down"
+              buttonContent={{
+                label: `Show columns`,
+                content:
+                  tableColumns.filter((column) => !column.show).length === 0
+                    ? `All`
+                    : `Mixed`,
+              }}
+              style="plain"
+              shouldHideChildrenOnClick={false}
+            >
+              <Dropdown.Contents>
+                {tableColumns.map(({ name, value, show }) => (
+                  <Dropdown.ListItem key={name}>
+                    <Dropdown.BlockLink
+                      isItemSelected={show}
+                      isMultiSelect={true}
+                      onClick={() => onColumnVisiblityChange(name, !show)}
+                    >
+                      <Dropdown.BlockLinkText text={value} />
+                    </Dropdown.BlockLink>
+                  </Dropdown.ListItem>
+                ))}
+              </Dropdown.Contents>
+            </Dropdown>
 
-                <Dropdown
-                  arrowIcon="down"
-                  buttonContent={{
-                    label: `Row count`,
-                    content: rowsPerPage.toString(),
-                  }}
-                  isDisabled={!loaded}
-                  style="plain"
-                >
-                  <Dropdown.Contents>
-                    {ROWS_PER_PAGE_OPTIONS.map((option) => (
-                      <Dropdown.ListItem key={option}>
-                        <Dropdown.BlockLink
-                          onClick={() => setRowsPerPage(option)}
-                        >
-                          <Dropdown.BlockLinkText
-                            isItemSelected={option === rowsPerPage}
-                            text={option}
-                          />
-                        </Dropdown.BlockLink>
-                      </Dropdown.ListItem>
-                    ))}
-                  </Dropdown.Contents>
-                </Dropdown>
-              </GridCell>
+            <Dropdown
+              arrowIcon="down"
+              buttonContent={{
+                label: `Row count`,
+                content: rowsPerPage.toString(),
+              }}
+              style="plain"
+            >
+              <Dropdown.Contents>
+                {ROWS_PER_PAGE_OPTIONS.map((option) => (
+                  <Dropdown.ListItem key={option}>
+                    <Dropdown.BlockLink onClick={() => setRowsPerPage(option)}>
+                      <Dropdown.BlockLinkText
+                        isItemSelected={option === rowsPerPage}
+                        text={option}
+                      />
+                    </Dropdown.BlockLink>
+                  </Dropdown.ListItem>
+                ))}
+              </Dropdown.Contents>
+            </Dropdown>
+          </GridCell>
 
-              <GridCell large={12}>
-                <Table
-                  className="content-types-list-table"
-                  shouldAddHover={false}
-                >
-                  <Table.THead>
-                    <Table.TR>
-                      {tableColumns
-                        .filter((column) => column.show)
-                        .map(({ name, value, width }) => (
-                          <Table.TH
-                            width={tableColumnsWidthMap.get(name)}
-                            sorting={{
-                              canSort: true,
-                              handleSort: () =>
-                                handleTableSort(name as TableColumn),
-                              order: sortDirection,
-                            }}
-                            key={name}
-                          >
-                            {value}
-                          </Table.TH>
-                        ))}
+          <GridCell large={12}>
+            <Table className="content-types-list-table" shouldAddHover={false}>
+              <Table.THead>
+                <Table.TR>
+                  {tableColumns
+                    .filter((column) => column.show)
+                    .map(({ name, value, width }) => (
                       <Table.TH
-                        width={tableColumnsWidthMap.get(`actions`)}
-                      ></Table.TH>
-                    </Table.TR>
-                  </Table.THead>
+                        width={tableColumnsWidthMap.get(name)}
+                        sorting={{
+                          canSort: true,
+                          handleSort: () =>
+                            handleTableSort(name as TableColumn),
+                          order: sortDirection,
+                        }}
+                        key={name}
+                      >
+                        {value}
+                      </Table.TH>
+                    ))}
+                  <Table.TH
+                    width={tableColumnsWidthMap.get(`actions`)}
+                  ></Table.TH>
+                </Table.TR>
+              </Table.THead>
 
-                  <Table.TBody>
-                    {tableItems.length > 0 ? (
-                      tableItems.map(
-                        ({
-                          id,
-                          contentTypeGuid,
-                          name,
-                          languageBrach,
-                          pageUrls,
-                          editUrl,
-                        }) => (
-                          <Table.TR key={contentTypeGuid}>
-                            {tableColumns
-                              .filter((column) => column.show)
-                              .map((column) => (
-                                <Table.TD key={column.name}>
-                                  <>
-                                    {column.name === "id" ? id : ""}
-                                    {column.name === "guid" ? guid : ""}
-                                    {column.name === "name" ? name : ""}
-                                    {column.name === "languageBrach"
-                                      ? languageBrach
-                                      : ""}
-                                    {column.name === "pageUrl" &&
-                                    pageUrls.length > 0 &&
-                                    pageUrls[0] ? (
-                                      <Link href={pageUrls[0]} newWindow>
-                                        {pageUrls[0]}
-                                      </Link>
-                                    ) : (
-                                      ""
-                                    )}
-                                  </>
-                                </Table.TD>
-                              ))}
-                            <Table.TD>
-                              <Link href={editUrl}>
-                                <Button size="small" width="default" isLink>
-                                  Edit
-                                </Button>
-                              </Link>
+              <Table.TBody>
+                {tableItems.length > 0 ? (
+                  tableItems.map(
+                    ({
+                      id,
+                      contentTypeGuid,
+                      name,
+                      languageBrach,
+                      pageUrls,
+                      editUrl,
+                    }) => (
+                      <Table.TR key={contentTypeGuid}>
+                        {tableColumns
+                          .filter((column) => column.show)
+                          .map((column) => (
+                            <Table.TD key={column.name}>
+                              <>
+                                {column.name === "id" ? id : ""}
+                                {column.name === "guid" ? contentTypeGuid : ""}
+                                {column.name === "name" ? name : ""}
+                                {column.name === "languageBrach"
+                                  ? languageBrach
+                                  : ""}
+                                {column.name === "pageUrl" &&
+                                pageUrls.length > 0 &&
+                                pageUrls[0] ? (
+                                  <Link href={pageUrls[0]} newWindow>
+                                    {pageUrls[0]}
+                                  </Link>
+                                ) : (
+                                  ""
+                                )}
+                              </>
                             </Table.TD>
-                          </Table.TR>
-                        )
-                      )
-                    ) : loaded ? (
-                      <Table.TR noHover>
-                        <Table.TD colSpan={5}>No matching results</Table.TD>
-                      </Table.TR>
-                    ) : (
-                      <Table.TR noHover>
-                        <Table.TD colSpan={5} textAlign="center">
-                          <Spinner />
+                          ))}
+                        <Table.TD>
+                          <Link href={editUrl}>
+                            <Button size="small" width="default" isLink>
+                              Edit
+                            </Button>
+                          </Link>
                         </Table.TD>
                       </Table.TR>
-                    )}
-                  </Table.TBody>
-                </Table>
-              </GridCell>
+                    )
+                  )
+                ) : (
+                  <Table.TR noHover>
+                    <Table.TD colSpan={5}>No matching results</Table.TD>
+                  </Table.TR>
+                )}
+              </Table.TBody>
+            </Table>
+          </GridCell>
 
-              {filteredItems.length > rowsPerPage && (
-                <GridCell large={12} medium={8} small={4}>
-                  <PaginationControls
-                    currentPage={currentPage}
-                    goToPage={(page: number) => setCurrentPage(page)}
-                    isLoading={!loaded}
-                    totalPages={totalPages}
-                  />
-                </GridCell>
-              )}
-            </Grid>
-          </GridContainer>
-        </Workspace>
-      </ContentArea>
-    </div>
+          {filteredItems.length > rowsPerPage && (
+            <GridCell large={12} medium={8} small={4}>
+              <PaginationControls
+                currentPage={currentPage}
+                goToPage={(page: number) => setCurrentPage(page)}
+                totalPages={totalPages}
+              />
+            </GridCell>
+          )}
+        </Grid>
+      </GridContainer>
+    </Layout>
   );
 };
 
