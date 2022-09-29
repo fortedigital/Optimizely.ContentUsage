@@ -13,6 +13,7 @@ import {
 import { useLoaderData, useNavigate } from "react-router-dom";
 import { AxiosResponse } from "axios";
 import Layout from "../Components/Layout";
+import { viewContentTypeUsages } from "../routes";
 
 type TableColumn = "guid" | "name" | "displayName" | "type" | "usageCount";
 
@@ -152,7 +153,7 @@ const ContentTypesView = () => {
   );
 
   const onTableRowClick = useCallback(
-    (guid: string) => navigate(`/viewContentTypeUsages/${guid}`),
+    (guid: string) => navigate(viewContentTypeUsages(guid)),
     [navigate]
   );
 

@@ -13,9 +13,10 @@ import {
   Table,
   Typography,
 } from "optimizely-oui";
-import { useLoaderData, useNavigate, useParams } from "react-router-dom";
+import { useHref, useLoaderData } from "react-router-dom";
 import { AxiosResponse } from "axios";
 import Layout from "../Components/Layout";
+import { viewContentTypes } from "../routes";
 
 type TableColumn = "guid" | "id" | "name" | "languageBrach" | "pageUrl";
 
@@ -100,10 +101,6 @@ const ContentTypeUsageView = () => {
       ]),
     [tableColumnWidth]
   );
-
-  const navigate = useNavigate();
-  const { guid } = useParams();
-  if (!guid) navigate(`/`);
 
   const handleTableSort = useCallback(
     (column: TableColumn) => {
@@ -225,6 +222,8 @@ const ContentTypeUsageView = () => {
     if (response && response.data) setContentTypeUsages(response.data);
   }, [response]);
 
+  const viewContentTypesRealPath = useHref(viewContentTypes());
+
   return (
     <Layout>
       <GridContainer className="content-types-list">
@@ -239,7 +238,11 @@ const ContentTypeUsageView = () => {
           <GridCell large={12} medium={8} small={4}>
             <Breadcrumb
               items={[
-                { title: `Content Usage`, link: ``, level: 1 },
+                {
+                  title: `Content Usage`,
+                  link: viewContentTypesRealPath,
+                  level: 1,
+                },
                 {
                   title: "",
                   link: ``,
@@ -357,7 +360,7 @@ const ContentTypeUsageView = () => {
                       pageUrls,
                       editUrl,
                     }) => (
-                      <Table.TR key={contentTypeGuid}>
+                      <Table.TR key={id}>
                         {tableColumns
                           .filter((column) => column.show)
                           .map((column) => (

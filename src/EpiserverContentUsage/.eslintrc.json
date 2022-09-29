@@ -1,6 +1,4 @@
 {
-  "extends": [
-    "eslint:recommended",
-    "prettier"
-  ]
+  "root": true,
+  "extends": ["eslint:recommended", "prettier"]
 }

@@ -8,22 +8,20 @@ import { Api } from "./Lib/Api";
 import Router from "./Components/Router";
 
 interface AppProps {
-  baseUrl?: string;
   model: AppModel;
 }
 
 export const App = ({
-  baseUrl,
-  model: { getContentTypesEndpointUrl, getContentUsagesEndpointUrl },
+  model: { moduleBaseUrl, contentTypesEndpointUrl, contentUsagesEndpointUrl },
 }: AppProps) => {
   Api.setEndpoints({
-    getContentTypes: getContentTypesEndpointUrl,
-    getContentTypeUsages: getContentUsagesEndpointUrl,
+    getContentTypes: contentTypesEndpointUrl,
+    getContentTypeUsages: contentUsagesEndpointUrl,
   });
 
   return (
     <div className="epi-content-usage">
-      <Router baseUrl={baseUrl} />
+      <Router baseUrl={moduleBaseUrl} />
     </div>
   );
 };
