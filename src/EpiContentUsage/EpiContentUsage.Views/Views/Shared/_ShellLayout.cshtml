@@ -1,0 +1,27 @@
+@using EPiServer.Framework.Web.Resources
+@using EPiServer.Shell.Navigation
+@model EpiContentUsage.ViewModels.MainViewViewModel
+
+@{
+    Layout = string.Empty;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Content Security Policy Management</title>
+
+        <!-- Shell -->
+        @ClientResources.RenderResources("ShellCore")
+
+        <!-- LightTheme -->
+        @ClientResources.RenderResources("ShellCoreLightTheme")
+    </head>
+    <body>
+        @Html.CreatePlatformNavigationMenu()
+        
+        <div @Html.ApplyPlatformNavigation()>
+            @RenderBody();
+        </div>
+    </body>
+</html>
