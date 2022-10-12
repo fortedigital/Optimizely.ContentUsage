@@ -25,6 +25,13 @@ public class ContentTypeService
 
         return contentTypes;
     }
+    
+    public ContentType? Get(Guid guid)
+    {
+        var contentType = _contentTypeRepository.Load(guid);
+        
+        return contentType;
+    }
 
     private static IEnumerable<ContentType> Filter(IEnumerable<ContentType> contentTypes,
         ContentTypesFilterCriteria? filterCriteria)

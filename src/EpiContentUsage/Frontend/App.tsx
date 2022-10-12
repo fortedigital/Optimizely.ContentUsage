@@ -11,6 +11,7 @@ export const App = ({model}: AppProps) => (
     <Workspace>
         <Card>
             <h1>{model.moduleBaseUrl}</h1>
+            <TextButton href={model.contentTypeEndpointUrl}>Content Type Endpoint</TextButton>
             <TextButton href={model.contentTypesEndpointUrl}>Content Types Endpoint</TextButton>
             <TextButton href={model.contentUsagesEndpointUrl}>Content Usages Endpoint</TextButton>
         </Card>

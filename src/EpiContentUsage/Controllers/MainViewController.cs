@@ -22,6 +22,7 @@ public class MainViewController : Controller
 
         var viewModel = new MainViewViewModel(
             moduleBaseUrl,
+            Url.RouteUrl(ContentTypeController.GetContentTypeRouteName),
             Url.RouteUrl(ContentTypeController.GetContentTypesRouteName),
             Url.RouteUrl(ContentUsageController.GetContentUsagesRouteName)
         );
