@@ -1,8 +1,8 @@
-﻿using Microsoft.AspNetCore.Html;
+﻿using System.Text.Json;
+using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System.Text.Json;
 
-namespace EpiserverContentUsage.Extensions;
+namespace EpiContentUsage.Extensions;
 
 public static class HtmlHelperExtensions
 {

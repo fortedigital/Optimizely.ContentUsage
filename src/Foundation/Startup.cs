@@ -35,7 +35,7 @@ using Microsoft.Extensions.Hosting;
 using System;
 using System.Linq;
 using UNRVLD.ODP.VisitorGroups.Initilization;
-using EpiserverContentUsage.Api.Extensions;
+using EpiContentUsage.Api.Extensions;
 
 namespace Foundation
 {

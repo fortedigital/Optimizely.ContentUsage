@@ -1,11 +1,11 @@
-﻿using EPiServer.Shell.Modules;
-using EpiserverContentUsage.Api.Features.ContentType;
-using EpiserverContentUsage.Api.Features.ContentUsage;
-using EpiserverContentUsage.ViewModels;
+﻿using EpiContentUsage.Api.Features.ContentType;
+using EpiContentUsage.Api.Features.ContentUsage;
+using EpiContentUsage.ViewModels;
+using EPiServer.Shell.Modules;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace EpiserverContentUsage.Controllers;
+namespace EpiContentUsage.Controllers;
 
 public class MainViewController : Controller
 {

@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
 
     <PropertyGroup>
-        <RootNamespace>EpiserverContentUsage</RootNamespace>
+        <RootNamespace>EpiContentUsage</RootNamespace>
         <PackageId>EpiContentUsage</PackageId>
-        <Title>EpiserverContentUsage</Title>
+        <Title>EpiContentUsage</Title>
         <Version>0.0.0.0</Version>
         <Authors>Forte Digital</Authors>
         <Description>Optimizely CMS admin plugin for listing out usages of particular content types.</Description>

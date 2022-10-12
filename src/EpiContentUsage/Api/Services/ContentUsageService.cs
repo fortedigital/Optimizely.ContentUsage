@@ -6,7 +6,7 @@ using EPiServer.Editor;
 using EPiServer.ServiceLocation;
 using EPiServer.Web.Routing;
 
-namespace EpiserverContentUsage.Api.Services;
+namespace EpiContentUsage.Api.Services;
 
 [ServiceConfiguration(Lifecycle = ServiceInstanceScope.Scoped)]
 public class ContentUsageService

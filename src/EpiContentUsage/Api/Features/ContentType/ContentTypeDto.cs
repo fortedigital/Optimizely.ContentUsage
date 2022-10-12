@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace EpiserverContentUsage.Api.Features.ContentType;
+namespace EpiContentUsage.Api.Features.ContentType;
 
 public class ContentTypeDto
 {

@@ -1,9 +1,9 @@
-﻿using Reinforced.Typings.Attributes;
-using Reinforced.Typings.Fluent;
-using System.Linq;
+﻿using System.Linq;
 using System.Reflection;
+using Reinforced.Typings.Attributes;
+using Reinforced.Typings.Fluent;
 
-namespace EpiserverContentUsage;
+namespace EpiContentUsage;
 
 public static class ReinforcedTypingsConfiguration
 {

@@ -4,7 +4,7 @@ using System.Linq;
 using EPiServer.DataAbstraction;
 using EPiServer.ServiceLocation;
 
-namespace EpiserverContentUsage.Api.Services;
+namespace EpiContentUsage.Api.Services;
 
 [ServiceConfiguration(Lifecycle = ServiceInstanceScope.Scoped)]
 public class ContentTypeService

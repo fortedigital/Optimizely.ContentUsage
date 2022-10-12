@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using EpiserverContentUsage.Api.Features.ContentUsage;
+using EpiContentUsage.Api.Features.ContentUsage;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,7 +11,7 @@ using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
-namespace EpiserverContentUsage.Api.Extensions;
+namespace EpiContentUsage.Api.Extensions;
 
 public static class WebApplicationBuilderExtensions
 {

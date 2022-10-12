@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace EpiserverContentUsage.Api.Features.ContentUsage;
+namespace EpiContentUsage.Api.Features.ContentUsage;
 
 public class ContentUsageDto
 {

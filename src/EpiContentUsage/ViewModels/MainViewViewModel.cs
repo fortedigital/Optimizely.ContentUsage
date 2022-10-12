@@ -1,6 +1,6 @@
 ﻿using Reinforced.Typings.Attributes;
 
-namespace EpiserverContentUsage.ViewModels;
+namespace EpiContentUsage.ViewModels;
 
 public class MainViewViewModel
 {
