@@ -38,11 +38,11 @@ Open command prompt as administrator
 
 ```
 git clone https://github.com/fortedigital/EpiContentUsage.git
-cd EpiContentUsage/src/EpiserverContentUsage
-dotnet build EpiserverContentUsage.csproj
+cd EpiContentUsage/src/EpiContentUsage
+dotnet build EpiContentUsage.csproj
 yarn install
 yarn build
-dotnet pack EpiserverContentUsage.csproj
+dotnet pack EpiContentUsage.csproj
 cd ../../
 setup.cmd 
 dotnet run --project src/Foundation/Foundation.csproj
