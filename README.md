@@ -1,14 +1,14 @@
 
-# EpiserverContentUsage
+# EpiContentUsage
 
-EpiserverContentUsage is a small shell module for Optimizely CMS 12.
+EpiContentUsage is a small shell module for Optimizely CMS 12.
 
 It lists the available content types and its instances (blocks or pages), published throughout the website.
 
 ## Foundation 
 
 For demo purposes the solution uses [Foundation](https://github.com/episerver/Foundation).
-Foundation project consumes EpiserverContentUsage as a Nuget package.
+Foundation project consumes EpiContentUsage as a Nuget package.
 
 ---
 
@@ -54,6 +54,6 @@ dotnet run --project src/Foundation/Foundation.csproj
 
 After completing the setup steps and running the solution, access the site at <a href="http://localhost:5000">http://localhost:5000</a>.
 
-To change the default port, modify the file <a href="https://github.com/episerver/Foundation/blob/main/src/Foundation/Properties/launchSettings.json">/src/Foundation/Properties/launchSettings.json</a>.
+To change the default port, modify the file <a href="https://github.com/fortedigital/EpiContentUsage/blob/master/src/Foundation/Properties/launchSettings.json">/src/Foundation/Properties/launchSettings.json</a>.
 
 ---
