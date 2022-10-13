@@ -1,4 +1,5 @@
 ﻿using EpiContentUsage.Api.Features.ContentType;
+using EpiContentUsage.Api.Features.ContentTypeBase;
 using EpiContentUsage.Api.Features.ContentUsage;
 using EpiContentUsage.ViewModels;
 using EPiServer.Shell.Modules;
@@ -22,6 +23,7 @@ public class MainViewController : Controller
 
         var viewModel = new MainViewViewModel(
             moduleBaseUrl,
+            Url.RouteUrl(ContentTypeBaseController.GetContentTypeBasesRouteName),
             Url.RouteUrl(ContentTypeController.GetContentTypesRouteName),
             Url.RouteUrl(ContentUsageController.GetContentUsagesRouteName)
         );
