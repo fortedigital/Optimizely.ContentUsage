@@ -30,6 +30,7 @@ public class ContentTypeController : ControllerBase
     [HttpGet]
     [Route("[action]", Name = GetContentTypeRouteName)]
     [SwaggerResponse(StatusCodes.Status200OK, null, typeof(ContentTypeDto))]
+    [SwaggerResponse(StatusCodes.Status404NotFound)]
     public ActionResult GetContentType([FromQuery] [BindRequired] Guid guid)
     {
         var contentType = _contentTypeService.Get(guid);
