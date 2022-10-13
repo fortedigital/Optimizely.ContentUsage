@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk.Razor">
 
     <PropertyGroup>
-        <RootNamespace>Forte.EpiContentUsage</RootNamespace>
-        <PackageId>EpiContentUsage</PackageId>
+        <RootNamespace>EpiContentUsage</RootNamespace>
+        <PackageId>Forte.EpiContentUsage</PackageId>
         <Title>Forte.EpiContentUsage</Title>
         <Version>0.0.0.0</Version>
         <Authors>Forte Digital</Authors>
