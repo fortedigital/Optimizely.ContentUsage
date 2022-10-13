@@ -4,6 +4,10 @@
 		<VersionPrefix>2021.04.1.0</VersionPrefix>
 		<VersionSuffix></VersionSuffix>
 		<PackageVersion Condition=" '$(PackageVersion)' == '' ">$(VersionPrefix)$(VersionSuffix)</PackageVersion>
+		<RestoreSources Condition="'$(Configuration)'=='Debug'">
+			$(RestoreSources);
+			..\EpiContentUsage\bin\Debug;
+		</RestoreSources>
 	</PropertyGroup>
 	<ItemGroup>
 		<PackageReference Include="Advanced.CMS.AdvancedReviews" Version="1.1.2" />
