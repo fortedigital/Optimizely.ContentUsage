@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace EpiContentUsage.Api.Features.ContentUsage;
+namespace Forte.EpiContentUsage.Api.Features.ContentUsage;
 
 public class ContentUsageDto
 {

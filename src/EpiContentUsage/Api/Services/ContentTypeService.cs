@@ -4,7 +4,7 @@ using System.Linq;
 using EPiServer.DataAbstraction;
 using EPiServer.ServiceLocation;
 
-namespace EpiContentUsage.Api.Services;
+namespace Forte.EpiContentUsage.Api.Services;
 
 [ServiceConfiguration(Lifecycle = ServiceInstanceScope.Scoped)]
 public class ContentTypeService

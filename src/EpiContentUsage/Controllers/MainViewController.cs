@@ -1,11 +1,11 @@
-﻿using EpiContentUsage.Api.Features.ContentType;
-using EpiContentUsage.Api.Features.ContentUsage;
-using EpiContentUsage.ViewModels;
-using EPiServer.Shell.Modules;
+﻿using EPiServer.Shell.Modules;
+using Forte.EpiContentUsage.Api.Features.ContentType;
+using Forte.EpiContentUsage.Api.Features.ContentUsage;
+using Forte.EpiContentUsage.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace EpiContentUsage.Controllers;
+namespace Forte.EpiContentUsage.Controllers;
 
 public class MainViewController : Controller
 {

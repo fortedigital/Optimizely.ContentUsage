@@ -1,7 +1,7 @@
 ﻿using EPiServer.Core;
 using EPiServer.ServiceLocation;
 
-namespace EpiContentUsage.Api.Features.ContentType;
+namespace Forte.EpiContentUsage.Api.Features.ContentType;
 
 [ServiceConfiguration(Lifecycle = ServiceInstanceScope.Scoped)]
 public class ContentTypeMapper
