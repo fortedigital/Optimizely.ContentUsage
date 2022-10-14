@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using EpiContentUsage.Api.Services;
+using Forte.EpiContentUsage.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
-namespace EpiContentUsage.Api.Features.ContentTypeBase;
+namespace Forte.EpiContentUsage.Api.Features.ContentTypeBase;
 
 [ApiController]
 [Authorize(Roles = "CmsAdmins")]

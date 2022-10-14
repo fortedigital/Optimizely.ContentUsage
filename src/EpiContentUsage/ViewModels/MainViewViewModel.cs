@@ -4,7 +4,7 @@ namespace Forte.EpiContentUsage.ViewModels;
 
 public class MainViewViewModel
 {
-    public MainViewViewModel(string moduleBaseUrl, string contentTypeBasesEndpointUrl,  string contentTypeEndpointUrl,
+    public MainViewViewModel(string moduleBaseUrl, string contentTypeBasesEndpointUrl, string contentTypeEndpointUrl,
         string contentTypesEndpointUrl, string contentUsagesEndpointUrl) =>
         FrontendAppModel =
             new AppModel

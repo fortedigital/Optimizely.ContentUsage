@@ -1,6 +1,6 @@
 ﻿using Reinforced.Typings.Attributes;
 
-namespace EpiContentUsage.Api.Features.ContentTypeBase;
+namespace Forte.EpiContentUsage.Api.Features.ContentTypeBase;
 
 [TsInterface]
 public class ContentTypeBaseDto
