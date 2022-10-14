@@ -36,6 +36,7 @@ using System;
 using System.Linq;
 using UNRVLD.ODP.VisitorGroups.Initilization;
 using EpiContentUsage.Api.Extensions;
+using EpiContentUsage.Initialization;
 
 namespace Foundation
 {
@@ -198,6 +199,7 @@ namespace Foundation
             services.AddAdvancedReviews();
             services.AddGetaCategories();
             services.AddODPVisitorGroups();
+            services.AddEpiContentUsage();
 
             // Add Welcome DAM
             services.AddDAMUi();
