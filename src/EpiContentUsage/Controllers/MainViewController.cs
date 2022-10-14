@@ -1,4 +1,5 @@
-﻿using EPiServer.Shell.Modules;
+using EPiServer.Shell.Modules;
+using Forte.EpiContentUsage.Api.Features.ContentTypeBase;
 using Forte.EpiContentUsage.Api.Features.ContentType;
 using Forte.EpiContentUsage.Api.Features.ContentUsage;
 using Forte.EpiContentUsage.ViewModels;
@@ -22,6 +23,7 @@ public class MainViewController : Controller
 
         var viewModel = new MainViewViewModel(
             moduleBaseUrl,
+            Url.RouteUrl(ContentTypeBaseController.GetContentTypeBasesRouteName),
             Url.RouteUrl(ContentTypeController.GetContentTypeRouteName),
             Url.RouteUrl(ContentTypeController.GetContentTypesRouteName),
             Url.RouteUrl(ContentUsageController.GetContentUsagesRouteName)
