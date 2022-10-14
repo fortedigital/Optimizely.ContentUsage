@@ -3,7 +3,7 @@ using System.Linq;
 using EPiServer.Shell.Modules;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace EpiContentUsage.Initialization;
+namespace Forte.EpiContentUsage.Initialization;
 
 public static class ServiceCollectionExtensions
 {

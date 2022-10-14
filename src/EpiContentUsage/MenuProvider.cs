@@ -2,7 +2,7 @@
 using EPiServer.Shell;
 using EPiServer.Shell.Navigation;
 
-namespace EpiContentUsage
+namespace Forte.EpiContentUsage
 {
     [MenuProvider]
     public class MenuProvider : IMenuProvider

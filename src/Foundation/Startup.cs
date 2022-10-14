@@ -34,9 +34,9 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.Linq;
+using Forte.EpiContentUsage.Api.Extensions;
+using Forte.EpiContentUsage.Initialization;
 using UNRVLD.ODP.VisitorGroups.Initilization;
-using EpiContentUsage.Api.Extensions;
-using EpiContentUsage.Initialization;
 
 namespace Foundation
 {
