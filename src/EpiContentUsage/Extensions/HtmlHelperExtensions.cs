@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace EpiContentUsage.Extensions;
+namespace Forte.EpiContentUsage.Extensions;
 
 public static class HtmlHelperExtensions
 {

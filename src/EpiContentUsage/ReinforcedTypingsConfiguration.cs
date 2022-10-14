@@ -3,7 +3,7 @@ using System.Reflection;
 using Reinforced.Typings.Attributes;
 using Reinforced.Typings.Fluent;
 
-namespace EpiContentUsage;
+namespace Forte.EpiContentUsage;
 
 public static class ReinforcedTypingsConfiguration
 {

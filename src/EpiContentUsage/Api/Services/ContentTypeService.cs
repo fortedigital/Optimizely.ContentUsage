@@ -4,7 +4,7 @@ using System.Linq;
 using EPiServer.DataAbstraction;
 using EPiServer.ServiceLocation;
 
-namespace EpiContentUsage.Api.Services;
+namespace Forte.EpiContentUsage.Api.Services;
 
 [ServiceConfiguration(Lifecycle = ServiceInstanceScope.Scoped)]
 public class ContentTypeService
@@ -24,6 +24,13 @@ public class ContentTypeService
         }
 
         return contentTypes;
+    }
+    
+    public ContentType? Get(Guid guid)
+    {
+        var contentType = _contentTypeRepository.Load(guid);
+        
+        return contentType;
     }
 
     private static IEnumerable<ContentType> Filter(IEnumerable<ContentType> contentTypes,

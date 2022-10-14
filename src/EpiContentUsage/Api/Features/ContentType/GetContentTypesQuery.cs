@@ -1,4 +1,4 @@
-﻿namespace EpiContentUsage.Api.Features.ContentType;
+﻿namespace Forte.EpiContentUsage.Api.Features.ContentType;
 
 public class GetContentTypesQuery
 {

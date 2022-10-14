@@ -1,15 +1,17 @@
 ﻿using Reinforced.Typings.Attributes;
 
-namespace EpiContentUsage.ViewModels;
+namespace Forte.EpiContentUsage.ViewModels;
 
 public class MainViewViewModel
 {
-    public MainViewViewModel(string moduleBaseUrl, string contentTypeBasesEndpointUrl, string contentTypesEndpointUrl, string contentUsagesEndpointUrl) =>
+    public MainViewViewModel(string moduleBaseUrl, string contentTypeBasesEndpointUrl,  string contentTypeEndpointUrl,
+        string contentTypesEndpointUrl, string contentUsagesEndpointUrl) =>
         FrontendAppModel =
             new AppModel
             {
                 ModuleBaseUrl = moduleBaseUrl,
                 ContentTypeBasesEndpointUrl = contentTypeBasesEndpointUrl,
+                ContentTypeEndpointUrl = contentTypeEndpointUrl,
                 ContentTypesEndpointUrl = contentTypesEndpointUrl,
                 ContentUsagesEndpointUrl = contentUsagesEndpointUrl
             };
@@ -22,6 +24,7 @@ public class AppModel
 {
     public string ModuleBaseUrl { get; set; }
     public string ContentTypeBasesEndpointUrl { get; set; }
+    public string ContentTypeEndpointUrl { get; set; }
     public string ContentTypesEndpointUrl { get; set; }
     public string ContentUsagesEndpointUrl { get; set; }
 }
