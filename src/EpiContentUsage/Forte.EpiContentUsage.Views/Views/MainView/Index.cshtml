@@ -1,5 +1,5 @@
-@using EPiServer.Shell
 @using Forte.EpiContentUsage.Extensions
+@using Forte.EpiContentUsage.Initialization
 @model Forte.EpiContentUsage.ViewModels.MainViewViewModel
 
 @{
@@ -9,7 +9,7 @@
 <noscript>You need to enable JavaScript to run this app.</noscript>
 <div id="react-app"></div>
 <script type="text/javascript">const appModel = @Html.Serialized(Model.FrontendAppModel);</script>
-<script src="@Paths.ToClientResource(Model.GetType(),"ClientResources/react-app.js")"></script>
+<script src="@PathsResolver.ToClientResource(Model.GetType(),"ClientResources/react-app.js")"></script>
 
 
 
