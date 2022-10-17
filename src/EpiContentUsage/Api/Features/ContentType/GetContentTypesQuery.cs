@@ -1,5 +1,8 @@
-﻿namespace Forte.EpiContentUsage.Api.Features.ContentType;
+﻿using Reinforced.Typings.Attributes;
 
+namespace Forte.EpiContentUsage.Api.Features.ContentType;
+
+[TsInterface]
 public class GetContentTypesQuery
 {
     public string? Name { get; set; }
@@ -7,6 +10,7 @@ public class GetContentTypesQuery
     public ContentTypesSorting? SortBy { get; set; }
 }
 
+[TsEnum(UseString = true)]
 public enum ContentTypesSorting
 {
     Name = 0,

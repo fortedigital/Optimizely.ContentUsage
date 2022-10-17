@@ -51,7 +51,7 @@ public class ContentUsageController : ControllerBase
             Id = contentUsage.ContentLink.ID,
             ContentTypeGuid = guid,
             Name = contentUsage.Name,
-            LanguageBrach = contentUsage.LanguageBranch,
+            LanguageBranch = contentUsage.LanguageBranch,
             PageUrls = _contentUsageService.GetPageUrls(contentUsage.ContentLink),
             EditUrl = _contentUsageService.GetEditUrl(contentUsage)
         });

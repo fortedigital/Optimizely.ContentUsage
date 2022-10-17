@@ -1,7 +1,9 @@
 ﻿using System;
+using Reinforced.Typings.Attributes;
 
 namespace Forte.EpiContentUsage.Api.Features.ContentType;
 
+[TsInterface]
 public class ContentTypeDto
 {
     public Guid Guid { get; set; }
