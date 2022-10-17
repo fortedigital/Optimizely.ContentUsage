@@ -201,10 +201,14 @@ namespace Foundation
             services.AddODPVisitorGroups();
             services.AddEpiContentUsage();
 
+            if (_webHostingEnvironment.IsDevelopment())
+            {
+                services.AddEpiContentUsageDevServer("http://localhost:8080/");
+                services.AddEpiContentUsageSwagger();
+            }
+            
             // Add Welcome DAM
             services.AddDAMUi();
-            
-            services.AddEpiContentUsageSwagger();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
