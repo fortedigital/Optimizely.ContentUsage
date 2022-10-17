@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using EpiContentUsage.Api.Services;
 using EPiServer.Core;
 using EPiServer.DataAbstraction;
+using Forte.EpiContentUsage.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Swashbuckle.AspNetCore.Annotations;
 
-namespace EpiContentUsage.Api.Features.ContentUsage;
+namespace Forte.EpiContentUsage.Api.Features.ContentUsage;
 
 [ApiController]
 [Authorize(Roles = "CmsAdmins")]

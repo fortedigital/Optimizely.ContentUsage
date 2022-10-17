@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Reinforced.Typings.Attributes;
 
-namespace EpiContentUsage.Api.Features.ContentUsage;
+namespace Forte.EpiContentUsage.Api.Features.ContentUsage;
 
 [TsInterface]
 public class ContentUsageDto

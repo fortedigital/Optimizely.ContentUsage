@@ -1,6 +1,6 @@
 ﻿using Reinforced.Typings.Attributes;
 
-namespace EpiContentUsage.Api.Features.ContentType;
+namespace Forte.EpiContentUsage.Api.Features.ContentType;
 
 [TsInterface]
 public class GetContentTypesQuery

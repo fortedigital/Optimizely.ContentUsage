@@ -1,28 +1,46 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using EpiContentUsage.Api.Services;
-using EPiServer.Core;
+using Forte.EpiContentUsage.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Swashbuckle.AspNetCore.Annotations;
 
-namespace EpiContentUsage.Api.Features.ContentType;
+namespace Forte.EpiContentUsage.Api.Features.ContentType;
 
 [ApiController]
 [Authorize(Roles = "CmsAdmins")]
 [Route("[controller]")]
 public class ContentTypeController : ControllerBase
 {
+    public const string GetContentTypeRouteName = "ContentType";
     public const string GetContentTypesRouteName = "ContentTypes";
-    private readonly IContentModelUsage _contentModelUsage;
 
+    private readonly ContentTypeMapper _contentTypeMapper;
     private readonly ContentTypeService _contentTypeService;
 
-    public ContentTypeController(ContentTypeService contentTypeService, IContentModelUsage contentModelUsage)
+    public ContentTypeController(ContentTypeService contentTypeService, ContentTypeMapper contentTypeMapper)
     {
         _contentTypeService = contentTypeService;
-        _contentModelUsage = contentModelUsage;
+        _contentTypeMapper = contentTypeMapper;
+    }
+
+    [HttpGet]
+    [Route("[action]", Name = GetContentTypeRouteName)]
+    [SwaggerResponse(StatusCodes.Status200OK, null, typeof(ContentTypeDto))]
+    [SwaggerResponse(StatusCodes.Status404NotFound)]
+    public ActionResult GetContentType([FromQuery] [BindRequired] Guid guid)
+    {
+        var contentType = _contentTypeService.Get(guid);
+
+        if (contentType == null)
+            return NotFound();
+            
+        var contentTypeDto = _contentTypeMapper.Map(contentType);
+
+        return Ok(contentTypeDto);
     }
 
     [HttpGet]
@@ -33,15 +51,7 @@ public class ContentTypeController : ControllerBase
         var contentTypes =
             _contentTypeService.GetAll(new ContentTypesFilterCriteria { Name = query?.Name, Type = query?.Type });
 
-        var contentTypeDtos = contentTypes.Select(contentType =>
-            new ContentTypeDto
-            {
-                DisplayName = contentType.DisplayName,
-                Name = contentType.Name,
-                Guid = contentType.GUID,
-                Type = contentType.Base.ToString(),
-                UsageCount = _contentModelUsage.ListContentOfContentType(contentType).Count
-            });
+        var contentTypeDtos = contentTypes.Select(_contentTypeMapper.Map);
 
         contentTypeDtos = query?.SortBy switch
         {
