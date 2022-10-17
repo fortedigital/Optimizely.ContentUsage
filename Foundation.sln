@@ -17,9 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		setup.sh = setup.sh
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EpiserverContentUsage", "src\EpiserverContentUsage\EpiserverContentUsage.csproj", "{690D27B2-8356-428C-9F59-116DDE623D13}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EpiserverContentUsage.Api", "src\EpiserverContentUsage.Api\EpiserverContentUsage.Api.csproj", "{D6E06298-682C-4F22-98DC-E72474CE02B7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EpiContentUsage", "src\EpiContentUsage\EpiContentUsage.csproj", "{690D27B2-8356-428C-9F59-116DDE623D13}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,10 +33,6 @@ Global
 		{690D27B2-8356-428C-9F59-116DDE623D13}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{690D27B2-8356-428C-9F59-116DDE623D13}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{690D27B2-8356-428C-9F59-116DDE623D13}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D6E06298-682C-4F22-98DC-E72474CE02B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D6E06298-682C-4F22-98DC-E72474CE02B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D6E06298-682C-4F22-98DC-E72474CE02B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D6E06298-682C-4F22-98DC-E72474CE02B7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
