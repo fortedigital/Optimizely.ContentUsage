@@ -32,6 +32,9 @@ module.exports = (env, argv) => {
         },
         resolve: {
             extensions: ['.ts', '.tsx', '.js']
+        },
+        devServer: {
+            static: path.resolve(__dirname, 'module/ClientResources')
         }
     }
 }
