@@ -3,12 +3,10 @@ using System.Linq;
 using EPiServer.Core;
 using EPiServer.DataAbstraction;
 using EPiServer.Editor;
-using EPiServer.ServiceLocation;
 using EPiServer.Web.Routing;
 
 namespace Forte.EpiContentUsage.Api.Services;
 
-[ServiceConfiguration(Lifecycle = ServiceInstanceScope.Scoped)]
 public class ContentUsageService
 {
     private readonly IContentSoftLinkRepository _contentSoftLinkRepository;
