@@ -14,7 +14,7 @@ public class MainViewController : Controller
 
     public MainViewController(ModuleTable modules) => _modules = modules;
 
-    [Authorize(Roles = "CmsAdmins")]
+    [Authorize(Policy = "episerver:defaultshellmodule")]
     [HttpGet]
     public IActionResult Index()
     {
