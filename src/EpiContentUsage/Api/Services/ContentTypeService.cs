@@ -2,11 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using EPiServer.DataAbstraction;
-using EPiServer.ServiceLocation;
 
 namespace Forte.EpiContentUsage.Api.Services;
 
-[ServiceConfiguration(Lifecycle = ServiceInstanceScope.Scoped)]
 public class ContentTypeService
 {
     private readonly IContentTypeRepository _contentTypeRepository;

@@ -5,6 +5,14 @@ EpiContentUsage is a small shell module for Optimizely CMS 12.
 
 It lists the available content types and its instances (blocks or pages), published throughout the website.
 
+## How to use?
+
+To make it work in your CMS 12 web app:
+1. Install the `Forte.EpiContentUsage` NuGet
+2. Add `services.AddEpiContentUsage();` where you register services
+
+---
+
 ## Foundation 
 
 For demo purposes the solution uses [Foundation](https://github.com/episerver/Foundation).

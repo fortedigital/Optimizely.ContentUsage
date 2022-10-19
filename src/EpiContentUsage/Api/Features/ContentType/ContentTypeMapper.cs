@@ -1,9 +1,7 @@
 ﻿using EPiServer.Core;
-using EPiServer.ServiceLocation;
 
 namespace Forte.EpiContentUsage.Api.Features.ContentType;
 
-[ServiceConfiguration(Lifecycle = ServiceInstanceScope.Scoped)]
 public class ContentTypeMapper
 {
     private readonly IContentModelUsage _contentModelUsage;

@@ -2,11 +2,9 @@
 using System.Collections.Generic;
 using EPiServer.Core;
 using EPiServer.DataAbstraction;
-using EPiServer.ServiceLocation;
 
 namespace Forte.EpiContentUsage.Api.Services;
 
-[ServiceConfiguration(Lifecycle = ServiceInstanceScope.Scoped)]
 public class ContentTypeBaseService
 {
     private static readonly IDictionary<ContentTypeBase, Type> _contentTypeBases = new Dictionary<ContentTypeBase, Type>
