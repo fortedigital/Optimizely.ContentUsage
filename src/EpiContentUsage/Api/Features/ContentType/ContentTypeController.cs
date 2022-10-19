@@ -11,7 +11,7 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace Forte.EpiContentUsage.Api.Features.ContentType;
 
 [ApiController]
-[Authorize(Roles = "CmsAdmins")]
+[Authorize(Policy = "episerver:defaultshellmodule")]
 [Route("[controller]")]
 public class ContentTypeController : ControllerBase
 {
