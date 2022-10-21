@@ -1,5 +1,5 @@
 export const routes = {
-  index: `/MainView`,
+  index: `/`,
   contentTypeUsages: `/ViewContentTypeUsages`,
 };
 

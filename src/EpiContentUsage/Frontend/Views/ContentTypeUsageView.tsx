@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Breadcrumb } from "@episerver/ui-framework";
-import { ContentTypeUsage, SortDirection } from "../types";
+import { ContentType, ContentTypeUsage, SortDirection } from "../types";
 import {
   Button,
   Dropdown,
@@ -13,7 +13,7 @@ import {
   Table,
   Typography,
 } from "optimizely-oui";
-import { useHref, useLoaderData } from "react-router-dom";
+import { useHref, useLoaderData, useLocation } from "react-router-dom";
 import { AxiosResponse } from "axios";
 import Layout from "../Components/Layout";
 import { viewContentTypes } from "../routes";
@@ -23,6 +23,8 @@ type TableColumn = "guid" | "id" | "name" | "languageBrach" | "pageUrl";
 const ROWS_PER_PAGE_OPTIONS = [15, 30, 60];
 
 const ContentTypeUsageView = () => {
+  const [contentTypeDisplayName, setContentTypeDisplayName] =
+    useState<string>();
   const [contentTypeUsages, setContentTypeUsages] = useState<
     ContentTypeUsage[]
   >([]);
@@ -35,6 +37,8 @@ const ContentTypeUsageView = () => {
   const [rowsPerPage, setRowsPerPage] = useState<number>(
     ROWS_PER_PAGE_OPTIONS[0]
   );
+  const location = useLocation();
+
   const [tableColumns, setTableColumns] = useState([
     { name: "id", value: "ID", show: true, width: "60px" },
     { name: "guid", value: "GUID", show: true, width: "320px" },
@@ -222,16 +226,30 @@ const ContentTypeUsageView = () => {
     []
   );
 
-  const response = useLoaderData() as AxiosResponse<ContentTypeUsage[], any>;
+  const response = useLoaderData() as
+    | AxiosResponse<ContentTypeUsage[]>
+    | [AxiosResponse<ContentType>, AxiosResponse<ContentTypeUsage[]>];
   useEffect(() => {
-    if (response && response.data) setContentTypeUsages(response.data);
+    if (response) {
+      if (Array.isArray(response)) {
+        const [contentTypeResponse, contentTypeUsagesResponse] = response;
+        if (contentTypeUsagesResponse.data)
+          setContentTypeUsages(contentTypeUsagesResponse.data);
+        if (contentTypeResponse.data)
+          setContentTypeDisplayName(contentTypeResponse.data.displayName);
+      } else if (response.data) {
+        setContentTypeDisplayName(location.state?.contentType?.displayName);
+        setContentTypeUsages(response.data);
+      }
+    }
   }, [response]);
 
   const viewContentTypesRealPath = useHref(viewContentTypes());
+  const thisRealPath = useHref(location.pathname);
 
   return (
     <Layout>
-      <GridContainer className="content-types-list">
+      <GridContainer className="content-usage-list">
         <Grid>
           <GridCell large={12} medium={8} small={4}>
             <div className="epi-main-header">
@@ -241,28 +259,30 @@ const ContentTypeUsageView = () => {
             </div>
           </GridCell>
           <GridCell large={12} medium={8} small={4}>
-            <Breadcrumb
-              items={[
-                {
-                  title: `Content Usage`,
-                  link: viewContentTypesRealPath,
-                  level: 1,
-                },
-                {
-                  title: "",
-                  link: ``,
-                  level: 2,
-                  active: true,
-                },
-              ]}
-            />
+            {contentTypeDisplayName ? (
+              <Breadcrumb
+                items={[
+                  {
+                    title: `Content Usage`,
+                    link: viewContentTypesRealPath,
+                    level: 1,
+                  },
+                  {
+                    title: contentTypeDisplayName,
+                    link: thisRealPath,
+                    level: 2,
+                    active: true,
+                  },
+                ]}
+              />
+            ) : null}
           </GridCell>
 
           <GridCell
             large={8}
             medium={6}
             small={2}
-            className="content-types-list-filters"
+            className="content-usage-list-filters"
           >
             <Input
               displayError={false}
@@ -329,7 +349,10 @@ const ContentTypeUsageView = () => {
           </GridCell>
 
           <GridCell large={12}>
-            <Table className="content-types-list-table" shouldAddHover={true}>
+            <Table
+              className="content-usage-table"
+              shouldAddHover={tableItems.length > 0}
+            >
               <Table.THead>
                 <Table.TR>
                   {tableColumns

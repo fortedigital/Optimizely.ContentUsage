@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useCallback, useRef } from "react";
 import {
-  createBrowserRouter,
+  createHashRouter,
   createRoutesFromElements,
-  LoaderFunction,
+  LoaderFunctionArgs,
   redirect,
   Route,
   RouterProvider,
@@ -18,39 +18,67 @@ interface RouterProps {
   baseUrl?: string;
 }
 
-const contentTypesLoader: LoaderFunction = () =>
-  Api.get<ContentType[]>(Api.endpoints.getContentTypes);
+interface LoadDataFunction {
+  (initialLoad: boolean, args: LoaderFunctionArgs): Promise<any> | Response;
+}
 
-const contentTypeUsagesLoader: LoaderFunction = ({ params }) => {
-  if (!params.guid) redirect(routes.index);
-  return Api.get<ContentTypeUsage[]>(Api.endpoints.getContentTypeUsages, {
-    guid: params.guid,
-  });
+const contentTypesLoader: LoadDataFunction = () =>
+  Api.get<ContentType[]>(Api.endpoints.contentTypesEndpointUrl);
+
+const contentTypeUsagesLoader: LoadDataFunction = (initialLoad, { params }) => {
+  if (!params.guid) return redirect(routes.index);
+  const contentTypeUsages = Api.get<ContentTypeUsage[]>(
+    Api.endpoints.contentUsagesEndpointUrl,
+    {
+      guid: params.guid,
+    }
+  );
+
+  if (initialLoad) {
+    const contentType = Api.get<ContentType>(
+      Api.endpoints.contentTypeEndpointUrl,
+      { guid: params.guid }
+    );
+
+    return Promise.all([contentType, contentTypeUsages]);
+  }
+
+  return contentTypeUsages;
 };
 
 const Router = ({ baseUrl }: RouterProps) => {
-  const router = createBrowserRouter(
+  const initialLoadRef = useRef<boolean>(true);
+
+  const loadData = useCallback(
+    (loaderFunction: LoadDataFunction) => async (args: LoaderFunctionArgs) => {
+      const data = await loaderFunction(initialLoadRef.current, args);
+      initialLoadRef.current = false;
+      return data;
+    },
+    []
+  );
+
+  const router = createHashRouter(
     createRoutesFromElements(
       <>
         <Route
           path={routes.index}
           element={<ContentTypesView />}
-          loader={contentTypesLoader}
+          loader={loadData(contentTypesLoader)}
         />
         <Route
           path={routes.contentTypeUsages}
           element={<ContentTypeUsageView />}
-          loader={contentTypeUsagesLoader}
+          loader={loadData(contentTypeUsagesLoader)}
         >
           <Route
             path=":guid"
             element={<ContentTypeUsageView />}
-            loader={contentTypeUsagesLoader}
+            loader={loadData(contentTypeUsagesLoader)}
           />
         </Route>
       </>
-    ),
-    { basename: baseUrl }
+    )
   );
 
   return <RouterProvider router={router} fallbackElement={<Loader />} />;

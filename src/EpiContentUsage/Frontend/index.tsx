@@ -3,7 +3,7 @@ import ReactDOM from "react-dom";
 import { App } from "./App";
 import { AppModel } from "./dtos";
 
-declare var appModel: AppModel;
+declare const appModel: AppModel;
 
 const rootNode = document.getElementById("react-app");
 

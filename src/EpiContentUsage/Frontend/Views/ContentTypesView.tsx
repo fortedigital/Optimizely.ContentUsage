@@ -32,7 +32,7 @@ const ContentTypesView = () => {
     ROWS_PER_PAGE_OPTIONS[0]
   );
   const [tableColumns, setTableColumns] = useState([
-    { name: "guid", value: "GUID", show: true },
+    { name: "guid", value: "GUID", show: false },
     { name: "displayName", value: "Display name", show: true },
     { name: "name", value: "Name", show: true },
     { name: "type", value: "Type", show: true },
@@ -213,7 +213,10 @@ const ContentTypesView = () => {
   );
 
   const onTableRowClick = useCallback(
-    (guid: string) => navigate(viewContentTypeUsages(guid)),
+    (guid: string, displayName: string) =>
+      navigate(viewContentTypeUsages(guid), {
+        state: { contentType: { displayName: displayName } },
+      }),
     [navigate]
   );
 
@@ -224,7 +227,7 @@ const ContentTypesView = () => {
 
   return (
     <Layout>
-      <GridContainer className="content-types-list">
+      <GridContainer className="content-usage-list">
         <Grid>
           <GridCell large={12} medium={8} small={4}>
             <div className="epi-main-header">
@@ -238,7 +241,7 @@ const ContentTypesView = () => {
             large={8}
             medium={6}
             small={2}
-            className="content-types-list-filters"
+            className="content-usage-list-filters"
           >
             <Input
               displayError={false}
@@ -305,7 +308,10 @@ const ContentTypesView = () => {
           </GridCell>
 
           <GridCell large={12}>
-            <Table className="content-types-list-table" shouldAddHover={true}>
+            <Table
+              className="content-usage-table"
+              shouldAddHover={tableItems.length > 0}
+            >
               <Table.THead>
                 <Table.TR>
                   {tableColumns
@@ -336,7 +342,7 @@ const ContentTypesView = () => {
                     ({ guid, name, displayName, type, usageCount }) => (
                       <Table.TR
                         key={guid}
-                        onRowClick={() => onTableRowClick(guid)}
+                        onRowClick={() => onTableRowClick(guid, displayName)}
                       >
                         {tableColumns
                           .filter((column) => column.show)

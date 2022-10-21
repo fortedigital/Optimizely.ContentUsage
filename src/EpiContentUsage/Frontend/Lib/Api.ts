@@ -1,14 +1,18 @@
 import axios from "axios";
 
 interface Endpoints {
-  getContentTypes: string | null;
-  getContentTypeUsages: string | null;
+  contentTypeBasesEndpointUrl: string | null;
+  contentTypeEndpointUrl: string | null;
+  contentTypesEndpointUrl: string | null;
+  contentUsagesEndpointUrl: string | null;
 }
 
 export class Api {
   static endpoints: Endpoints = {
-    getContentTypes: null,
-    getContentTypeUsages: null,
+    contentTypeBasesEndpointUrl: null,
+    contentTypeEndpointUrl: null,
+    contentTypesEndpointUrl: null,
+    contentUsagesEndpointUrl: null,
   };
 
   public static setEndpoints(endpoints: Endpoints) {

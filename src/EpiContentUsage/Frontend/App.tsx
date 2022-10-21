@@ -12,11 +12,13 @@ interface AppProps {
 }
 
 export const App = ({
-                        model: { moduleBaseUrl, contentTypesEndpointUrl, contentUsagesEndpointUrl },
-                    }: AppProps) => {
+    model: { moduleBaseUrl, contentTypeBasesEndpointUrl, contentTypeEndpointUrl, contentTypesEndpointUrl, contentUsagesEndpointUrl },
+}: AppProps) => {
     Api.setEndpoints({
-        getContentTypes: contentTypesEndpointUrl,
-        getContentTypeUsages: contentUsagesEndpointUrl,
+        contentTypeBasesEndpointUrl,
+        contentTypeEndpointUrl,
+        contentTypesEndpointUrl,
+        contentUsagesEndpointUrl,
     });
 
     return (
