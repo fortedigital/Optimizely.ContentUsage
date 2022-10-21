@@ -4,9 +4,9 @@
   "main": "Frontend/index.tsx",
   "license": "MIT",
   "scripts": {
-    "start": "webpack-dev-server",
+    "start": "webpack-dev-server --mode=development",
     "watch": "webpack --mode=development --watch",
-    "build": "webpack --mode=development"
+    "build": "webpack --mode=production"
   },
   "dependencies": {
     "@episerver/ui-framework": "^0.17.1",
@@ -24,6 +24,7 @@
     "css-loader": "^6.7.1",
     "eslint": "^8.23.1",
     "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-react": "^7.31.8",
     "prettier": "^2.7.1",
     "sass": "^1.54.9",
