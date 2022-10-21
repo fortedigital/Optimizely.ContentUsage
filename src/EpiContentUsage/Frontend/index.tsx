@@ -1,9 +1,10 @@
-import React from 'react';
-import {createRoot} from 'react-dom/client';
-import {App} from './App';
+import React from "react";
+import ReactDOM from "react-dom";
+import { App } from "./App";
+import { AppModel } from "./dtos";
 
-const container = document.getElementById('react-app');
-const root = createRoot(container!);
+declare const appModel: AppModel;
 
-// @ts-ignore
-root.render(<App model={appModel}/>);
+const rootNode = document.getElementById("react-app");
+
+ReactDOM.render(<App model={appModel} />, rootNode);

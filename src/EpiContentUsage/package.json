@@ -1,21 +1,33 @@
 {
-  "name": "react-app",
+  "name": "episerver-content-usage-tool",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "Frontend/index.tsx",
   "license": "MIT",
   "scripts": {
-    "build": "webpack --mode=development",
-    "start": "webpack-dev-server"
+    "start": "webpack-dev-server --mode=development",
+    "watch": "webpack --mode=development --watch",
+    "build": "webpack --mode=production"
   },
   "dependencies": {
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "@episerver/ui-framework": "^0.17.1",
+    "axios": "^0.27.2",
+    "optimizely-oui": "^49.0.0",
+    "react": "^16.11.0",
+    "react-dom": "^16.11.0",
+    "react-router-dom": "^6.4.1"
   },
   "devDependencies": {
-    "@episerver/ui-framework": "^0.17.1",
-    "@types/react": "^18.0.17",
-    "@types/react-dom": "^18.0.6",
+    "@types/react": "^16.11.0",
+    "@types/react-dom": "^16.9.0",
+    "@typescript-eslint/eslint-plugin": "^5.38.1",
+    "@typescript-eslint/parser": "^5.38.1",
     "css-loader": "^6.7.1",
+    "eslint": "^8.23.1",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-react": "^7.31.8",
+    "prettier": "^2.7.1",
+    "sass": "^1.54.9",
     "sass-loader": "^13.0.2",
     "style-loader": "^3.3.1",
     "ts-loader": "^9.3.1",

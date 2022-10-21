@@ -21,12 +21,7 @@ module.exports = (env, argv) => {
                     use: [
                         "style-loader",
                         "css-loader",
-                        {
-                            loader: "sass-loader",
-                            options: {
-                                includePaths: ["node_modules"],
-                            },
-                        },
+                        "sass-loader"
                     ],
                 },
             ]
