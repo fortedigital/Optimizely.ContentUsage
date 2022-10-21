@@ -13,10 +13,10 @@ import {
   Table,
   Typography,
 } from "optimizely-oui";
-import { useHref, useLoaderData, useLocation } from "react-router-dom";
+import { useLoaderData, useLocation } from "react-router-dom";
 import { AxiosResponse } from "axios";
 import Layout from "../Components/Layout";
-import { viewContentTypes } from "../routes";
+import { getRoutePath, viewContentTypes } from "../routes";
 
 type TableColumn = "guid" | "id" | "name" | "languageBrach" | "pageUrl";
 
@@ -244,9 +244,6 @@ const ContentTypeUsageView = () => {
     }
   }, [response]);
 
-  const viewContentTypesRealPath = useHref(viewContentTypes());
-  const thisRealPath = useHref(location.pathname);
-
   return (
     <Layout>
       <GridContainer className="content-usage-list">
@@ -264,12 +261,12 @@ const ContentTypeUsageView = () => {
                 items={[
                   {
                     title: `Content Usage`,
-                    link: viewContentTypesRealPath,
+                    link: getRoutePath(viewContentTypes()),
                     level: 1,
                   },
                   {
                     title: contentTypeDisplayName,
-                    link: thisRealPath,
+                    link: getRoutePath(location.pathname),
                     level: 2,
                     active: true,
                   },

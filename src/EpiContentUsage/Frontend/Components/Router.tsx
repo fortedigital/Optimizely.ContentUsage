@@ -8,14 +8,14 @@ import {
   RouterProvider,
 } from "react-router-dom";
 import { Api } from "../Lib/Api";
-import { routes } from "../routes";
+import { routes, setBaseUrl } from "../routes";
 import { ContentType, ContentTypeUsage } from "../types";
 import ContentTypesView from "../Views/ContentTypesView";
 import ContentTypeUsageView from "../Views/ContentTypeUsageView";
 import Loader from "./Loader";
 
 interface RouterProps {
-  baseUrl?: string;
+  baseUrl: string;
 }
 
 interface LoadDataFunction {
@@ -27,6 +27,7 @@ const contentTypesLoader: LoadDataFunction = () =>
 
 const contentTypeUsagesLoader: LoadDataFunction = (initialLoad, { params }) => {
   if (!params.guid) return redirect(routes.index);
+
   const contentTypeUsages = Api.get<ContentTypeUsage[]>(
     Api.endpoints.contentUsagesEndpointUrl,
     {
@@ -47,6 +48,7 @@ const contentTypeUsagesLoader: LoadDataFunction = (initialLoad, { params }) => {
 };
 
 const Router = ({ baseUrl }: RouterProps) => {
+  setBaseUrl(baseUrl);
   const initialLoadRef = useRef<boolean>(true);
 
   const loadData = useCallback(
