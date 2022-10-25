@@ -5,7 +5,7 @@
         <RootNamespace>Forte.EpiContentUsage</RootNamespace>
         <PackageId>Forte.EpiContentUsage</PackageId>
         <Title>Forte.EpiContentUsage</Title>
-        <Version>0.0.142.0</Version>
+        <Version>0.0.0.0</Version>
         <Authors>Forte Digital</Authors>
         <Description>A shell module for Optimizely CMS 12. Lists the available content types and its instances on the website</Description>
         <PackageProjectUrl>https://github.com/fortedigital/EpiContentUsage</PackageProjectUrl>
@@ -36,18 +36,8 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Content Remove="pack.proj"/>
-        <None Include="pack.proj" />
-        <Content Remove="package.json" />
-        <None Include="package.json" />
-        <Content Remove="tsconfig.json" />
-        <None Include="tsconfig.json" />
-        <Content Remove="module\module.config" />
-        <None Include="module\module.config" />
-        <Content Remove=".eslintrc.json" />
-        <None Include=".eslintrc.json" />
-        <Content Remove=".prettierrc.json" />
-        <None Include=".prettierrc.json" />
+        <Content Remove=".\*" />
+        <None Include=".\*" />
     </ItemGroup>
 
     <Import Project=".\pack.proj" />

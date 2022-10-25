@@ -29,7 +29,7 @@
     <ItemGroup>
         <Content Include="$(ZipFile)" >
             <Pack>true</Pack>
-            <PackagePath>contentFiles\any\any\modules\_protected\$(AssemblyName)\</PackagePath>
+            <PackagePath>content\modules\_protected\$(AssemblyName)\;contentFiles\any\any\modules\_protected\$(AssemblyName)\</PackagePath>
             <PackageCopyToOutput>true</PackageCopyToOutput>
             <BuildAction>None</BuildAction>
         </Content>
