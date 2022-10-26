@@ -36,10 +36,10 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Content Remove=".\*" />
-        <None Include=".\*" />
+        <Content Remove="**/*" />
+        <Content Include="**/*.cshtml" CopyToPublishDirectory="PreserveNewest" />
+        <None Include="**/*" Exclude="**/*.cshtml;bin/**;obj/**" />
     </ItemGroup>
 
-    <Import Project=".\pack.proj" />
-
+    <Import Project="pack.proj" />
 </Project>
