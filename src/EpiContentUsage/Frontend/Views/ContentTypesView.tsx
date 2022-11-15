@@ -130,8 +130,7 @@ const ContentTypesView = () => {
   const onSearchValueChange: React.KeyboardEventHandler<HTMLInputElement> =
     useCallback((event) => {
       event.persist();
-      // @ts-ignore
-      handleSearch(event.target.value);
+      handleSearch(event.currentTarget.value);
     }, []);
 
   const changeColumnVisibility = useCallback(
