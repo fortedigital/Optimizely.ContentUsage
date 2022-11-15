@@ -18,7 +18,7 @@ import { AxiosResponse } from "axios";
 import Layout from "../Components/Layout";
 import { getRoutePath, viewContentTypes } from "../routes";
 
-type TableColumn = "guid" | "id" | "name" | "languageBrach" | "pageUrl";
+type TableColumn = "guid" | "id" | "name" | "languageBranch" | "pageUrl";
 
 const ROWS_PER_PAGE_OPTIONS = [15, 30, 60];
 
@@ -43,7 +43,7 @@ const ContentTypeUsageView = () => {
     { name: "id", value: "ID", show: true, width: "60px" },
     { name: "guid", value: "GUID", show: true, width: "320px" },
     { name: "name", value: "Name", show: true },
-    { name: "languageBrach", value: "Language", show: true, width: "100px" },
+    { name: "languageBranch", value: "Language", show: true, width: "100px" },
     { name: "pageUrl", value: "URL", show: true },
   ]);
 
@@ -51,15 +51,15 @@ const ContentTypeUsageView = () => {
     id: boolean,
     guid: boolean,
     name: boolean,
-    languageBrach: boolean,
+    languageBranch: boolean,
     pageUrl: boolean
   ) => string;
 
   const tableColumnWidth = useCallback(
     (callbackFn: TableColumnWidthCallbackFunction) => {
       const columns = tableColumns.map((column) => column.show);
-      const [id, guid, name, languageBrach, pageUrl] = columns;
-      return callbackFn(id, guid, name, languageBrach, pageUrl);
+      const [id, guid, name, languageBranch, pageUrl] = columns;
+      return callbackFn(id, guid, name, languageBranch, pageUrl);
     },
     [tableColumns]
   );
@@ -69,36 +69,36 @@ const ContentTypeUsageView = () => {
       new Map([
         [
           "id",
-          tableColumnWidth((id, guid, name, languageBrach, pageUrl) => {
-            if (!guid && !name && !languageBrach && !pageUrl) return "auto";
+          tableColumnWidth((id, guid, name, languageBranch, pageUrl) => {
+            if (!guid && !name && !languageBranch && !pageUrl) return "auto";
             return "60px";
           }),
         ],
         [
           "guid",
-          tableColumnWidth((id, guid, name, languageBrach, pageUrl) => {
+          tableColumnWidth((id, guid, name, languageBranch, pageUrl) => {
             if (!name && !pageUrl) return "auto";
             return "320px";
           }),
         ],
         ["name", "auto"],
         [
-          "languageBrach",
-          tableColumnWidth((id, guid, name, languageBrach, pageUrl) => {
+          "languageBranch",
+          tableColumnWidth((id, guid, name, languageBranch, pageUrl) => {
             if (!guid && !pageUrl) return "auto";
             return "100px";
           }),
         ],
         [
           "pageUrl",
-          tableColumnWidth((id, guid, name, languageBrach, pageUrl) => {
+          tableColumnWidth((id, guid, name, languageBranch, pageUrl) => {
             if (!guid) return "auto";
             return "340px";
           }),
         ],
         [
           "actions",
-          tableColumnWidth((id, guid, name, languageBrach, pageUrl) => {
+          tableColumnWidth((id, guid, name, languageBranch, pageUrl) => {
             return "60px";
           }),
         ],
@@ -137,8 +137,7 @@ const ContentTypeUsageView = () => {
   const onSearchValueChange: React.KeyboardEventHandler<HTMLInputElement> =
     useCallback((event) => {
       event.persist();
-      // @ts-ignore
-      handleSearch(event.target.value);
+      handleSearch(event.currentTarget.value);
     }, []);
 
   const changeColumnVisibility = useCallback(
@@ -178,7 +177,7 @@ const ContentTypeUsageView = () => {
         )
           return true;
         if (
-          value.languageBrach
+          value.languageBranch
             ?.toLocaleLowerCase()
             .includes(searchValue.toLocaleLowerCase())
         )
@@ -381,7 +380,7 @@ const ContentTypeUsageView = () => {
                       id,
                       contentTypeGuid,
                       name,
-                      languageBrach,
+                      languageBranch,
                       pageUrls,
                       editUrl,
                     }) => (
@@ -397,8 +396,8 @@ const ContentTypeUsageView = () => {
                                 {column.name === "id" ? id : ""}
                                 {column.name === "guid" ? contentTypeGuid : ""}
                                 {column.name === "name" ? name : ""}
-                                {column.name === "languageBrach"
-                                  ? languageBrach
+                                {column.name === "languageBranch"
+                                  ? languageBranch
                                   : ""}
                                 {column.name === "pageUrl" &&
                                 pageUrls.length > 0 &&

@@ -10,7 +10,7 @@ export interface ContentTypeUsage {
   id: number;
   contentTypeGuid: string;
   name?: string;
-  languageBrach?: string;
+  languageBranch?: string;
   pageUrls?: string[];
   editUrl: string;
 }
