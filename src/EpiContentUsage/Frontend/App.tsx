@@ -11,21 +11,8 @@ interface AppProps {
   model: AppModel;
 }
 
-export const App = ({
-  model: {
-    moduleBaseUrl,
-    contentTypeBasesEndpointUrl,
-    contentTypeEndpointUrl,
-    contentTypesEndpointUrl,
-    contentUsagesEndpointUrl,
-  },
-}: AppProps) => {
-  Api.setEndpoints({
-    contentTypeBasesEndpointUrl,
-    contentTypeEndpointUrl,
-    contentTypesEndpointUrl,
-    contentUsagesEndpointUrl,
-  });
+export const App = ({ model: { moduleBaseUrl, ...endpoints } }: AppProps) => {
+  Api.setEndpoints(endpoints);
 
   return (
     <div className="epi-content-usage">

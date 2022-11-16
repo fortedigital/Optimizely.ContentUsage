@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { ContentType, SortDirection } from "../types";
+import { SortDirection } from "../types";
 import {
   Button,
   Dropdown,
@@ -15,13 +15,14 @@ import { Link, useLoaderData, useNavigate } from "react-router-dom";
 import { AxiosResponse } from "axios";
 import Layout from "../Components/Layout";
 import { viewContentTypeUsages } from "../routes";
+import { ContentTypeDto } from "../dtos";
 
 type TableColumn = "guid" | "name" | "displayName" | "type" | "usageCount";
 
 const ROWS_PER_PAGE_OPTIONS = [15, 30, 60];
 
 const ContentTypesView = () => {
-  const [contentTypes, setContentTypes] = useState<ContentType[]>([]);
+  const [contentTypes, setContentTypes] = useState<ContentTypeDto[]>([]);
   const [searchValue, setSearchValue] = useState<string>("");
   const [sortBy, setSortBy] = useState<TableColumn | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(
@@ -219,7 +220,7 @@ const ContentTypesView = () => {
     [navigate]
   );
 
-  const response = useLoaderData() as AxiosResponse<ContentType[], any>;
+  const response = useLoaderData() as AxiosResponse<ContentTypeDto[], any>;
   useEffect(() => {
     if (response && response.data) setContentTypes(response.data);
   }, [response]);
