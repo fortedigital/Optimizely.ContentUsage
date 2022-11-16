@@ -7,9 +7,9 @@ import {
   Route,
   RouterProvider,
 } from "react-router-dom";
+import { ContentTypeDto, ContentUsageDto } from "../dtos";
 import { Api } from "../Lib/Api";
 import { routes, setBaseUrl } from "../routes";
-import { ContentType, ContentTypeUsage } from "../types";
 import ContentTypesView from "../Views/ContentTypesView";
 import ContentTypeUsageView from "../Views/ContentTypeUsageView";
 import Loader from "./Loader";
@@ -23,12 +23,12 @@ interface LoadDataFunction {
 }
 
 const contentTypesLoader: LoadDataFunction = () =>
-  Api.get<ContentType[]>(Api.endpoints.contentTypesEndpointUrl);
+  Api.get<ContentTypeDto[]>(Api.endpoints.contentTypesEndpointUrl);
 
 const contentTypeUsagesLoader: LoadDataFunction = (initialLoad, { params }) => {
   if (!params.guid) return redirect(routes.index);
 
-  const contentTypeUsages = Api.get<ContentTypeUsage[]>(
+  const contentTypeUsages = Api.get<ContentUsageDto[]>(
     Api.endpoints.contentUsagesEndpointUrl,
     {
       guid: params.guid,
@@ -36,7 +36,7 @@ const contentTypeUsagesLoader: LoadDataFunction = (initialLoad, { params }) => {
   );
 
   if (initialLoad) {
-    const contentType = Api.get<ContentType>(
+    const contentType = Api.get<ContentTypeDto>(
       Api.endpoints.contentTypeEndpointUrl,
       { guid: params.guid }
     );

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Breadcrumb } from "@episerver/ui-framework";
-import { ContentType, ContentTypeUsage, SortDirection } from "../types";
+import { SortDirection } from "../types";
 import {
   Button,
   Dropdown,
@@ -17,6 +17,7 @@ import { useLoaderData, useLocation } from "react-router-dom";
 import { AxiosResponse } from "axios";
 import Layout from "../Components/Layout";
 import { getRoutePath, viewContentTypes } from "../routes";
+import { ContentTypeDto, ContentUsageDto } from "../dtos";
 
 type TableColumn = "guid" | "id" | "name" | "languageBranch" | "pageUrl";
 
@@ -25,9 +26,9 @@ const ROWS_PER_PAGE_OPTIONS = [15, 30, 60];
 const ContentTypeUsageView = () => {
   const [contentTypeDisplayName, setContentTypeDisplayName] =
     useState<string>();
-  const [contentTypeUsages, setContentTypeUsages] = useState<
-    ContentTypeUsage[]
-  >([]);
+  const [contentTypeUsages, setContentTypeUsages] = useState<ContentUsageDto[]>(
+    []
+  );
   const [searchValue, setSearchValue] = useState<string>("");
   const [sortBy, setSortBy] = useState<TableColumn | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>(
@@ -197,7 +198,7 @@ const ContentTypeUsageView = () => {
       })
       .sort((prevValue, nextValue) => {
         if (!sortBy) return 0;
-        const sortField = sortBy as keyof ContentTypeUsage;
+        const sortField = sortBy as keyof ContentUsageDto;
         if (sortDirection === SortDirection.Descending)
           return prevValue[sortField] > nextValue[sortField] ? -1 : 1;
         else if (sortDirection === SortDirection.Ascending)
@@ -226,8 +227,8 @@ const ContentTypeUsageView = () => {
   );
 
   const response = useLoaderData() as
-    | AxiosResponse<ContentTypeUsage[]>
-    | [AxiosResponse<ContentType>, AxiosResponse<ContentTypeUsage[]>];
+    | AxiosResponse<ContentUsageDto[]>
+    | [AxiosResponse<ContentTypeDto>, AxiosResponse<ContentUsageDto[]>];
   useEffect(() => {
     if (response) {
       if (Array.isArray(response)) {
