@@ -12,7 +12,7 @@ import EpiContentUsageAPIClient from "../Lib/EpiContentUsageAPIClient";
 import { routes, setBaseUrl } from "../routes";
 import ContentTypesView from "../Views/ContentTypesView";
 import ContentTypeUsageView from "../Views/ContentTypeUsageView";
-import PageLoader from "./PageLoader";
+import PageLoader from "./PageLoader/PageLoader";
 import { useAPI } from "../Contexts/ApiProvider";
 
 interface RouterProps {

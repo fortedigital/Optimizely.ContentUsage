@@ -1,0 +1,17 @@
+.epi-content-usage {
+  position: relative;
+
+  .epi-content-usage-grid {
+    .epi-content-usage-table {
+      tr.hover--disabled:hover {
+        td {
+          background: inherit;
+        }
+      }
+
+      .oui-spinner {
+        margin: 30px;
+      }
+    }
+  }
+}

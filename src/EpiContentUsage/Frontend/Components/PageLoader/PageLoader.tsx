@@ -4,7 +4,7 @@ import { Spinner } from "optimizely-oui";
 import "./PageLoader.scss";
 
 const PageLoader = () => (
-  <div className="page-loader">
+  <div className="epi-content-usage-page-loader">
     <Spinner />
   </div>
 );
