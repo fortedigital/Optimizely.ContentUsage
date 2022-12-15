@@ -11,9 +11,9 @@ import {
   PaginationControls,
   Table,
 } from "optimizely-oui";
-import { useLoaderData, useLocation, useNavigate } from "react-router-dom";
+import { useLoaderData, useLocation } from "react-router-dom";
 import Layout from "../Components/Layout";
-import { getRoutePath, viewContentTypes } from "../routes";
+import { getRoutePath, navigateTo, viewContentTypes } from "../routes";
 import { ContentTypeDto, ContentUsageDto } from "../dtos";
 import { useFilteredTableData } from "../Lib/hooks/useFilteredTableData";
 import { APIResponse } from "../Lib/EpiContentUsageAPIClient";
@@ -141,7 +141,6 @@ const ContentTypeUsageView = () => {
     []
   );
   const location = useLocation();
-  const navigate = useNavigate();
 
   const {
     views: {
@@ -230,8 +229,8 @@ const ContentTypeUsageView = () => {
   ];
 
   const onTableRowClick = useCallback(
-    (editUrl: string) => navigate(editUrl),
-    [navigate]
+    (editUrl: string) => navigateTo(editUrl),
+    [navigateTo]
   );
 
   const response = useLoaderData() as
