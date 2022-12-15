@@ -23,6 +23,21 @@ export const translations = {
         },
       },
     },
+    contentUsagesView: {
+      table: {
+        columns: {
+          id: "ID",
+          contentTypeGuid: "GUID",
+          displayName: "Display name",
+          name: "Name",
+          languageBranch: "Language",
+          pageUrl: "URL",
+        },
+        actions: {
+          edit: "Edit",
+        },
+      },
+    },
   },
   noResults: "No matching results",
 };

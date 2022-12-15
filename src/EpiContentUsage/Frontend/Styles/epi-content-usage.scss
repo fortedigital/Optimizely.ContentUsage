@@ -3,9 +3,21 @@
 
   .epi-content-usage-grid {
     .epi-content-usage-table {
-      tr.hover--disabled:hover {
-        td {
-          background: inherit;
+      & > tbody {
+        & > tr {
+          &:hover {
+            cursor: pointer;
+
+            & > td {
+              background-color: var(--grey-25);
+            }
+          } 
+
+          &.hover--disabled:hover {
+            & > td {
+              background: inherit;
+            }
+          }
         }
       }
 
