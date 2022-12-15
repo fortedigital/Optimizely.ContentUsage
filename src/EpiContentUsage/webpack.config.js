@@ -1,9 +1,10 @@
-const path = require('path');
+const path = require("path");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 module.exports = (env, argv) => {
     return {
         entry: {
-            'react-app': './Frontend/index.tsx'
+            'epi-content-usage': './Frontend/index.tsx'
         },
         module: {
             rules: [
@@ -14,12 +15,12 @@ module.exports = (env, argv) => {
                 },
                 {
                   test: /\.css$/i,
-                  use: ["style-loader", "css-loader"],
+                  use: [MiniCssExtractPlugin.loader, "css-loader"],
                 },
                 {
                     test: /\.s[ac]ss$/i,
                     use: [
-                        "style-loader",
+                        MiniCssExtractPlugin.loader,
                         "css-loader",
                         "sass-loader"
                     ],
@@ -27,7 +28,7 @@ module.exports = (env, argv) => {
             ]
         },
         output: {
-            filename: '[name].js',
+            filename: '[name].bundle.js',
             path: path.resolve(__dirname, 'module/ClientResources')
         },
         resolve: {
@@ -35,6 +36,11 @@ module.exports = (env, argv) => {
         },
         devServer: {
             static: path.resolve(__dirname, 'module/ClientResources')
-        }
+        },
+        plugins: [
+            new MiniCssExtractPlugin({
+              filename: "[name].bundle.css",
+            }),
+        ]
     }
-}
+};
