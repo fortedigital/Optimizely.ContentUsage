@@ -41,7 +41,6 @@ function ColumnsFilter<TableDataType>({
               isItemSelected={visible}
               isMultiSelect={true}
               onClick={onChange ? () => onChange(name, !visible) : undefined}
-              isDisabled={visible && columns.length === 1}
             >
               <Dropdown.BlockLinkText text={value} />
             </Dropdown.BlockLink>
