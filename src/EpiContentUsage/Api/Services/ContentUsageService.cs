@@ -9,13 +9,16 @@ namespace Forte.EpiContentUsage.Api.Services;
 
 public class ContentUsageService
 {
+    private readonly IContentModelUsage _contentModelUsage;
     private readonly IContentSoftLinkRepository _contentSoftLinkRepository;
     private readonly IUrlResolver _urlResolver;
 
-    public ContentUsageService(IUrlResolver urlResolver, IContentSoftLinkRepository contentSoftLinkRepository)
+    public ContentUsageService(IUrlResolver urlResolver, IContentSoftLinkRepository contentSoftLinkRepository,
+        IContentModelUsage contentModelUsage)
     {
         _urlResolver = urlResolver;
         _contentSoftLinkRepository = contentSoftLinkRepository;
+        _contentModelUsage = contentModelUsage;
     }
 
     public IEnumerable<string> GetPageUrls(ContentReference contentLink)
@@ -34,6 +37,18 @@ public class ContentUsageService
 
     public string GetEditUrl(ContentUsage contentUsage)
     {
-        return PageEditing.GetEditUrl(contentUsage.ContentLink);
+        var latestVersionContentLink = contentUsage.ContentLink.ToReferenceWithoutVersion();
+
+        return PageEditing.GetEditUrl(latestVersionContentLink);
+    }
+
+    public IEnumerable<ContentUsage> GetContentUsages(ContentType contentType)
+    {
+        var contentUsages = _contentModelUsage.ListContentOfContentType(contentType);
+
+        var contentUsageLatestVersions = contentUsages.GroupBy(u => new { u.ContentLink.ID, u.LanguageBranch })
+            .Select(v => v.MaxBy(u => u.ContentLink.WorkID));
+
+        return contentUsageLatestVersions;
     }
 }
