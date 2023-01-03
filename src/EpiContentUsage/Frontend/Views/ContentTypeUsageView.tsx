@@ -177,7 +177,7 @@ const ContentTypeUsageView = () => {
     totalPages,
     currentPage,
     goToPage,
-  } = useFilteredTableData(contentTypeUsages, initialTableColumns);
+  } = useFilteredTableData({ rows: contentTypeUsages, initialTableColumns });
 
   const tableColumnsWidthMap = useMemo(
     () =>

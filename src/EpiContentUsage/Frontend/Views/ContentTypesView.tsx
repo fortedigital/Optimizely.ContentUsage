@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   Button,
   Grid,
@@ -19,9 +25,11 @@ import { useFilteredTableData } from "../Lib/hooks/useFilteredTableData";
 import { TableColumn } from "../types";
 
 const ContentTypesView = () => {
+  const [dataLoaded, setDataLoaded] = useState<boolean>(false);
   const translations = useTranslations();
   const [contentTypes, setContentTypes] = useState<ContentTypeDto[]>([]);
   const navigate = useNavigate();
+  const gridContainerRef = useRef<HTMLElement | null>();
 
   const {
     views: {
@@ -87,7 +95,23 @@ const ContentTypesView = () => {
     totalPages,
     currentPage,
     goToPage,
-  } = useFilteredTableData(contentTypes, initialTableColumns);
+  } = useFilteredTableData({
+    rows: contentTypes,
+    initialTableColumns,
+  });
+
+  const scrollToTop = useCallback(
+    () => gridContainerRef.current?.scrollIntoView({ behavior: "smooth" }),
+    []
+  );
+
+  const handlePageChange = useCallback(
+    (page: number) => {
+      goToPage(page);
+      scrollToTop();
+    },
+    [goToPage]
+  );
 
   const tableColumnsWidthMap = useMemo(
     () =>
@@ -134,13 +158,15 @@ const ContentTypesView = () => {
   const response = useLoaderData() as APIResponse<ContentTypeDto[]>;
 
   useEffect(() => {
-    if (response && !response.hasErrors && response.data)
+    if (!dataLoaded && response && !response.hasErrors && response.data) {
+      setDataLoaded(true);
       setContentTypes(response.data);
-  }, [response]);
+    }
+  }, [response, dataLoaded]);
 
   return (
     <Layout>
-      <GridContainer className="epi-content-usage-grid">
+      <GridContainer ref={gridContainerRef} className="epi-content-usage-grid">
         <Grid>
           <GridCell large={12} medium={8} small={4}>
             <Header title={translations.title} />
@@ -222,7 +248,7 @@ const ContentTypesView = () => {
             <GridCell large={12} medium={8} small={4}>
               <PaginationControls
                 currentPage={currentPage}
-                goToPage={goToPage}
+                goToPage={handlePageChange}
                 totalPages={totalPages}
               />
             </GridCell>

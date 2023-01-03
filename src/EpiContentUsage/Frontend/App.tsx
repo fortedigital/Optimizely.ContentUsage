@@ -6,8 +6,6 @@ import Router from "./Components/Router";
 import APIProvider from "./Contexts/ApiProvider";
 import { AppModel } from "./dtos";
 import TranslationsProvider from "./Contexts/TranslationsProvider";
-// import "@episerver/ui-framework/dist/main.css";
-// import "optimizely-oui/dist/styles.css";
 
 interface AppProps {
   model: AppModel;

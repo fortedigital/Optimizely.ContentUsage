@@ -2,7 +2,7 @@ import React from "react";
 import { Dropdown } from "optimizely-oui";
 import { useTranslations } from "../../Contexts/TranslationsProvider";
 
-export const ROWS_PER_PAGE_DEFAULT_OPTIONS = [15, 30, 60];
+export const ROWS_PER_PAGE_DEFAULT_OPTIONS = [50, 100, 200];
 
 interface NumberOfRowsFilterProps {
   selected: number;
