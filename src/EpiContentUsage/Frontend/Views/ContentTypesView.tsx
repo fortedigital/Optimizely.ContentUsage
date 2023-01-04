@@ -118,7 +118,7 @@ const ContentTypesView = () => {
       goToPage(page);
       scrollToTop();
     },
-    [goToPage]
+    [goToPage, scrollToTop]
   );
 
   const tableColumnsWidthMap = useMemo(
@@ -242,6 +242,7 @@ const ContentTypesView = () => {
                               iconName="ellipsis"
                               size="small"
                               style="plain"
+                              title={actions.title}
                             />
                           }
                         >
