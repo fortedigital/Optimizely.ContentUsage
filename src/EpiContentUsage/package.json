@@ -13,11 +13,13 @@
     "axios": "^0.27.2",
     "optimizely-oui": "^49.0.0",
     "react": "^16.11.0",
+    "react-copy-to-clipboard": "^5.1.0",
     "react-dom": "^16.11.0",
     "react-router-dom": "^6.4.1"
   },
   "devDependencies": {
     "@types/react": "^16.11.0",
+    "@types/react-copy-to-clipboard": "^5.0.4",
     "@types/react-dom": "^16.9.0",
     "@typescript-eslint/eslint-plugin": "^5.38.1",
     "@typescript-eslint/parser": "^5.38.1",

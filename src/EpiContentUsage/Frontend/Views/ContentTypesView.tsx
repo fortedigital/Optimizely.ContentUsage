@@ -6,14 +6,16 @@ import React, {
   useState,
 } from "react";
 import {
-  Button,
+  ButtonIcon,
+  Dropdown,
   Grid,
   GridCell,
   GridContainer,
   PaginationControls,
   Table,
 } from "optimizely-oui";
-import { Link, useLoaderData, useNavigate } from "react-router-dom";
+import { useLoaderData, useNavigate } from "react-router-dom";
+import { CopyToClipboard } from "react-copy-to-clipboard";
 import Layout from "../Components/Layout";
 import { viewContentTypeUsages } from "../routes";
 import { ContentTypeDto } from "../dtos";
@@ -73,10 +75,16 @@ const ContentTypesView = () => {
   ] as TableColumn<ContentTypeDto>[];
 
   const onTableRowClick = useCallback(
-    (guid: string, displayName: string) =>
-      navigate(viewContentTypeUsages(guid), {
-        state: { contentType: { displayName: displayName } },
-      }),
+    (guid: string, displayName: string, alwaysTriggerClick = false) =>
+      (event: React.PointerEvent) => {
+        const target = event.target as HTMLTableCellElement | undefined;
+
+        if ((target && target.tagName === "TD") || alwaysTriggerClick) {
+          navigate(viewContentTypeUsages(guid), {
+            state: { contentType: { displayName: displayName } },
+          });
+        }
+      },
     [navigate]
   );
 
@@ -215,9 +223,10 @@ const ContentTypesView = () => {
                   rows.map((row) => (
                     <Table.TR
                       key={row.guid}
-                      onRowClick={() =>
-                        onTableRowClick(row.guid, row.displayName || row.name)
-                      }
+                      onRowClick={onTableRowClick(
+                        row.guid,
+                        row.displayName || row.name
+                      )}
                     >
                       {tableColumns
                         .filter((column) => column.visible)
@@ -227,11 +236,40 @@ const ContentTypesView = () => {
                           </Table.TD>
                         ))}
                       <Table.TD verticalAlign="middle">
-                        <Link to={viewContentTypeUsages(row.guid)}>
-                          <Button size="small" width="default" isLink>
-                            {actions.viewUsages}
-                          </Button>
-                        </Link>
+                        <Dropdown
+                          activator={
+                            <ButtonIcon
+                              iconName="ellipsis"
+                              size="small"
+                              style="plain"
+                            />
+                          }
+                        >
+                          <Dropdown.Contents>
+                            <Dropdown.ListItem
+                              onClick={onTableRowClick(
+                                row.guid,
+                                row.displayName || row.name,
+                                true
+                              )}
+                            >
+                              <Dropdown.BlockLink>
+                                <Dropdown.BlockLinkText
+                                  text={actions.viewUsages}
+                                />
+                              </Dropdown.BlockLink>
+                            </Dropdown.ListItem>
+                            <Dropdown.ListItem onClick={null}>
+                              <CopyToClipboard text={row.guid}>
+                                <Dropdown.BlockLink>
+                                  <Dropdown.BlockLinkText
+                                    text={actions.copyGuid}
+                                  />
+                                </Dropdown.BlockLink>
+                              </CopyToClipboard>
+                            </Dropdown.ListItem>
+                          </Dropdown.Contents>
+                        </Dropdown>
                       </Table.TD>
                     </Table.TR>
                   ))

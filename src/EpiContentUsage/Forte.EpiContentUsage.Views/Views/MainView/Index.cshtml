@@ -9,5 +9,5 @@
 <noscript>You need to enable JavaScript to run this app.</noscript>
 <div id="epi-content-usage-root"></div>
 <script type="text/javascript">const appModel = @Html.Serialized(Model.FrontendAppModel);</script>
-<link rel="stylesheet" href="@PathsHelper.ToClientResource(Model.GetType(),"ClientResources/epi-content-usage.bundle.css")">
-<script src="@PathsHelper.ToClientResource(Model.GetType(),"ClientResources/epi-content-usage.bundle.js")"></script>
+<link rel="stylesheet" href="@PathsHelper.ToClientResource(Model.GetType(),"ClientResources/epi-content-usage.bundle.css")" crossorigin>
+<script src="@PathsHelper.ToClientResource(Model.GetType(),"ClientResources/epi-content-usage.bundle.js")" crossorigin></script>

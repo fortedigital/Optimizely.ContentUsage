@@ -6,6 +6,7 @@ module.exports = (env, argv) => {
         entry: {
             'epi-content-usage': './Frontend/index.tsx'
         },
+        devtool: 'cheap-module-source-map',
         module: {
             rules: [
                 {
@@ -35,7 +36,12 @@ module.exports = (env, argv) => {
             extensions: ['.ts', '.tsx', '.js']
         },
         devServer: {
-            static: path.resolve(__dirname, 'module/ClientResources')
+            static: path.resolve(__dirname, 'module/ClientResources'),
+            headers: {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+                "Access-Control-Allow-Headers": "X-Requested-With, content-type, Authorization"
+            }
         },
         plugins: [
             new MiniCssExtractPlugin({

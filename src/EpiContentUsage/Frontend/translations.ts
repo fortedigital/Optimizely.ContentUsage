@@ -20,6 +20,7 @@ export const translations = {
         },
         actions: {
           viewUsages: "View usages",
+          copyGuid: "Copy GUID",
         },
       },
     },
