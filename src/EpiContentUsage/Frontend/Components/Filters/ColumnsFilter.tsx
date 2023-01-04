@@ -19,7 +19,7 @@ function ColumnsFilter<TableDataType>({
 
     if (filteredColumns.length === columns.length)
       return translations.filters.all;
-    if (filteredColumns.length === 1) return filteredColumns[0].value;
+    if (filteredColumns.length === 1) return filteredColumns[0].name;
 
     return translations.filters.mixed;
   }, [columns, translations]);
@@ -35,14 +35,14 @@ function ColumnsFilter<TableDataType>({
       shouldHideChildrenOnClick={false}
     >
       <Dropdown.Contents>
-        {columns.map(({ name, value, visible }) => (
+        {columns.map(({ id, name, visible }) => (
           <Dropdown.ListItem key={name}>
             <Dropdown.BlockLink
               isItemSelected={visible}
               isMultiSelect={true}
-              onClick={onChange ? () => onChange(name, !visible) : undefined}
+              onClick={onChange ? () => onChange(id, !visible) : undefined}
             >
-              <Dropdown.BlockLinkText text={value} />
+              <Dropdown.BlockLinkText text={name} />
             </Dropdown.BlockLink>
           </Dropdown.ListItem>
         ))}

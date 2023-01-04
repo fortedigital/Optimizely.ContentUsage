@@ -45,15 +45,15 @@ const ContentTypeUsageDiscloseTableRow = ({
         ...tableColumns
           .filter((column) => column.visible)
           .map((column) => (
-            <Table.TD key={column.name}>
-              {column.name.toString() === "pageUrl" &&
+            <Table.TD key={column.id}>
+              {column.id.toString() === "pageUrl" &&
               row.pageUrls.length > 0 &&
               row.pageUrls[0] ? (
                 <Link href={row.pageUrls[0]} newWindow>
                   {row.pageUrls[0]}
                 </Link>
               ) : (
-                row[column.name]
+                row[column.id]
               )}
             </Table.TD>
           )),
@@ -110,15 +110,15 @@ const ContentTypeUsageTableRow = ({
       {tableColumns
         .filter((column) => column.visible)
         .map((column) => (
-          <Table.TD key={column.name}>
-            {column.name.toString() === "pageUrl" &&
+          <Table.TD key={column.id}>
+            {column.id.toString() === "pageUrl" &&
             row.pageUrls.length > 0 &&
             row.pageUrls[0] ? (
               <Link href={row.pageUrls[0]} newWindow>
                 {row.pageUrls[0]}
               </Link>
             ) : (
-              row[column.name]
+              row[column.id]
             )}
           </Table.TD>
         ))}
@@ -151,15 +151,15 @@ const ContentTypeUsageView = () => {
   } = translations;
 
   const initialTableColumns = [
-    { name: "id", value: columns.id, visible: true, filter: true },
-    { name: "name", value: columns.name, visible: true, filter: true },
+    { id: "id", name: columns.id, visible: true, filter: true },
+    { id: "name", name: columns.name, visible: true, filter: true },
     {
-      name: "languageBranch",
-      value: columns.languageBranch,
+      id: "languageBranch",
+      name: columns.languageBranch,
       visible: true,
       filter: true,
     },
-    { name: "pageUrl", value: columns.pageUrl, visible: true, filter: true },
+    { id: "pageUrl", name: columns.pageUrl, visible: true, filter: true },
   ] as TableColumn<ContentUsageDto>[];
 
   const {
@@ -294,15 +294,15 @@ const ContentTypeUsageView = () => {
                     .filter((column) => column.visible)
                     .map((column) => (
                       <Table.TH
-                        width={tableColumnsWidthMap.get(column.name)}
+                        width={tableColumnsWidthMap.get(column.id)}
                         sorting={{
                           canSort: true,
                           handleSort: () => onSortChange(column),
                           order: sortDirection,
                         }}
-                        key={column.name}
+                        key={column.id}
                       >
-                        {column.value}
+                        {column.name}
                       </Table.TH>
                     ))}
                   <Table.TH width={tableColumnsWidthMap.get(`actions`)} />

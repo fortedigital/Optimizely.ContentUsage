@@ -26,6 +26,15 @@ import { useTranslations } from "../Contexts/TranslationsProvider";
 import { useFilteredTableData } from "../Lib/hooks/useFilteredTableData";
 import { TableColumn } from "../types";
 
+enum ContentTypesTableColumn {
+  GUID = "guid",
+  DisplayName = "displayName",
+  Name = "name",
+  Type = "type",
+  UsageCount = "usageCount",
+  Actions = "actions",
+}
+
 const ContentTypesView = () => {
   const [dataLoaded, setDataLoaded] = useState<boolean>(false);
   const translations = useTranslations();
@@ -43,32 +52,32 @@ const ContentTypesView = () => {
 
   const initialTableColumns = [
     {
-      name: "guid",
-      value: columns.guid,
+      id: ContentTypesTableColumn.GUID,
+      name: columns.guid,
       visible: false,
       filter: true,
     },
     {
-      name: "displayName",
-      value: columns.displayName,
+      id: ContentTypesTableColumn.DisplayName,
+      name: columns.displayName,
       visible: true,
       filter: true,
     },
     {
-      name: "name",
-      value: columns.name,
+      id: ContentTypesTableColumn.Name,
+      name: columns.name,
       visible: true,
       filter: true,
     },
     {
-      name: "type",
-      value: columns.type,
+      id: ContentTypesTableColumn.Type,
+      name: columns.type,
       visible: true,
       filter: true,
     },
     {
-      name: "usageCount",
-      value: columns.usageCount,
+      id: ContentTypesTableColumn.UsageCount,
+      name: columns.usageCount,
       visible: true,
       filter: true,
     },
@@ -125,14 +134,14 @@ const ContentTypesView = () => {
     () =>
       new Map([
         [
-          "guid",
+          ContentTypesTableColumn.GUID,
           useTableColumns((guid, displayName, name, type, usageCount) => {
             if (!displayName && !name) return "auto";
             return "320px";
           }),
         ],
         [
-          "displayName",
+          ContentTypesTableColumn.DisplayName,
           useTableColumns((guid, displayName, name, type, usageCount) => {
             if (!guid) return "auto";
             return "200px";
@@ -140,21 +149,21 @@ const ContentTypesView = () => {
         ],
         ["name", "auto"],
         [
-          "type",
+          ContentTypesTableColumn.Type,
           useTableColumns((guid, displayName, name, type, usageCount) => {
             if (!guid || !displayName) return "auto";
             return "150px";
           }),
         ],
         [
-          "usageCount",
+          ContentTypesTableColumn.UsageCount,
           useTableColumns((guid, displayName, name, type, usageCount) => {
             if (!guid || !displayName) return "auto";
             return "120px";
           }),
         ],
         [
-          "actions",
+          ContentTypesTableColumn.Actions,
           useTableColumns((guid, displayName, name, type, usageCount) => {
             return "100px";
           }),
@@ -203,18 +212,22 @@ const ContentTypesView = () => {
                     .filter((column) => column.visible)
                     .map((column) => (
                       <Table.TH
-                        width={tableColumnsWidthMap.get(column.name)}
+                        width={tableColumnsWidthMap.get(column.id)}
                         sorting={{
                           canSort: true,
                           handleSort: () => onSortChange(column),
                           order: sortDirection,
                         }}
-                        key={column.name}
+                        key={column.id}
                       >
-                        {column.value}
+                        {column.name}
                       </Table.TH>
                     ))}
-                  <Table.TH width={tableColumnsWidthMap.get("actions")} />
+                  <Table.TH
+                    width={tableColumnsWidthMap.get(
+                      ContentTypesTableColumn.Actions
+                    )}
+                  />
                 </Table.TR>
               </Table.THead>
 
@@ -231,9 +244,7 @@ const ContentTypesView = () => {
                       {tableColumns
                         .filter((column) => column.visible)
                         .map((column) => (
-                          <Table.TD key={column.name}>
-                            {row[column.name]}
-                          </Table.TD>
+                          <Table.TD key={column.id}>{row[column.id]}</Table.TD>
                         ))}
                       <Table.TD verticalAlign="middle">
                         <Dropdown

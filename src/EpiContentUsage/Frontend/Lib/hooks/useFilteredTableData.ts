@@ -4,6 +4,15 @@ import { ROWS_PER_PAGE_DEFAULT_OPTIONS } from "../../Components/Filters/NumberOf
 import { SortDirection, TableColumn } from "../../types";
 import { useDebounce } from "./useDebounce";
 
+enum FilteredTableDataQueryParam {
+  SortBy = "sortBy",
+  Order = "order",
+  Query = "query",
+  ShowColumn = "showColumn",
+  Page = "page",
+  RowsPerPage = "rowsPerPage",
+}
+
 interface FilteredTableDataHookOptions<TableDataType> {
   rows: TableDataType[];
   initialTableColumns: TableColumn<TableDataType>[];
@@ -39,7 +48,7 @@ export function useFilteredTableData<TableDataType>({
   currentPage: number;
   goToPage: (page: number) => void;
 } {
-  const [dataChanged, setDataChanged] = useState<boolean>(false);
+  const [datasetChanged, setDatasetChanged] = useState<boolean>(false);
   const [searchFieldValue, setSearchFieldValue] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [sortBy, setSortBy] = useState<keyof TableDataType | null>(null);
@@ -68,7 +77,7 @@ export function useFilteredTableData<TableDataType>({
 
   const handleTableSort = useCallback(
     (column: TableColumn<TableDataType>) => {
-      if (!tableColumns.find(({ name }) => name === column.name)) return;
+      if (!tableColumns.find(({ id }) => id === column.id)) return;
       // If the user isn't switching sort columns, toggle the sort direction
       const sortToggleMap = {
         [SortDirection.Ascending]: SortDirection.Descending,
@@ -76,17 +85,20 @@ export function useFilteredTableData<TableDataType>({
       };
       let newOrder = SortDirection.Ascending;
 
-      if (sortBy === column.name) {
+      if (sortBy === column.id) {
         newOrder = sortToggleMap[sortDirection];
       }
 
       setSearchParams((prevSearchParams) => {
-        prevSearchParams.set("sortBy", column.name.toString());
-        prevSearchParams.set("order", newOrder);
+        prevSearchParams.set(
+          FilteredTableDataQueryParam.SortBy,
+          column.id.toString()
+        );
+        prevSearchParams.set(FilteredTableDataQueryParam.Order, newOrder);
         return prevSearchParams;
       });
       setCurrentPage(1);
-      setSortBy(column.name as keyof TableDataType);
+      setSortBy(column.id as keyof TableDataType);
       setSortDirection(newOrder);
     },
     [setCurrentPage, setSortBy, setSortDirection, sortBy, sortDirection]
@@ -95,14 +107,15 @@ export function useFilteredTableData<TableDataType>({
   const handleSearch = useDebounce(
     (value: string) => {
       setSearchParams((prevSearchParams) => {
-        if (value) prevSearchParams.set("query", value);
-        else prevSearchParams.delete("query");
+        if (value)
+          prevSearchParams.set(FilteredTableDataQueryParam.Query, value);
+        else prevSearchParams.delete(FilteredTableDataQueryParam.Query);
         return prevSearchParams;
       });
       setCurrentPage(1);
       setSearchQuery(value);
     },
-    500,
+    300,
     []
   );
 
@@ -127,21 +140,24 @@ export function useFilteredTableData<TableDataType>({
     );
 
   const changeColumnVisibility = useCallback(
-    (name: string, visible: boolean) => {
+    (id: string, visible: boolean) => {
       const newTableColumns = tableColumns.slice(0);
       const columnIndex = newTableColumns.findIndex(
-        (column) => column.name === name
+        (column) => column.id === id
       );
       newTableColumns[columnIndex].visible = visible;
-      if (!visible && newTableColumns[columnIndex].name === sortBy)
+      if (!visible && newTableColumns[columnIndex].id === sortBy)
         setSortBy(null);
 
       setSearchParams((prevSearchParams) => {
-        prevSearchParams.delete("showColumn");
+        prevSearchParams.delete(FilteredTableDataQueryParam.ShowColumn);
         newTableColumns
           .filter((column) => column.visible)
           .forEach((column) =>
-            prevSearchParams.append("showColumn", column.name.toString())
+            prevSearchParams.append(
+              FilteredTableDataQueryParam.ShowColumn,
+              column.id.toString()
+            )
           );
         return prevSearchParams;
       });
@@ -151,10 +167,9 @@ export function useFilteredTableData<TableDataType>({
   );
 
   const onColumnVisiblityChange = useCallback(
-    (name: string, visible: boolean) => {
+    (id: string, visible: boolean) => {
       if (tableColumns.filter((column) => column.visible).length > 1 || visible)
-        changeColumnVisibility(name, visible);
-      return;
+        changeColumnVisibility(id, visible);
     },
     [tableColumns, changeColumnVisibility]
   );
@@ -162,7 +177,7 @@ export function useFilteredTableData<TableDataType>({
   const handlePageChange = useCallback(
     (page: number) => {
       setSearchParams((prevSearchParams) => {
-        prevSearchParams.set("page", page.toString());
+        prevSearchParams.set(FilteredTableDataQueryParam.Page, page.toString());
         return prevSearchParams;
       });
       setCurrentPage(page);
@@ -173,7 +188,10 @@ export function useFilteredTableData<TableDataType>({
   const onRowsPerPageChange = useCallback(
     (option: number) => {
       setSearchParams((prevSearchParams) => {
-        prevSearchParams.set("rowsPerPage", option.toString());
+        prevSearchParams.set(
+          FilteredTableDataQueryParam.RowsPerPage,
+          option.toString()
+        );
         return prevSearchParams;
       });
       setRowsPerPage(option);
@@ -244,19 +262,21 @@ export function useFilteredTableData<TableDataType>({
 
   const handleUpdateQueryParams = useCallback(
     (queryParams: URLSearchParams) => {
-      if (queryParams.has("sortBy")) {
-        const param = queryParams.get("sortBy") as keyof TableDataType;
+      if (queryParams.has(FilteredTableDataQueryParam.SortBy)) {
+        const param = queryParams.get(
+          FilteredTableDataQueryParam.SortBy
+        ) as keyof TableDataType;
         if (
           tableColumns
             .filter((column) => column.visible)
-            .map((column) => column.name)
+            .map((column) => column.id)
             .includes(param)
         )
           setSortBy(param);
       }
 
-      if (queryParams.has("order")) {
-        const param = queryParams.get("order");
+      if (queryParams.has(FilteredTableDataQueryParam.Order)) {
+        const param = queryParams.get(FilteredTableDataQueryParam.Order);
         if (
           param === SortDirection.Ascending ||
           param === SortDirection.Descending
@@ -264,15 +284,17 @@ export function useFilteredTableData<TableDataType>({
           setSortDirection(param);
       }
 
-      if (queryParams.has("query")) {
-        const param = queryParams.get("query");
+      if (queryParams.has(FilteredTableDataQueryParam.Query)) {
+        const param = queryParams.get(FilteredTableDataQueryParam.Query);
         const value = encodeURIComponent(param);
         setSearchFieldValue(value);
         setSearchQuery(value);
       }
 
-      if (queryParams.has("showColumn")) {
-        const columns = queryParams.getAll("showColumn");
+      if (queryParams.has(FilteredTableDataQueryParam.ShowColumn)) {
+        const columns = queryParams.getAll(
+          FilteredTableDataQueryParam.ShowColumn
+        );
         setTableColumns((tableColumns) => {
           const newTableColumns = tableColumns.slice(0).map((tableColumn) => ({
             ...tableColumn,
@@ -281,7 +303,7 @@ export function useFilteredTableData<TableDataType>({
 
           columns.forEach((column) => {
             const tableColumnIndex = newTableColumns.findIndex(
-              (tableColumn) => tableColumn.name === column
+              (tableColumn) => tableColumn.id === column
             );
             if (tableColumnIndex > -1) {
               newTableColumns[tableColumnIndex].visible = true;
@@ -292,16 +314,16 @@ export function useFilteredTableData<TableDataType>({
         });
       }
 
-      if (queryParams.has("rowsPerPage")) {
-        const param = queryParams.get("rowsPerPage");
+      if (queryParams.has(FilteredTableDataQueryParam.RowsPerPage)) {
+        const param = queryParams.get(FilteredTableDataQueryParam.RowsPerPage);
         const number = parseInt(param);
         if (!Number.isNaN(number) && rowsPerPageOptions.includes(number)) {
           setRowsPerPage(number);
         }
       }
 
-      if (queryParams.has("page")) {
-        const param = queryParams.get("page");
+      if (queryParams.has(FilteredTableDataQueryParam.Page)) {
+        const param = queryParams.get(FilteredTableDataQueryParam.Page);
         const number = parseInt(param);
         if (!Number.isNaN(number) && number > 0 && number <= totalPages) {
           setCurrentPage(number);
@@ -311,14 +333,14 @@ export function useFilteredTableData<TableDataType>({
     [totalPages]
   );
 
-  useEffect(() => setDataChanged(true), [rows]);
+  useEffect(() => setDatasetChanged(true), [rows]);
 
   useEffect(() => {
-    if (dataChanged && rows.length > 0 && totalPages > 0 && searchParams) {
-      setDataChanged(false);
+    if (datasetChanged && rows.length > 0 && totalPages > 0 && searchParams) {
+      setDatasetChanged(false);
       handleUpdateQueryParams(searchParams);
     }
-  }, [dataChanged, rows, totalPages, searchParams]);
+  }, [datasetChanged, rows, totalPages, searchParams]);
 
   return {
     rows: tableRows,

@@ -4,8 +4,8 @@ export enum SortDirection {
 }
 
 export interface TableColumn<TableDataType> {
-  name: keyof TableDataType;
-  value: string;
+  id: keyof TableDataType;
+  name: string;
   visible?: boolean;
   filter?: boolean;
 }
