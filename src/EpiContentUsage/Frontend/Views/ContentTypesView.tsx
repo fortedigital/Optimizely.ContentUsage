@@ -118,7 +118,11 @@ const ContentTypesView = () => {
   });
 
   const scrollToTop = useCallback(
-    () => gridContainerRef.current?.scrollIntoView({ behavior: "smooth" }),
+    () =>
+      setTimeout(
+        () => gridContainerRef.current?.scrollIntoView({ behavior: "smooth" }),
+        0
+      ),
     []
   );
 

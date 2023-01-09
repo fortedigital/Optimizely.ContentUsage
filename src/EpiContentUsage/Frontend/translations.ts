@@ -29,14 +29,15 @@ export const translations = {
       table: {
         columns: {
           id: "ID",
-          contentTypeGuid: "GUID",
           displayName: "Display name",
           name: "Name",
           languageBranch: "Language",
           pageUrl: "URL",
         },
         actions: {
+          title: "Actions",
           edit: "Edit",
+          view: "View",
         },
       },
     },

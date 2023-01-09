@@ -112,7 +112,7 @@ export function useFilteredTableData<TableDataType>({
         else prevSearchParams.delete(FilteredTableDataQueryParam.Query);
         return prevSearchParams;
       });
-      setCurrentPage(1);
+      handlePageChange();
       setSearchQuery(value);
     },
     300,
@@ -175,12 +175,17 @@ export function useFilteredTableData<TableDataType>({
   );
 
   const handlePageChange = useCallback(
-    (page: number) => {
+    (page?: number) => {
       setSearchParams((prevSearchParams) => {
-        prevSearchParams.set(FilteredTableDataQueryParam.Page, page.toString());
+        if (typeof page === "number")
+          prevSearchParams.set(
+            FilteredTableDataQueryParam.Page,
+            page.toString()
+          );
+        else prevSearchParams.delete(FilteredTableDataQueryParam.Page);
         return prevSearchParams;
       });
-      setCurrentPage(page);
+      setCurrentPage(page ?? 1);
     },
     [setCurrentPage]
   );
@@ -209,21 +214,17 @@ export function useFilteredTableData<TableDataType>({
         if (filterFn) return filterFn(row, searchQuery);
 
         for (const column in row) {
-          const tableColumn = tableColumns.find(({ name }) => name === column);
+          const tableColumn = tableColumns.find(({ id }) => id === column);
 
           if (tableColumn && tableColumn.filter && tableColumn.visible) {
             const value = row[column];
-            if (
-              typeof value === "string" &&
-              value
-                .toLocaleLowerCase()
-                .includes(parsedSearchValue.toLocaleLowerCase())
-            )
-              return true;
 
             if (
-              typeof value === "number" &&
-              parseInt(parsedSearchValue) === value
+              value &&
+              value
+                .toString()
+                .toLocaleLowerCase()
+                .includes(parsedSearchValue.toLocaleLowerCase())
             )
               return true;
           }

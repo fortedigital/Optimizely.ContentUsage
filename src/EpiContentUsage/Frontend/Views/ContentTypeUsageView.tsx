@@ -1,9 +1,16 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { Breadcrumb } from "@episerver/ui-framework";
 import { TableColumn } from "../types";
 import {
-  Button,
+  ButtonIcon,
   DiscloseTable,
+  Dropdown,
   Grid,
   GridCell,
   GridContainer,
@@ -21,9 +28,20 @@ import Header from "../Components/Header";
 import { useTranslations } from "../Contexts/TranslationsProvider";
 import Filters from "../Components/Filters/Filters";
 
+enum ContentTypeUsageTableColumn {
+  ID = "id",
+  Name = "name",
+  LanguageBranch = "languageBranch",
+  PageUrl = "pageUrl",
+  Actions = "actions",
+}
+
 interface ContentTypeUsageTableRowProps<TableDataType> extends ContentUsageDto {
   tableColumns: TableColumn<TableDataType>[];
-  onRowClick?: () => void;
+  onRowClick?: (event: React.PointerEvent) => void;
+  onEditButtonClick?: (event: React.PointerEvent) => void;
+  onViewWebsiteClick?: () => void;
+  hasDiscloseTableRows?: boolean;
 }
 
 const ContentTypeUsageDiscloseTableRow = ({
@@ -46,24 +64,12 @@ const ContentTypeUsageDiscloseTableRow = ({
           .filter((column) => column.visible)
           .map((column) => (
             <Table.TD key={column.id}>
-              {column.id.toString() === "pageUrl" &&
-              row.pageUrls.length > 0 &&
-              row.pageUrls[0] ? (
-                <Link href={row.pageUrls[0]} newWindow>
-                  {row.pageUrls[0]}
-                </Link>
-              ) : (
-                row[column.id]
-              )}
+              {column.id.toString() === ContentTypeUsageTableColumn.PageUrl
+                ? null
+                : row[column.id]}
             </Table.TD>
           )),
-        <Table.TD key="actions">
-          <Link href={row.editUrl}>
-            <Button size="small" width="default" isLink>
-              {actions.edit}
-            </Button>
-          </Link>
-        </Table.TD>,
+        <Table.TD key={ContentTypeUsageTableColumn.Actions} />,
       ]}
       isFullWidth
       key={row.id}
@@ -79,9 +85,11 @@ const ContentTypeUsageDiscloseTableRow = ({
             <Table.TBody>
               {row.pageUrls.length > 0 &&
                 row.pageUrls.map((pageUrl, index) => (
-                  <Link key={index} href={pageUrl} newWindow>
-                    {pageUrl}
-                  </Link>
+                  <Table.TR key={index}>
+                    <Link key={index} href={pageUrl} newWindow>
+                      {pageUrl}
+                    </Link>
+                  </Table.TR>
                 ))}
             </Table.TBody>
           </Table>
@@ -94,6 +102,9 @@ const ContentTypeUsageDiscloseTableRow = ({
 const ContentTypeUsageTableRow = ({
   tableColumns,
   onRowClick,
+  onEditButtonClick,
+  onViewWebsiteClick,
+  hasDiscloseTableRows,
   ...row
 }: ContentTypeUsageTableRowProps<ContentUsageDto>) => {
   const {
@@ -106,12 +117,12 @@ const ContentTypeUsageTableRow = ({
 
   return (
     <Table.TR onRowClick={onRowClick}>
-      <Table.TD />
+      {hasDiscloseTableRows && <Table.TD />}
       {tableColumns
         .filter((column) => column.visible)
         .map((column) => (
           <Table.TD key={column.id}>
-            {column.id.toString() === "pageUrl" &&
+            {column.id.toString() === ContentTypeUsageTableColumn.PageUrl &&
             row.pageUrls.length > 0 &&
             row.pageUrls[0] ? (
               <Link href={row.pageUrls[0]} newWindow>
@@ -123,17 +134,38 @@ const ContentTypeUsageTableRow = ({
           </Table.TD>
         ))}
       <Table.TD>
-        <Link href={row.editUrl}>
-          <Button size="small" width="default" isLink>
-            {actions.edit}
-          </Button>
-        </Link>
+        <Dropdown
+          activator={
+            <ButtonIcon
+              iconName="ellipsis"
+              size="small"
+              style="plain"
+              title={actions.title}
+            />
+          }
+        >
+          <Dropdown.Contents>
+            {row.pageUrls[0] && (
+              <Dropdown.ListItem onClick={onViewWebsiteClick}>
+                <Dropdown.BlockLink>
+                  <Dropdown.BlockLinkText text={actions.view} />
+                </Dropdown.BlockLink>
+              </Dropdown.ListItem>
+            )}
+            <Dropdown.ListItem onClick={onEditButtonClick}>
+              <Dropdown.BlockLink>
+                <Dropdown.BlockLinkText text={actions.edit} />
+              </Dropdown.BlockLink>
+            </Dropdown.ListItem>
+          </Dropdown.Contents>
+        </Dropdown>
       </Table.TD>
     </Table.TR>
   );
 };
 
 const ContentTypeUsageView = () => {
+  const [dataLoaded, setDataLoaded] = useState<boolean>(false);
   const translations = useTranslations();
   const [contentTypeDisplayName, setContentTypeDisplayName] =
     useState<string>();
@@ -141,6 +173,7 @@ const ContentTypeUsageView = () => {
     []
   );
   const location = useLocation();
+  const gridContainerRef = useRef<HTMLElement | null>();
 
   const {
     views: {
@@ -151,15 +184,30 @@ const ContentTypeUsageView = () => {
   } = translations;
 
   const initialTableColumns = [
-    { id: "id", name: columns.id, visible: true, filter: true },
-    { id: "name", name: columns.name, visible: true, filter: true },
     {
-      id: "languageBranch",
+      id: ContentTypeUsageTableColumn.ID,
+      name: columns.id,
+      visible: true,
+      filter: true,
+    },
+    {
+      id: ContentTypeUsageTableColumn.Name,
+      name: columns.name,
+      visible: true,
+      filter: true,
+    },
+    {
+      id: ContentTypeUsageTableColumn.LanguageBranch,
       name: columns.languageBranch,
       visible: true,
       filter: true,
     },
-    { id: "pageUrl", name: columns.pageUrl, visible: true, filter: true },
+    {
+      id: ContentTypeUsageTableColumn.PageUrl,
+      name: columns.pageUrl,
+      visible: true,
+      filter: true,
+    },
   ] as TableColumn<ContentUsageDto>[];
 
   const {
@@ -179,33 +227,46 @@ const ContentTypeUsageView = () => {
     goToPage,
   } = useFilteredTableData({ rows: contentTypeUsages, initialTableColumns });
 
+  const scrollToTop = useCallback(
+    () => gridContainerRef.current?.scrollIntoView({ behavior: "smooth" }),
+    []
+  );
+
+  const handlePageChange = useCallback(
+    (page: number) => {
+      goToPage(page);
+      scrollToTop();
+    },
+    [goToPage, scrollToTop]
+  );
+
   const tableColumnsWidthMap = useMemo(
     () =>
       new Map([
         [
-          "id",
+          ContentTypeUsageTableColumn.ID,
           useTableColumns((id, name, languageBranch, pageUrl) => {
             if (!name && !languageBranch && !pageUrl) return "auto";
             return "60px";
           }),
         ],
-        ["name", "auto"],
+        [ContentTypeUsageTableColumn.Name, "auto"],
         [
-          "languageBranch",
+          ContentTypeUsageTableColumn.LanguageBranch,
           useTableColumns((id, name, languageBranch, pageUrl) => {
             if (!pageUrl) return "auto";
             return "100px";
           }),
         ],
         [
-          "pageUrl",
+          ContentTypeUsageTableColumn.PageUrl,
           useTableColumns((id, name, languageBranch, pageUrl) => {
             return "auto";
             // return "340px";
           }),
         ],
         [
-          "actions",
+          ContentTypeUsageTableColumn.Actions,
           useTableColumns((id, name, languageBranch, pageUrl) => {
             return "60px";
           }),
@@ -214,23 +275,49 @@ const ContentTypeUsageView = () => {
     [useTableColumns]
   );
 
-  const breadcrumbItems = [
-    {
-      title: translations.title,
-      link: getRoutePath(viewContentTypes()),
-      level: 1,
-    },
-    {
-      title: contentTypeDisplayName,
-      link: getRoutePath(location.pathname),
-      level: 2,
-      active: true,
-    },
-  ];
+  const breadcrumbItems = useMemo(
+    () => [
+      {
+        title: translations.title,
+        link: getRoutePath(viewContentTypes()),
+        level: 1,
+      },
+      {
+        title: contentTypeDisplayName,
+        link: getRoutePath(location.pathname),
+        level: 2,
+        active: true,
+      },
+    ],
+    [translations, contentTypeDisplayName]
+  );
 
   const onTableRowClick = useCallback(
-    (editUrl: string) => navigateTo(editUrl),
+    (url?: string | null, alwaysTriggerClick = false) =>
+      (event: React.PointerEvent) => {
+        if (!url) return;
+
+        const target = event.target as HTMLTableCellElement | undefined;
+
+        if ((target && target.tagName === "TD") || alwaysTriggerClick) {
+          navigateTo(url);
+        }
+      },
     [navigateTo]
+  );
+
+  const onViewWebsiteClick = useCallback(
+    (url?: string | null) => () => {
+      if (!url) return;
+
+      navigateTo(url);
+    },
+    [navigateTo]
+  );
+
+  const hasDiscloseTableRows = useMemo(
+    () => rows.some((row) => row.pageUrls.length > 1),
+    [rows]
   );
 
   const response = useLoaderData() as
@@ -238,7 +325,7 @@ const ContentTypeUsageView = () => {
     | [APIResponse<ContentTypeDto>, APIResponse<ContentUsageDto[]>];
 
   useEffect(() => {
-    if (response) {
+    if (!dataLoaded && response) {
       if (Array.isArray(response)) {
         const [contentTypeResponse, contentTypeUsagesResponse] = response;
 
@@ -257,12 +344,13 @@ const ContentTypeUsageView = () => {
         setContentTypeDisplayName(location.state?.contentType?.displayName);
         setContentTypeUsages(response.data);
       }
+      setDataLoaded(true);
     }
   }, [response]);
 
   return (
     <Layout>
-      <GridContainer className="epi-content-usage-grid">
+      <GridContainer ref={gridContainerRef} className="epi-content-usage-grid">
         <Grid>
           <GridCell large={12} medium={8} small={4}>
             <Header title={translations.title} />
@@ -289,12 +377,19 @@ const ContentTypeUsageView = () => {
             <DiscloseTable className="epi-content-usage-table">
               <Table.THead>
                 <Table.TR>
-                  <Table.TH isCollapsed={true} />
+                  {hasDiscloseTableRows && (
+                    <Table.TH
+                      isCollapsed={true}
+                      style={{ paddingRight: "30px" }}
+                    />
+                  )}
                   {tableColumns
                     .filter((column) => column.visible)
                     .map((column) => (
                       <Table.TH
-                        width={tableColumnsWidthMap.get(column.id)}
+                        width={tableColumnsWidthMap.get(
+                          ContentTypeUsageTableColumn.ID
+                        )}
                         sorting={{
                           canSort: true,
                           handleSort: () => onSortChange(column),
@@ -305,7 +400,11 @@ const ContentTypeUsageView = () => {
                         {column.name}
                       </Table.TH>
                     ))}
-                  <Table.TH width={tableColumnsWidthMap.get(`actions`)} />
+                  <Table.TH
+                    width={tableColumnsWidthMap.get(
+                      ContentTypeUsageTableColumn.Actions
+                    )}
+                  />
                 </Table.TR>
               </Table.THead>
 
@@ -323,7 +422,10 @@ const ContentTypeUsageView = () => {
                         key={`${row.id}-${row.languageBranch}`}
                         {...row}
                         tableColumns={tableColumns}
-                        onRowClick={() => onTableRowClick(row.editUrl)}
+                        onRowClick={onTableRowClick(row.pageUrls[0])}
+                        onEditButtonClick={onTableRowClick(row.editUrl, true)}
+                        onViewWebsiteClick={onViewWebsiteClick(row.pageUrls[0])}
+                        hasDiscloseTableRows={hasDiscloseTableRows}
                       />
                     )
                   )
@@ -340,7 +442,7 @@ const ContentTypeUsageView = () => {
             <GridCell large={12} medium={8} small={4}>
               <PaginationControls
                 currentPage={currentPage}
-                goToPage={goToPage}
+                goToPage={handlePageChange}
                 totalPages={totalPages}
               />
             </GridCell>
