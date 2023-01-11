@@ -2,11 +2,13 @@
 export const translations = {
   title: "Content Usage",
   filters: {
+    contentTypes: "Content types",
     showColumns: "Show columns",
     all: "All",
     mixed: "Mixed",
     numberOfRows: "Number of rows",
     search: "Search",
+    none: "None",
   },
   views: {
     contentTypesView: {

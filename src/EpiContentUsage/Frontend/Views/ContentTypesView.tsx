@@ -18,7 +18,7 @@ import { useLoaderData, useNavigate } from "react-router-dom";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import Layout from "../Components/Layout";
 import { viewContentTypeUsages } from "../routes";
-import { ContentTypeDto } from "../dtos";
+import { ContentTypeBaseDto, ContentTypeDto } from "../dtos";
 import Header from "../Components/Header";
 import Filters from "../Components/Filters/Filters";
 import { APIResponse } from "../Lib/EpiContentUsageAPIClient";
@@ -38,6 +38,9 @@ enum ContentTypesTableColumn {
 const ContentTypesView = () => {
   const [dataLoaded, setDataLoaded] = useState<boolean>(false);
   const translations = useTranslations();
+  const [initialContentTypeBases, setInitialContentTypeBases] = useState<
+    ContentTypeBaseDto[]
+  >([]);
   const [contentTypes, setContentTypes] = useState<ContentTypeDto[]>([]);
   const navigate = useNavigate();
   const gridContainerRef = useRef<HTMLElement | null>();
@@ -102,6 +105,8 @@ const ContentTypesView = () => {
     searchValue,
     onSearchChange,
     onClearButtonClick,
+    contentTypeBases,
+    onContentTypeBaseChange,
     tableColumns,
     useTableColumns,
     onTableColumnChange,
@@ -115,6 +120,7 @@ const ContentTypesView = () => {
   } = useFilteredTableData({
     rows: contentTypes,
     initialTableColumns,
+    initialContentTypeBases,
   });
 
   const scrollToTop = useCallback(
@@ -176,12 +182,27 @@ const ContentTypesView = () => {
     [useTableColumns]
   );
 
-  const response = useLoaderData() as APIResponse<ContentTypeDto[]>;
+  const response = useLoaderData() as [
+    APIResponse<ContentTypeBaseDto[]>,
+    APIResponse<ContentTypeDto[]>
+  ];
 
   useEffect(() => {
-    if (!dataLoaded && response && !response.hasErrors && response.data) {
+    if (!dataLoaded && response && Array.isArray(response)) {
+      const [contentTypeBasesResponse, contentTypesResponse] = response;
+
+      if (
+        !contentTypeBasesResponse.hasErrors &&
+        contentTypeBasesResponse.data
+      ) {
+        setInitialContentTypeBases(contentTypeBasesResponse.data);
+      }
+
+      if (!contentTypesResponse.hasErrors && contentTypesResponse.data) {
+        setContentTypes(contentTypesResponse.data);
+      }
+
       setDataLoaded(true);
-      setContentTypes(response.data);
     }
   }, [response, dataLoaded]);
 
@@ -198,6 +219,8 @@ const ContentTypesView = () => {
               searchValue={searchValue}
               onSearchChange={onSearchChange}
               onClearButtonClick={onClearButtonClick}
+              contentTypeBases={contentTypeBases}
+              onContentTypeBaseChange={onContentTypeBaseChange}
               columns={tableColumns}
               onTableColumnChange={onTableColumnChange}
               selectedRowsPerPage={selectedRowsPerPage}

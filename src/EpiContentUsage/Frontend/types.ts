@@ -9,3 +9,8 @@ export interface TableColumn<TableDataType> {
   visible?: boolean;
   filter?: boolean;
 }
+
+export interface ContentTypeBase {
+  name: string;
+  visible?: boolean;
+}
