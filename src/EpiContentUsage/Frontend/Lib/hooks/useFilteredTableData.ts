@@ -31,7 +31,7 @@ interface FilteredTableDataHookOptions<TableDataType> {
 export function useFilteredTableData<TableDataType>({
   rows,
   initialContentTypeBases,
-  contentTypeBaseColumnId = "type",
+  contentTypeBaseColumnId = FilteredTableDataQueryParam.ContentTypeBase,
   initialTableColumns,
   initialSortDirection = SortDirection.Ascending,
   rowsPerPageOptions = ROWS_PER_PAGE_DEFAULT_OPTIONS,

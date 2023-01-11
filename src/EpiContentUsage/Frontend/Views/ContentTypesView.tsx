@@ -195,7 +195,12 @@ const ContentTypesView = () => {
         !contentTypeBasesResponse.hasErrors &&
         contentTypeBasesResponse.data
       ) {
-        setInitialContentTypeBases(contentTypeBasesResponse.data);
+        setInitialContentTypeBases(
+          contentTypeBasesResponse.data.map((contentTypeBase) => ({
+            visible: true,
+            ...contentTypeBase,
+          }))
+        );
       }
 
       if (!contentTypesResponse.hasErrors && contentTypesResponse.data) {
