@@ -55,7 +55,7 @@ export function useFilteredTableData<TableDataType>({
   currentPage: number;
   goToPage: (page: number) => void;
 } {
-  const [triggerUpdate, setTriggerUpdate] = useState<boolean>(true);
+  const [triggerUpdate, setTriggerUpdate] = useState<boolean>(false);
   const [datasetChanged, setDatasetChanged] = useState<boolean>(false);
   const [searchFieldValue, setSearchFieldValue] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -475,7 +475,7 @@ export function useFilteredTableData<TableDataType>({
   );
 
   useEffect(() => {
-    if (currentPage < 0 || currentPage > totalPages) {
+    if (triggerUpdate && (currentPage < 0 || currentPage > totalPages)) {
       handlePageChange();
     }
   }, [currentPage]);
@@ -496,6 +496,7 @@ export function useFilteredTableData<TableDataType>({
     if (datasetChanged && rows.length > 0 && totalPages > 0) {
       setDatasetChanged(false);
       handleUpdateQueryParams(searchParams);
+      setTriggerUpdate(true);
     }
   }, [datasetChanged, rows]);
 
