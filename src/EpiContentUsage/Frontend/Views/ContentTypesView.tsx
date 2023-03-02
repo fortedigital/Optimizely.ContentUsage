@@ -219,7 +219,7 @@ const ContentTypesView = () => {
             <Header title={translations.title} />
           </GridCell>
 
-          <GridCell large={8} medium={6} small={2}>
+          <GridCell large={12} medium={8} small={4}>
             <Filters
               searchValue={searchValue}
               onSearchChange={onSearchChange}
@@ -233,7 +233,7 @@ const ContentTypesView = () => {
             />
           </GridCell>
 
-          <GridCell large={12}>
+          <GridCell large={12} medium={8} small={4}>
             <Table
               className="epi-content-usage-table"
               shouldAddHover={rows.length > 0}
@@ -303,7 +303,7 @@ const ContentTypesView = () => {
                                 />
                               </Dropdown.BlockLink>
                             </Dropdown.ListItem>
-                            <Dropdown.ListItem onClick={null}>
+                            <Dropdown.ListItem>
                               <CopyToClipboard text={row.guid}>
                                 <Dropdown.BlockLink>
                                   <Dropdown.BlockLinkText
