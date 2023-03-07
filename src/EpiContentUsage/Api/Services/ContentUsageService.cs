@@ -27,9 +27,10 @@ public class ContentUsageService
         _publishedStateAssessor = publishedStateAssessor;
     }
 
-    public IEnumerable<string> GetPageUrls(ContentReference contentLink)
+    public IEnumerable<string> GetPageUrls(ContentUsage contentUsage)
     {
-        var url = _urlResolver.GetUrl(contentLink);
+        var contentLink = contentUsage.ContentLink;
+        var url = _urlResolver.GetUrl(contentLink, contentUsage.LanguageBranch);
 
         if (!string.IsNullOrEmpty(url)) 
             return CheckIsPublished(contentLink) ? new[] { url } : new string[] { };
@@ -39,14 +40,14 @@ public class ContentUsageService
             .Select(softLink => softLink.OwnerContentLink)
             .Where(ownerContentLink => ownerContentLink != null && CheckIsPublished(ownerContentLink));
 
-        return pageLinks.Select(pageLink => _urlResolver.GetUrl(pageLink));
+        return pageLinks.Select(pageLink => _urlResolver.GetUrl(pageLink, contentUsage.LanguageBranch));
     }
 
     public string GetEditUrl(ContentUsage contentUsage)
     {
         var latestVersionContentLink = contentUsage.ContentLink.ToReferenceWithoutVersion();
 
-        return PageEditing.GetEditUrl(latestVersionContentLink);
+        return PageEditing.GetEditUrlForLanguage(latestVersionContentLink, contentUsage.LanguageBranch);
     }
 
     public IEnumerable<ContentUsage> GetContentUsages(ContentType contentType)
