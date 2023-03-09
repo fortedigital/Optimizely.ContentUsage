@@ -7,12 +7,7 @@
 }
 
 <noscript>You need to enable JavaScript to run this app.</noscript>
-<div id="react-app"></div>
+<div id="epi-content-usage-root"></div>
 <script type="text/javascript">const appModel = @Html.Serialized(Model.FrontendAppModel);</script>
-<script src="@PathsHelper.ToClientResource(Model.GetType(),"ClientResources/react-app.js")"></script>
-
-
-
-        
-
-
+<link rel="stylesheet" href="@PathsHelper.ToClientResource(Model.GetType(),"ClientResources/epi-content-usage.bundle.css")" crossorigin>
+<script src="@PathsHelper.ToClientResource(Model.GetType(),"ClientResources/epi-content-usage.bundle.js")" crossorigin></script>

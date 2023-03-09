@@ -5,7 +5,7 @@
         <RootNamespace>Forte.EpiContentUsage</RootNamespace>
         <PackageId>Forte.EpiContentUsage</PackageId>
         <Title>Forte.EpiContentUsage</Title>
-        <Version>0.0.0.0</Version>
+        <Version>0.0.6.0</Version>
         <Authors>Forte Digital</Authors>
         <Description>A shell module for Optimizely CMS 12. Lists the available content types and its instances on the website</Description>
         <PackageProjectUrl>https://github.com/fortedigital/EpiContentUsage</PackageProjectUrl>

@@ -1,0 +1,28 @@
+// ## OUI Design Tokens
+@import "~@optimizely/design-tokens/dist/scss/colors";
+@import "~@optimizely/design-tokens/dist/scss/typography";
+
+// ## OUI Design Tokens variables
+@import "~optimizely-oui/src/tokens/forimport/_index.scss";
+
+// ## OUI and custom functions
+@import "~optimizely-oui/src/oui/partials/sass/functions";
+
+// ## OUI and custom variables
+@import "~optimizely-oui/src/oui/oui-variables";
+
+// ## OUI and custom partials
+// Partials are files that import other components
+@import "~optimizely-oui/src/oui/oui-partials";
+
+// ## Overrides (helper/utility classes)
+// Overrides use `!important` classes for overrides and should always be loaded last.
+@import "~optimizely-oui/src/overrides/admin";
+@import "~optimizely-oui/src/overrides/background";
+@import "~optimizely-oui/src/overrides/border";
+@import "~optimizely-oui/src/overrides/color";
+@import "~optimizely-oui/src/overrides/layout";
+@import "~optimizely-oui/src/overrides/margin";
+@import "~optimizely-oui/src/overrides/padding";
+@import "~optimizely-oui/src/overrides/type";
+@import "~optimizely-oui/src/overrides/sizing";

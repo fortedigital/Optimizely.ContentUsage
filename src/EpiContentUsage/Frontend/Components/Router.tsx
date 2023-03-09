@@ -7,39 +7,44 @@ import {
   Route,
   RouterProvider,
 } from "react-router-dom";
-import { ContentTypeDto, ContentUsageDto } from "../dtos";
-import { Api } from "../Lib/Api";
+
+import EpiContentUsageAPIClient from "../Lib/EpiContentUsageAPIClient";
 import { routes, setBaseUrl } from "../routes";
 import ContentTypesView from "../Views/ContentTypesView";
 import ContentTypeUsageView from "../Views/ContentTypeUsageView";
-import Loader from "./Loader";
+import PageLoader from "./PageLoader/PageLoader";
+import { useAPI } from "../Contexts/ApiProvider";
 
 interface RouterProps {
   baseUrl: string;
 }
 
 interface LoadDataFunction {
-  (initialLoad: boolean, args: LoaderFunctionArgs): Promise<any> | Response;
+  (
+    apiClient: EpiContentUsageAPIClient,
+    initialLoad: boolean,
+    args: LoaderFunctionArgs
+  ): Promise<any> | Response;
 }
 
-const contentTypesLoader: LoadDataFunction = () =>
-  Api.get<ContentTypeDto[]>(Api.endpoints.contentTypesEndpointUrl);
+const contentTypesLoader: LoadDataFunction = (api) => {
+  const contentTypeBases = api.getContentTypeBases();
+  const contentTypes = api.getContentTypes();
 
-const contentTypeUsagesLoader: LoadDataFunction = (initialLoad, { params }) => {
+  return Promise.all([contentTypeBases, contentTypes]);
+};
+
+const contentTypeUsagesLoader: LoadDataFunction = (
+  api,
+  initialLoad,
+  { params }
+) => {
   if (!params.guid) return redirect(routes.index);
 
-  const contentTypeUsages = Api.get<ContentUsageDto[]>(
-    Api.endpoints.contentUsagesEndpointUrl,
-    {
-      guid: params.guid,
-    }
-  );
+  const contentTypeUsages = api.getContentTypeUsages(params.guid);
 
   if (initialLoad) {
-    const contentType = Api.get<ContentTypeDto>(
-      Api.endpoints.contentTypeEndpointUrl,
-      { guid: params.guid }
-    );
+    const contentType = api.getContentType(params.guid);
 
     return Promise.all([contentType, contentTypeUsages]);
   }
@@ -50,13 +55,19 @@ const contentTypeUsagesLoader: LoadDataFunction = (initialLoad, { params }) => {
 const Router = ({ baseUrl }: RouterProps) => {
   setBaseUrl(baseUrl);
   const initialLoadRef = useRef<boolean>(true);
+  const api = useAPI();
 
   const loadData = useCallback(
-    (loaderFunction: LoadDataFunction) => async (args: LoaderFunctionArgs) => {
-      const data = await loaderFunction(initialLoadRef.current, args);
-      initialLoadRef.current = false;
-      return data;
-    },
+    (apiClient: EpiContentUsageAPIClient, loaderFunction: LoadDataFunction) =>
+      async (args: LoaderFunctionArgs) => {
+        const data = await loaderFunction(
+          apiClient,
+          initialLoadRef.current,
+          args
+        );
+        initialLoadRef.current = false;
+        return data;
+      },
     []
   );
 
@@ -66,24 +77,24 @@ const Router = ({ baseUrl }: RouterProps) => {
         <Route
           path={routes.index}
           element={<ContentTypesView />}
-          loader={loadData(contentTypesLoader)}
+          loader={loadData(api, contentTypesLoader)}
         />
         <Route
           path={routes.contentTypeUsages}
           element={<ContentTypeUsageView />}
-          loader={loadData(contentTypeUsagesLoader)}
+          loader={loadData(api, contentTypeUsagesLoader)}
         >
           <Route
             path=":guid"
             element={<ContentTypeUsageView />}
-            loader={loadData(contentTypeUsagesLoader)}
+            loader={loadData(api, contentTypeUsagesLoader)}
           />
         </Route>
       </>
     )
   );
 
-  return <RouterProvider router={router} fallbackElement={<Loader />} />;
+  return <RouterProvider router={router} fallbackElement={<PageLoader />} />;
 };
 
 export default Router;
