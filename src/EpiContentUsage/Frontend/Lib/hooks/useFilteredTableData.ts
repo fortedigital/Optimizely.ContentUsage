@@ -18,7 +18,7 @@ interface FilteredTableDataHookOptions<TableDataType> {
   rows: TableDataType[];
   initialTableColumns: TableColumn<TableDataType>[];
   initialContentTypeBases?: ContentTypeBase[];
-  contentTypeBaseColumnId?: string;
+  contentTypeBaseColumnId?: FilteredTableDataQueryParam;
   initialSortDirection?: SortDirection;
   rowsPerPageOptions?: number[];
   sortCompareFn?: (

@@ -228,7 +228,16 @@ namespace Foundation
             app.UseAnonymousId();
             app.UseStaticFiles();
             app.UseRouting();
-            app.UseCors(options => options.WithOrigins("http://localhost:8080").AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin());
+
+            if (env.IsDevelopment()) 
+            {
+                app.UseCors(options => options.WithOrigins("http://localhost:8080").AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin());
+            }
+            else 
+            {
+                app.UseCors();
+            }
+
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseEndpoints(endpoints =>
