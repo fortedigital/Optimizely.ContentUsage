@@ -1,5 +1,5 @@
 {
-  "name": "episerver-content-usage-tool",
+  "name": "epi-content-usage",
   "version": "1.0.0",
   "main": "Frontend/index.tsx",
   "license": "MIT",
