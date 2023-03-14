@@ -1,5 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useLocation, useSearchParams } from "react-router-dom";
+import {
+  URLSearchParamsInit,
+  useLocation,
+  useSearchParams,
+} from "react-router-dom";
 import { ROWS_PER_PAGE_DEFAULT_OPTIONS } from "../../Components/Filters/NumberOfRowsFilter";
 import { ContentTypeBase, SortDirection, TableColumn } from "../../types";
 import { useDebounce } from "./useDebounce";
@@ -79,6 +83,16 @@ export function useFilteredTableData<TableDataType>({
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
 
+  const debouncedSetSearchParams = useDebounce<
+    (prev: URLSearchParams) => URLSearchParamsInit
+  >(
+    (callback) => {
+      setSearchParams(callback);
+    },
+    300,
+    []
+  );
+
   const useTableColumns = useCallback(
     (callbackFn: (...args: boolean[]) => string) => {
       const columns = tableColumns.map((column) => column.visible);
@@ -90,7 +104,7 @@ export function useFilteredTableData<TableDataType>({
   const handlePageChange = useCallback(
     (page?: number) => {
       setTriggerUpdate(false);
-      setSearchParams((prevSearchParams) => {
+      debouncedSetSearchParams((prevSearchParams) => {
         if (typeof page === "number")
           prevSearchParams.set(
             FilteredTableDataQueryParam.Page,
@@ -101,13 +115,13 @@ export function useFilteredTableData<TableDataType>({
       });
       setCurrentPage(page ?? 1);
     },
-    [setCurrentPage, setSearchParams]
+    [setCurrentPage]
   );
 
   const handleSearch = useDebounce(
     (value: string) => {
       setTriggerUpdate(false);
-      setSearchParams((prevSearchParams) => {
+      debouncedSetSearchParams((prevSearchParams) => {
         if (value)
           prevSearchParams.set(FilteredTableDataQueryParam.Query, value);
         else prevSearchParams.delete(FilteredTableDataQueryParam.Query);
@@ -117,7 +131,7 @@ export function useFilteredTableData<TableDataType>({
       setSearchQuery(value);
     },
     300,
-    [handlePageChange, setSearchParams, setSearchQuery]
+    []
   );
 
   const onSearchValueChange: React.KeyboardEventHandler<HTMLInputElement> =
@@ -151,7 +165,7 @@ export function useFilteredTableData<TableDataType>({
         setSortBy(null);
 
       setTriggerUpdate(false);
-      setSearchParams((prevSearchParams) => {
+      debouncedSetSearchParams((prevSearchParams) => {
         prevSearchParams.delete(FilteredTableDataQueryParam.ShowColumn);
         newTableColumns
           .filter((column) => column.visible)
@@ -191,7 +205,7 @@ export function useFilteredTableData<TableDataType>({
       }
 
       setTriggerUpdate(false);
-      setSearchParams((prevSearchParams) => {
+      debouncedSetSearchParams((prevSearchParams) => {
         prevSearchParams.set(
           FilteredTableDataQueryParam.SortBy,
           column.id.toString()
@@ -210,14 +224,13 @@ export function useFilteredTableData<TableDataType>({
       setSortDirection,
       sortBy,
       sortDirection,
-      setSearchParams,
     ]
   );
 
   const onRowsPerPageChange = useCallback(
     (option: number) => {
       setTriggerUpdate(false);
-      setSearchParams((prevSearchParams) => {
+      debouncedSetSearchParams((prevSearchParams) => {
         prevSearchParams.set(
           FilteredTableDataQueryParam.RowsPerPage,
           option.toString()
@@ -227,7 +240,7 @@ export function useFilteredTableData<TableDataType>({
       setRowsPerPage(option);
       handlePageChange(1);
     },
-    [handlePageChange, setSearchParams]
+    [handlePageChange]
   );
 
   const onContentTypeBaseChange = useCallback(
@@ -246,7 +259,7 @@ export function useFilteredTableData<TableDataType>({
 
         handlePageChange(1);
         setTriggerUpdate(false);
-        setSearchParams((prevSearchParams) => {
+        debouncedSetSearchParams((prevSearchParams) => {
           prevSearchParams.delete(FilteredTableDataQueryParam.ContentTypeBase);
           newContentTypeBases
             .filter((contentTypeBase) => contentTypeBase.visible)
@@ -262,7 +275,7 @@ export function useFilteredTableData<TableDataType>({
         setContentTypeBases(newContentTypeBases);
       }
     },
-    [contentTypeBases, handlePageChange, setSearchParams]
+    [contentTypeBases, handlePageChange]
   );
 
   const filteredItems = useMemo(() => {
