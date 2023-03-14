@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { ROWS_PER_PAGE_DEFAULT_OPTIONS } from "../../Components/Filters/NumberOfRowsFilter";
-import { ContentTypeBase, SortDirection, TableColumn } from "../../types";
+import { ContentTypeBase, TableColumn } from "../../types";
+import { SortDirection } from "../../dtos";
 import { useDebounce } from "./useDebounce";
 
 enum FilteredTableDataQueryParam {
