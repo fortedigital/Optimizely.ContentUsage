@@ -1,4 +1,5 @@
-﻿using Reinforced.Typings.Attributes;
+﻿using Forte.EpiContentUsage.Api.Common;
+using Reinforced.Typings.Attributes;
 
 namespace Forte.EpiContentUsage.Api.Features.ContentType;
 
@@ -8,6 +9,7 @@ public class GetContentTypesQuery
     public string? Name { get; set; }
     public string? Type { get; set; }
     public ContentTypesSorting? SortBy { get; set; }
+    public SortDirection? Order { get; set; }
 }
 
 [TsEnum(UseString = true)]
