@@ -267,67 +267,51 @@ export function useFilteredTableData<TableDataType>({
   );
 
   const filteredItems = useMemo(() => {
-    return rows
-      .filter((row) => {
-        if (
-          contentTypeBases &&
-          contentTypeBaseColumnId &&
-          row[contentTypeBaseColumnId as keyof TableDataType]
-        ) {
-          const type = row[
-            contentTypeBaseColumnId as keyof TableDataType
-          ] as unknown;
-          const contentTypeBase = contentTypeBases
-            .filter((contentTypeBase) => contentTypeBase.visible)
-            .find((contentTypeBase) => contentTypeBase.name === type);
+    return rows.filter((row) => {
+      if (
+        contentTypeBases &&
+        contentTypeBaseColumnId &&
+        row[contentTypeBaseColumnId as keyof TableDataType]
+      ) {
+        const type = row[
+          contentTypeBaseColumnId as keyof TableDataType
+        ] as unknown;
+        const contentTypeBase = contentTypeBases
+          .filter((contentTypeBase) => contentTypeBase.visible)
+          .find((contentTypeBase) => contentTypeBase.name === type);
 
-          if (!contentTypeBase) return false;
+        if (!contentTypeBase) return false;
+      }
+
+      const parsedSearchValue = searchQuery.toLocaleLowerCase().trim();
+      if (!parsedSearchValue) return true;
+
+      if (filterFn) return filterFn(row, searchQuery);
+
+      for (const column in row) {
+        const tableColumn = tableColumns.find(({ id }) => id === column);
+
+        if (tableColumn && tableColumn.filter && tableColumn.visible) {
+          const value = row[column];
+
+          if (
+            value &&
+            value
+              .toString()
+              .toLocaleLowerCase()
+              .includes(parsedSearchValue.toLocaleLowerCase())
+          )
+            return true;
         }
+      }
 
-        const parsedSearchValue = searchQuery.toLocaleLowerCase().trim();
-        if (!parsedSearchValue) return true;
-
-        if (filterFn) return filterFn(row, searchQuery);
-
-        for (const column in row) {
-          const tableColumn = tableColumns.find(({ id }) => id === column);
-
-          if (tableColumn && tableColumn.filter && tableColumn.visible) {
-            const value = row[column];
-
-            if (
-              value &&
-              value
-                .toString()
-                .toLocaleLowerCase()
-                .includes(parsedSearchValue.toLocaleLowerCase())
-            )
-              return true;
-          }
-        }
-
-        return false;
-      })
-      .sort((prevValue, nextValue) => {
-        if (!sortBy) return 0;
-
-        if (sortCompareFn) return sortCompareFn(prevValue, nextValue);
-
-        if (!prevValue[sortBy]) return 1;
-
-        if (sortDirection === SortDirection.Descending)
-          return prevValue[sortBy] > nextValue[sortBy] ? -1 : 1;
-        else if (sortDirection === SortDirection.Ascending)
-          return prevValue[sortBy] > nextValue[sortBy] ? 1 : -1;
-        else return 0;
-      });
+      return false;
+    });
   }, [
     contentTypeBases,
     contentTypeBaseColumnId,
     rows,
     tableColumns,
-    sortDirection,
-    sortBy,
     searchQuery,
     sortCompareFn,
   ]);
