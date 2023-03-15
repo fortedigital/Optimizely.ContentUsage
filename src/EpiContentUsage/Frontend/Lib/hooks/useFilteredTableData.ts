@@ -158,6 +158,10 @@ export function useFilteredTableData<TableDataType>({
     [tableColumns]
   );
 
+  const setPageToStart = useCallback(() => {
+    setCurrentPage(1);
+  }, []);
+
   const handlePageChange = useCallback(
     (page?: number) => {
       setTriggerUpdate(false);
@@ -168,8 +172,7 @@ export function useFilteredTableData<TableDataType>({
 
   const handleSearch = useDebounce(
     (value: string) => {
-      setTriggerUpdate(false);
-      handlePageChange();
+      setPageToStart();
       setSearchQuery(value);
     },
     300,
@@ -237,7 +240,7 @@ export function useFilteredTableData<TableDataType>({
       setTriggerUpdate(false);
       setSortBy(column.id as keyof TableDataType);
       setSortDirection(newOrder);
-      handlePageChange(1);
+      setPageToStart();
     },
     [
       tableColumns,
@@ -253,7 +256,7 @@ export function useFilteredTableData<TableDataType>({
     (option: number) => {
       setTriggerUpdate(false);
       setRowsPerPage(option);
-      handlePageChange(1);
+      setPageToStart();
     },
     [handlePageChange]
   );
@@ -271,8 +274,7 @@ export function useFilteredTableData<TableDataType>({
         );
 
         newContentTypeBases[contentTypeBaseIndex].visible = !visible;
-
-        handlePageChange(1);
+        setPageToStart();
         setTriggerUpdate(false);
         setContentTypeBases(newContentTypeBases);
       }
@@ -468,7 +470,7 @@ export function useFilteredTableData<TableDataType>({
           setCurrentPage(number);
         }
       } else {
-        setCurrentPage(1);
+        setPageToStart();
       }
     },
     [
@@ -490,8 +492,7 @@ export function useFilteredTableData<TableDataType>({
   );
 
   useEffect(() => {
-    if (triggerUpdate && (currentPage < 0 || currentPage > totalPages)) {
-      handlePageChange();
+      setPageToStart();
     }
   }, [currentPage]);
 
