@@ -1,9 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  URLSearchParamsInit,
-  useLocation,
-  useSearchParams,
-} from "react-router-dom";
+import { useLocation, useSearchParams } from "react-router-dom";
 import { ROWS_PER_PAGE_DEFAULT_OPTIONS } from "../../Components/Filters/NumberOfRowsFilter";
 import { ContentTypeBase, SortDirection, TableColumn } from "../../types";
 import { useDebounce } from "./useDebounce";
@@ -84,7 +80,7 @@ export function useFilteredTableData<TableDataType>({
   const location = useLocation();
 
   const debouncedSetSearchParams = useDebounce<
-    (prev: URLSearchParams) => URLSearchParamsInit
+    (prev: URLSearchParams) => URLSearchParams
   >(
     (callback) => {
       setSearchParams(callback);
