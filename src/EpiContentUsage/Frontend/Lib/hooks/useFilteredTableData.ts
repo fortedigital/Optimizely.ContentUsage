@@ -89,55 +89,93 @@ export function useFilteredTableData<TableDataType>({
     []
   );
 
+  const [changesTracker, setChangesTracker] = useState({
+    currentPage: false,
+    searchQuery: false,
+    tableColumns: false,
+    sortBy: false,
+    sortDirection: false,
+    rowsPerPage: false,
+    contentTypeBases: false,
+  });
+
   useEffect(() => {
+    if (Object.values(changesTracker).filter((change) => change).length === 0) {
+      return;
+    }
+
     debouncedSetSearchParams((prevSearchParams) => {
       //Current Page
-      if (typeof currentPage === "number")
-        prevSearchParams.set(
-          FilteredTableDataQueryParam.Page,
-          currentPage.toString()
-        );
-      else prevSearchParams.delete(FilteredTableDataQueryParam.Page);
+      if (changesTracker.currentPage) {
+        if (typeof currentPage === "number") {
+          prevSearchParams.set(
+            FilteredTableDataQueryParam.Page,
+            currentPage.toString()
+          );
+        } else prevSearchParams.delete(FilteredTableDataQueryParam.Page);
+      }
 
       //Search query
-      if (searchQuery)
-        prevSearchParams.set(FilteredTableDataQueryParam.Query, searchQuery);
-      else prevSearchParams.delete(FilteredTableDataQueryParam.Query);
+      if (changesTracker.searchQuery) {
+        if (searchQuery)
+          prevSearchParams.set(FilteredTableDataQueryParam.Query, searchQuery);
+        else prevSearchParams.delete(FilteredTableDataQueryParam.Query);
+      }
 
       //TableColumns - ShowColumn
-      prevSearchParams.delete(FilteredTableDataQueryParam.ShowColumn);
-      tableColumns
-        .filter((column) => column.visible)
-        .forEach((column) =>
-          prevSearchParams.append(
-            FilteredTableDataQueryParam.ShowColumn,
-            column.id.toString()
-          )
-        );
+      if (changesTracker.tableColumns) {
+        prevSearchParams.delete(FilteredTableDataQueryParam.ShowColumn);
+        tableColumns
+          .filter((column) => column.visible)
+          .forEach((column) =>
+            prevSearchParams.append(
+              FilteredTableDataQueryParam.ShowColumn,
+              column.id.toString()
+            )
+          );
+      }
 
       //SortBy + SortDirection
-      prevSearchParams.set(
-        FilteredTableDataQueryParam.SortBy,
-        sortBy.toString()
-      );
-      prevSearchParams.set(FilteredTableDataQueryParam.Order, sortDirection);
+      if (changesTracker.sortBy) {
+        prevSearchParams.set(
+          FilteredTableDataQueryParam.SortBy,
+          sortBy.toString()
+        );
+      }
+      if (changesTracker.sortDirection) {
+        prevSearchParams.set(FilteredTableDataQueryParam.Order, sortDirection);
+      }
 
       //Rows per page
-      prevSearchParams.set(
-        FilteredTableDataQueryParam.RowsPerPage,
-        rowsPerPage.toString()
-      );
+      if (changesTracker.rowsPerPage) {
+        prevSearchParams.set(
+          FilteredTableDataQueryParam.RowsPerPage,
+          rowsPerPage.toString()
+        );
+      }
 
       //Content type bases
-      prevSearchParams.delete(FilteredTableDataQueryParam.ContentTypeBase);
-      contentTypeBases
-        .filter((contentTypeBase) => contentTypeBase.visible)
-        .forEach((contentTypeBase) =>
-          prevSearchParams.append(
-            FilteredTableDataQueryParam.ContentTypeBase,
-            contentTypeBase.name
-          )
-        );
+      if (changesTracker.contentTypeBases) {
+        prevSearchParams.delete(FilteredTableDataQueryParam.ContentTypeBase);
+        contentTypeBases
+          .filter((contentTypeBase) => contentTypeBase.visible)
+          .forEach((contentTypeBase) =>
+            prevSearchParams.append(
+              FilteredTableDataQueryParam.ContentTypeBase,
+              contentTypeBase.name
+            )
+          );
+      }
+
+      setChangesTracker({
+        currentPage: false,
+        searchQuery: false,
+        tableColumns: false,
+        sortBy: false,
+        sortDirection: false,
+        rowsPerPage: false,
+        contentTypeBases: false,
+      });
 
       return prevSearchParams;
     });
@@ -163,15 +201,24 @@ export function useFilteredTableData<TableDataType>({
   }, []);
 
   const handlePageChange = useCallback(
-    (page?: number) => {
+    (page: number) => {
       setTriggerUpdate(false);
-      setCurrentPage(page ?? 1);
+      setCurrentPage(page);
+      setChangesTracker({
+        ...changesTracker,
+        currentPage: true,
+      });
     },
     [setCurrentPage]
   );
 
   const handleSearch = useDebounce(
     (value: string) => {
+      setChangesTracker({
+        ...changesTracker,
+        searchQuery: true,
+        currentPage: true,
+      });
       setPageToStart();
       setSearchQuery(value);
     },
@@ -211,6 +258,10 @@ export function useFilteredTableData<TableDataType>({
 
       setTriggerUpdate(false);
       setTableColumns(newTableColumns);
+      setChangesTracker({
+        ...changesTracker,
+        tableColumns: true,
+      });
     },
     [tableColumns, setTableColumns, setSortBy, sortBy]
   );
@@ -241,6 +292,12 @@ export function useFilteredTableData<TableDataType>({
       setSortBy(column.id as keyof TableDataType);
       setSortDirection(newOrder);
       setPageToStart();
+      setChangesTracker({
+        ...changesTracker,
+        sortBy: true,
+        sortDirection: true,
+        currentPage: true,
+      });
     },
     [
       tableColumns,
@@ -257,6 +314,11 @@ export function useFilteredTableData<TableDataType>({
       setTriggerUpdate(false);
       setRowsPerPage(option);
       setPageToStart();
+      setChangesTracker({
+        ...changesTracker,
+        rowsPerPage: true,
+        currentPage: true,
+      });
     },
     [handlePageChange]
   );
@@ -277,6 +339,11 @@ export function useFilteredTableData<TableDataType>({
         setPageToStart();
         setTriggerUpdate(false);
         setContentTypeBases(newContentTypeBases);
+        setChangesTracker({
+          ...changesTracker,
+          contentTypeBases: true,
+          currentPage: true,
+        });
       }
     },
     [contentTypeBases, handlePageChange]
