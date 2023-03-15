@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { ROWS_PER_PAGE_DEFAULT_OPTIONS } from "../../Components/Filters/NumberOfRowsFilter";
 import { ContentTypeBase, SortDirection, TableColumn } from "../../types";
@@ -55,7 +55,7 @@ export function useFilteredTableData<TableDataType>({
   currentPage: number;
   goToPage: (page: number) => void;
 } {
-  const [triggerUpdate, setTriggerUpdate] = useState<boolean>(false);
+  const triggerUpdate = useRef<boolean>(false);
   const [datasetChanged, setDatasetChanged] = useState<boolean>(false);
   const [searchFieldValue, setSearchFieldValue] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -167,6 +167,7 @@ export function useFilteredTableData<TableDataType>({
           );
       }
 
+      triggerUpdate.current = false;
       setChangesTracker({
         currentPage: false,
         searchQuery: false,
@@ -186,6 +187,7 @@ export function useFilteredTableData<TableDataType>({
     sortBy,
     sortDirection,
     rowsPerPage,
+    contentTypeBases,
   ]);
 
   const useTableColumns = useCallback(
@@ -202,7 +204,7 @@ export function useFilteredTableData<TableDataType>({
 
   const handlePageChange = useCallback(
     (page: number) => {
-      setTriggerUpdate(false);
+      triggerUpdate.current = false;
       setCurrentPage(page);
       setChangesTracker({
         ...changesTracker,
@@ -219,6 +221,7 @@ export function useFilteredTableData<TableDataType>({
         searchQuery: true,
         currentPage: true,
       });
+      triggerUpdate.current = false;
       setPageToStart();
       setSearchQuery(value);
     },
@@ -255,8 +258,7 @@ export function useFilteredTableData<TableDataType>({
       newTableColumns[columnIndex].visible = visible;
       if (!visible && newTableColumns[columnIndex].id === sortBy)
         setSortBy(null);
-
-      setTriggerUpdate(false);
+      triggerUpdate.current = false;
       setTableColumns(newTableColumns);
       setChangesTracker({
         ...changesTracker,
@@ -287,8 +289,7 @@ export function useFilteredTableData<TableDataType>({
       if (sortBy === column.id) {
         newOrder = sortToggleMap[sortDirection];
       }
-
-      setTriggerUpdate(false);
+      triggerUpdate.current = false;
       setSortBy(column.id as keyof TableDataType);
       setSortDirection(newOrder);
       setPageToStart();
@@ -311,7 +312,7 @@ export function useFilteredTableData<TableDataType>({
 
   const onRowsPerPageChange = useCallback(
     (option: number) => {
-      setTriggerUpdate(false);
+      triggerUpdate.current = false;
       setRowsPerPage(option);
       setPageToStart();
       setChangesTracker({
@@ -337,7 +338,7 @@ export function useFilteredTableData<TableDataType>({
 
         newContentTypeBases[contentTypeBaseIndex].visible = !visible;
         setPageToStart();
-        setTriggerUpdate(false);
+        triggerUpdate.current = false;
         setContentTypeBases(newContentTypeBases);
         setChangesTracker({
           ...changesTracker,
@@ -559,6 +560,10 @@ export function useFilteredTableData<TableDataType>({
   );
 
   useEffect(() => {
+    if (
+      triggerUpdate.current &&
+      (currentPage < 0 || currentPage > totalPages)
+    ) {
       setPageToStart();
     }
   }, [currentPage]);
@@ -579,15 +584,15 @@ export function useFilteredTableData<TableDataType>({
     if (datasetChanged && rows.length > 0 && totalPages > 0) {
       setDatasetChanged(false);
       handleUpdateQueryParams(searchParams);
-      setTriggerUpdate(true);
+      triggerUpdate.current = true;
     }
   }, [datasetChanged, rows]);
 
   useEffect(() => {
-    if (triggerUpdate) {
+    if (triggerUpdate.current) {
       handleUpdateQueryParams(searchParams);
     } else {
-      setTriggerUpdate(true);
+      triggerUpdate.current = true;
     }
   }, [datasetChanged, location]);
 
