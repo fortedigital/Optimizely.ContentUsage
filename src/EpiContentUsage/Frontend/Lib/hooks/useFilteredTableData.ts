@@ -89,6 +89,67 @@ export function useFilteredTableData<TableDataType>({
     []
   );
 
+  useEffect(() => {
+    debouncedSetSearchParams((prevSearchParams) => {
+      //Current Page
+      if (typeof currentPage === "number")
+        prevSearchParams.set(
+          FilteredTableDataQueryParam.Page,
+          currentPage.toString()
+        );
+      else prevSearchParams.delete(FilteredTableDataQueryParam.Page);
+
+      //Search query
+      if (searchQuery)
+        prevSearchParams.set(FilteredTableDataQueryParam.Query, searchQuery);
+      else prevSearchParams.delete(FilteredTableDataQueryParam.Query);
+
+      //TableColumns - ShowColumn
+      prevSearchParams.delete(FilteredTableDataQueryParam.ShowColumn);
+      tableColumns
+        .filter((column) => column.visible)
+        .forEach((column) =>
+          prevSearchParams.append(
+            FilteredTableDataQueryParam.ShowColumn,
+            column.id.toString()
+          )
+        );
+
+      //SortBy + SortDirection
+      prevSearchParams.set(
+        FilteredTableDataQueryParam.SortBy,
+        sortBy.toString()
+      );
+      prevSearchParams.set(FilteredTableDataQueryParam.Order, sortDirection);
+
+      //Rows per page
+      prevSearchParams.set(
+        FilteredTableDataQueryParam.RowsPerPage,
+        rowsPerPage.toString()
+      );
+
+      //Content type bases
+      prevSearchParams.delete(FilteredTableDataQueryParam.ContentTypeBase);
+      contentTypeBases
+        .filter((contentTypeBase) => contentTypeBase.visible)
+        .forEach((contentTypeBase) =>
+          prevSearchParams.append(
+            FilteredTableDataQueryParam.ContentTypeBase,
+            contentTypeBase.name
+          )
+        );
+
+      return prevSearchParams;
+    });
+  }, [
+    currentPage,
+    searchQuery,
+    tableColumns,
+    sortBy,
+    sortDirection,
+    rowsPerPage,
+  ]);
+
   const useTableColumns = useCallback(
     (callbackFn: (...args: boolean[]) => string) => {
       const columns = tableColumns.map((column) => column.visible);
@@ -100,15 +161,6 @@ export function useFilteredTableData<TableDataType>({
   const handlePageChange = useCallback(
     (page?: number) => {
       setTriggerUpdate(false);
-      debouncedSetSearchParams((prevSearchParams) => {
-        if (typeof page === "number")
-          prevSearchParams.set(
-            FilteredTableDataQueryParam.Page,
-            page.toString()
-          );
-        else prevSearchParams.delete(FilteredTableDataQueryParam.Page);
-        return prevSearchParams;
-      });
       setCurrentPage(page ?? 1);
     },
     [setCurrentPage]
@@ -117,12 +169,6 @@ export function useFilteredTableData<TableDataType>({
   const handleSearch = useDebounce(
     (value: string) => {
       setTriggerUpdate(false);
-      debouncedSetSearchParams((prevSearchParams) => {
-        if (value)
-          prevSearchParams.set(FilteredTableDataQueryParam.Query, value);
-        else prevSearchParams.delete(FilteredTableDataQueryParam.Query);
-        return prevSearchParams;
-      });
       handlePageChange();
       setSearchQuery(value);
     },
@@ -161,18 +207,6 @@ export function useFilteredTableData<TableDataType>({
         setSortBy(null);
 
       setTriggerUpdate(false);
-      debouncedSetSearchParams((prevSearchParams) => {
-        prevSearchParams.delete(FilteredTableDataQueryParam.ShowColumn);
-        newTableColumns
-          .filter((column) => column.visible)
-          .forEach((column) =>
-            prevSearchParams.append(
-              FilteredTableDataQueryParam.ShowColumn,
-              column.id.toString()
-            )
-          );
-        return prevSearchParams;
-      });
       setTableColumns(newTableColumns);
     },
     [tableColumns, setTableColumns, setSortBy, sortBy]
@@ -201,14 +235,6 @@ export function useFilteredTableData<TableDataType>({
       }
 
       setTriggerUpdate(false);
-      debouncedSetSearchParams((prevSearchParams) => {
-        prevSearchParams.set(
-          FilteredTableDataQueryParam.SortBy,
-          column.id.toString()
-        );
-        prevSearchParams.set(FilteredTableDataQueryParam.Order, newOrder);
-        return prevSearchParams;
-      });
       setSortBy(column.id as keyof TableDataType);
       setSortDirection(newOrder);
       handlePageChange(1);
@@ -226,13 +252,6 @@ export function useFilteredTableData<TableDataType>({
   const onRowsPerPageChange = useCallback(
     (option: number) => {
       setTriggerUpdate(false);
-      debouncedSetSearchParams((prevSearchParams) => {
-        prevSearchParams.set(
-          FilteredTableDataQueryParam.RowsPerPage,
-          option.toString()
-        );
-        return prevSearchParams;
-      });
       setRowsPerPage(option);
       handlePageChange(1);
     },
@@ -255,19 +274,6 @@ export function useFilteredTableData<TableDataType>({
 
         handlePageChange(1);
         setTriggerUpdate(false);
-        debouncedSetSearchParams((prevSearchParams) => {
-          prevSearchParams.delete(FilteredTableDataQueryParam.ContentTypeBase);
-          newContentTypeBases
-            .filter((contentTypeBase) => contentTypeBase.visible)
-            .forEach((contentTypeBase) =>
-              prevSearchParams.append(
-                FilteredTableDataQueryParam.ContentTypeBase,
-                contentTypeBase.name
-              )
-            );
-          return prevSearchParams;
-        });
-
         setContentTypeBases(newContentTypeBases);
       }
     },
