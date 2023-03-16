@@ -6,12 +6,12 @@ namespace Forte.EpiContentUsage.Api.Common;
 
 public abstract class CollectionSorter<TSource>
 {
-    protected IEnumerable<TSource> SortBy<TKey>(IEnumerable<TSource> collection, Func<TSource, TKey> sorter, SortDirection? directions = SortDirection.Ascending)
+    protected IEnumerable<TSource> SortBy<TKey>(IEnumerable<TSource> collection, Func<TSource, TKey> sorter, SortDirection? directions = SortDirection.Asc)
     {
         return directions switch
         {
-            SortDirection.Ascending => collection.OrderBy(sorter),
-            SortDirection.Descending => collection.OrderByDescending(sorter),
+            SortDirection.Asc => collection.OrderBy(sorter),
+            SortDirection.Desc => collection.OrderByDescending(sorter),
             _ => throw new ArgumentOutOfRangeException(nameof(directions), directions, null)
         };
     }

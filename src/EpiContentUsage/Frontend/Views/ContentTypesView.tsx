@@ -245,7 +245,7 @@ const ContentTypesView = () => {
                         sorting={{
                           canSort: true,
                           handleSort: () => onSortChange(column),
-                          order: sortDirection,
+                          order: sortDirection.toLowerCase(),
                         }}
                         key={column.id}
                       >
