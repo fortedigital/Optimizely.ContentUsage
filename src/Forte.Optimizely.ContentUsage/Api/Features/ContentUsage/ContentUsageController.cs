@@ -19,11 +19,13 @@ public class ContentUsageController : ControllerBase
 
     private readonly IContentTypeRepository _contentTypeRepository;
     private readonly ContentUsageService _contentUsageService;
+    private readonly ContentUsageSorter _contentUsageSorter;
 
-    public ContentUsageController(IContentTypeRepository contentTypeRepository, ContentUsageService contentUsageService)
+    public ContentUsageController(IContentTypeRepository contentTypeRepository, ContentUsageService contentUsageService, ContentUsageSorter contentUsageSorter)
     {
         _contentTypeRepository = contentTypeRepository;
         _contentUsageService = contentUsageService;
+        _contentUsageSorter = contentUsageSorter;
     }
 
     [HttpGet]
@@ -47,6 +49,8 @@ public class ContentUsageController : ControllerBase
             PageUrls = _contentUsageService.GetPageUrls(contentUsage),
             EditUrl = _contentUsageService.GetEditUrl(contentUsage)
         });
+
+        contentUsagesDto = _contentUsageSorter.Sort(contentUsagesDto, query);
 
         return Ok(contentUsagesDto);
     }
