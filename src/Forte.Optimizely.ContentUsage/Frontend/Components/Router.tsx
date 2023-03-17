@@ -37,11 +37,16 @@ const contentTypesLoader: LoadDataFunction = (api) => {
 const contentTypeUsagesLoader: LoadDataFunction = (
   api,
   initialLoad,
-  { params }
+  { request, params }
 ) => {
   if (!params.guid) return redirect(routes.index);
 
-  const contentTypeUsages = api.getContentTypeUsages(params.guid);
+  const query = Object.fromEntries(new URL(request.url).searchParams.entries());
+
+  const contentTypeUsages = api.getContentTypeUsages({
+    guid: params.guid,
+    ...query,
+  });
 
   if (initialLoad) {
     const contentType = api.getContentType(params.guid);

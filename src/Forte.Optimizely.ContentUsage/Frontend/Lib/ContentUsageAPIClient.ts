@@ -62,7 +62,10 @@ export default class ContentUsageAPIClient {
     return this.get<ContentTypeDto>(this.endpoints.contentType, { guid });
   }
 
-  public async getContentTypeUsages(guid: string) {
-    return this.get<ContentUsageDto[]>(this.endpoints.contentUsages, { guid });
+  public async getContentTypeUsages(query: Record<string, string>) {
+    return this.get<ContentUsageDto[]>(
+      `${this.endpoints.contentUsages}`,
+      query
+    );
   }
 }
