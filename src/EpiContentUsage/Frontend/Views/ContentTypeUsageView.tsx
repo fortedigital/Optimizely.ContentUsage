@@ -325,7 +325,7 @@ const ContentTypeUsageView = () => {
     | [APIResponse<ContentTypeDto>, APIResponse<ContentUsageDto[]>];
 
   useEffect(() => {
-    if (!dataLoaded && response) {
+    if (response) {
       if (Array.isArray(response)) {
         const [contentTypeResponse, contentTypeUsagesResponse] = response;
 
@@ -393,7 +393,7 @@ const ContentTypeUsageView = () => {
                         sorting={{
                           canSort: true,
                           handleSort: () => onSortChange(column),
-                          order: sortDirection,
+                          order: sortDirection.toLowerCase(),
                         }}
                         key={column.id}
                       >
