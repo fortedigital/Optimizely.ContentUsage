@@ -2,6 +2,7 @@
 using System.Linq;
 using EPiServer.Shell.Modules;
 using Forte.EpiContentUsage.Api.Features.ContentType;
+using Forte.EpiContentUsage.Api.Features.ContentUsage;
 using Forte.EpiContentUsage.Api.Services;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -18,6 +19,7 @@ public static class ServiceCollectionExtensions
         services.AddTransient<ContentTypeMapper>();
         
         services.AddTransient<ContentTypeSorter>();
+        services.AddTransient<ContentUsageSorter>();
 
         services.AddTransient<IPathsResolver, DefaultPathsResolver>();
 
