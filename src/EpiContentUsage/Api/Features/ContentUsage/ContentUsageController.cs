@@ -6,7 +6,6 @@ using Forte.EpiContentUsage.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Forte.EpiContentUsage.Api.Features.ContentUsage;
@@ -31,9 +30,9 @@ public class ContentUsageController : ControllerBase
     [SwaggerResponse(StatusCodes.Status200OK, null, typeof(IEnumerable<ContentUsageDto>))]
     [SwaggerResponse(StatusCodes.Status404NotFound)]
     [Route("[action]", Name = GetContentUsagesRouteName)]
-    public ActionResult GetContentUsages([FromQuery] [BindRequired] Guid guid)
+    public ActionResult GetContentUsages([FromQuery] GetContentUsagesQuery query)
     {
-        var contentType = _contentTypeRepository.Load(guid);
+        var contentType = _contentTypeRepository.Load(query.Guid);
 
         if (contentType == null) return NotFound();
 
@@ -42,7 +41,7 @@ public class ContentUsageController : ControllerBase
         var contentUsagesDto = contentUsages.Select(contentUsage => new ContentUsageDto
         {
             Id = contentUsage.ContentLink.ID,
-            ContentTypeGuid = guid,
+            ContentTypeGuid = query.Guid,
             Name = contentUsage.Name,
             LanguageBranch = contentUsage.LanguageBranch,
             PageUrls = _contentUsageService.GetPageUrls(contentUsage),
