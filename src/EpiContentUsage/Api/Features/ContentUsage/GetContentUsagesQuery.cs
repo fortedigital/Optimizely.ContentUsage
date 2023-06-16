@@ -17,6 +17,6 @@ public enum ContentUsageSorting
 {
     Id,
     Name,
-    Language,
-    Url
+    LanguageBranch,
+    PageUrl
 }
