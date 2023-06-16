@@ -5,7 +5,7 @@ import { useTranslations } from "../../Contexts/TranslationsProvider";
 
 interface ContentTypeBasesFilterProps {
   contentTypeBases: ContentTypeBase[];
-  onChange?: (contentTypeBase: ContentTypeBase) => void;
+  onChange?: (contentTypeBase: ContentTypeBase, selectAll?: boolean) => void;
 }
 
 function ContentTypeBasesFilter({
@@ -28,6 +28,8 @@ function ContentTypeBasesFilter({
     return translations.filters.none;
   }, [contentTypeBases, translations]);
 
+  const isAllSelected = contentTypeBases.every((c) => c.visible);
+
   return (
     <Dropdown
       arrowIcon="down"
@@ -39,6 +41,23 @@ function ContentTypeBasesFilter({
       shouldHideChildrenOnClick={false}
     >
       <Dropdown.Contents>
+        <Dropdown.ListItem key="All/None">
+          <Dropdown.BlockLink
+            isItemSelected={isAllSelected}
+            isMultiSelect={true}
+            onClick={
+              onChange
+                ? () => {
+                    contentTypeBases.forEach((c) => {
+                      onChange(c, !isAllSelected);
+                    });
+                  }
+                : undefined
+            }
+          >
+            <Dropdown.BlockLinkText text={isAllSelected ? "None" : "All"} />
+          </Dropdown.BlockLink>
+        </Dropdown.ListItem>
         {contentTypeBases.map((contentTypeBase) => (
           <Dropdown.ListItem key={contentTypeBase.name}>
             <Dropdown.BlockLink

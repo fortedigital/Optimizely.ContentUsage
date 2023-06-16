@@ -172,6 +172,14 @@ export function useFilteredTableData<TableDataType>({
     (id: string, visible: boolean) => {
       if (tableColumns.filter((column) => column.visible).length > 1 || visible)
         changeColumnVisibility(id, visible);
+      else {
+        const displayNameColumn = tableColumns.find(
+          (c) => c.id === "displayName"
+        );
+
+        changeColumnVisibility(id, visible);
+        changeColumnVisibility(displayNameColumn.id as string, true);
+      }
     },
     [tableColumns, changeColumnVisibility]
   );
@@ -231,36 +239,34 @@ export function useFilteredTableData<TableDataType>({
   );
 
   const onContentTypeBaseChange = useCallback(
-    ({ name, visible }: ContentTypeBase) => {
-      if (
-        contentTypeBases.filter((contentTypeBase) => contentTypeBase.visible)
-          .length > 1 ||
-        !visible
-      ) {
-        const newContentTypeBases = contentTypeBases.slice(0);
+    ({ name, visible }: ContentTypeBase, valueForAll?: boolean) => {
+      const newContentTypeBases = contentTypeBases.slice(0);
+
+      if (valueForAll) {
+        newContentTypeBases.forEach((v) => (v.visible = valueForAll));
+      } else {
         const contentTypeBaseIndex = newContentTypeBases.findIndex(
           (contentTypeBase) => contentTypeBase.name === name
         );
-
         newContentTypeBases[contentTypeBaseIndex].visible = !visible;
-
-        handlePageChange(1);
-        setTriggerUpdate(false);
-        setSearchParams((prevSearchParams) => {
-          prevSearchParams.delete(FilteredTableDataQueryParam.ContentTypeBase);
-          newContentTypeBases
-            .filter((contentTypeBase) => contentTypeBase.visible)
-            .forEach((contentTypeBase) =>
-              prevSearchParams.append(
-                FilteredTableDataQueryParam.ContentTypeBase,
-                contentTypeBase.name
-              )
-            );
-          return prevSearchParams;
-        });
-
-        setContentTypeBases(newContentTypeBases);
       }
+
+      handlePageChange(1);
+      setTriggerUpdate(false);
+      setSearchParams((prevSearchParams) => {
+        prevSearchParams.delete(FilteredTableDataQueryParam.ContentTypeBase);
+        newContentTypeBases
+          .filter((contentTypeBase) => contentTypeBase.visible)
+          .forEach((contentTypeBase) =>
+            prevSearchParams.append(
+              FilteredTableDataQueryParam.ContentTypeBase,
+              contentTypeBase.name
+            )
+          );
+        return prevSearchParams;
+      });
+
+      setContentTypeBases(newContentTypeBases);
     },
     [contentTypeBases, handlePageChange, setSearchParams]
   );
