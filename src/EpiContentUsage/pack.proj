@@ -23,6 +23,7 @@
         <!-- Create the Zip file -->
         <ZipDirectory SourceDirectory="$(TmpOutDir)/content" DestinationFile="$(ZipFile)" Overwrite="true" />
         <!-- Cleanup -->
+        <RemoveDir Directories="$(TmpOutDir)"/>
 
     </Target>
 
