@@ -274,27 +274,36 @@ export function useFilteredTableData<TableDataType>({
   const filteredItems = useMemo(() => {
     return rows
       .filter((row) => {
-        if (
-          contentTypeBases &&
-          contentTypeBaseColumnId &&
-          row[contentTypeBaseColumnId as keyof TableDataType]
-        ) {
+        if (filterFn) return filterFn(row, searchQuery);
+        return true;
+      })
+      .filter((row) => {
+        if (contentTypeBases && contentTypeBaseColumnId) {
           const type = row[
             contentTypeBaseColumnId as keyof TableDataType
           ] as unknown;
+
+          const allDeselected = contentTypeBases.every(
+            (contentTypeBase) => !contentTypeBase.visible
+          );
+
+          if (allDeselected) {
+            if (type && contentTypeBases.some((t) => t.name === type))
+              return false;
+            return true;
+          }
+
           const contentTypeBase = contentTypeBases
             .filter((contentTypeBase) => contentTypeBase.visible)
             .find((contentTypeBase) => contentTypeBase.name === type);
 
           if (!contentTypeBase) return false;
         }
-
-        const parsedSearchValue = searchQuery.toLocaleLowerCase().trim();
-        if (!parsedSearchValue) return true;
-
-        if (filterFn) return filterFn(row, searchQuery);
-
+        return true;
+      })
+      .filter((row) => {
         for (const column in row) {
+          const parsedSearchValue = searchQuery.toLocaleLowerCase().trim();
           const tableColumn = tableColumns.find(({ id }) => id === column);
 
           if (tableColumn && tableColumn.filter && tableColumn.visible) {
