@@ -279,6 +279,14 @@ export function useFilteredTableData<TableDataType>({
       })
       .filter((row) => {
         if (contentTypeBases && contentTypeBaseColumnId) {
+          const allSelected = contentTypeBases.every(
+            (contentTypeBase) => contentTypeBase.visible
+          );
+
+          if (allSelected) {
+            return true;
+          }
+
           const type = row[
             contentTypeBaseColumnId as keyof TableDataType
           ] as unknown;
