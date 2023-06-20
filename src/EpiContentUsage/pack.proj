@@ -11,6 +11,8 @@
 
     <Target Name="CreateNugetPackage" AfterTargets="Build;Rebuild">
         <Message Text="Creating Nuget Package" />
+        <!-- Safe tmp directory clean up-->
+        <RemoveDir Directories="$(TmpOutDir)"/>
         <!-- Create the Versioned out dir for the client resources-->
         <!-- Copy -->
         <ItemGroup>
