@@ -1,14 +1,15 @@
-﻿using EPiServer.Core;
+﻿using System.Linq;
+using Forte.EpiContentUsage.Api.Services;
 
 namespace Forte.EpiContentUsage.Api.Features.ContentType;
 
 public class ContentTypeMapper
 {
-    private readonly IContentModelUsage _contentModelUsage;
-
-    public ContentTypeMapper(IContentModelUsage contentModelUsage)
+    private readonly ContentUsageService _contentUsageService;
+    
+    public ContentTypeMapper(ContentUsageService contentUsageService)
     {
-        _contentModelUsage = contentModelUsage;
+        _contentUsageService = contentUsageService;
     }
 
     public ContentTypeDto Map(EPiServer.DataAbstraction.ContentType contentType)
@@ -19,7 +20,7 @@ public class ContentTypeMapper
             Name = contentType.Name,
             Guid = contentType.GUID,
             Type = contentType.Base.ToString(),
-            UsageCount = _contentModelUsage.ListContentOfContentType(contentType).Count
+            UsageCount = _contentUsageService.GetContentUsages(contentType).Count()
         };
 
         return dto;

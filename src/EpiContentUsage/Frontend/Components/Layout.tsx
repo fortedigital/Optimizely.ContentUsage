@@ -1,5 +1,5 @@
-import { ContentArea, Workspace } from "@episerver/ui-framework";
 import React from "react";
+import { ContentArea, Workspace } from "@episerver/ui-framework";
 
 interface LayoutProps {
   children?: React.ReactNode;

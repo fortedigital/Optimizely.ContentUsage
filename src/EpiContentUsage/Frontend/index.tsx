@@ -5,6 +5,6 @@ import { AppModel } from "./dtos";
 
 declare const appModel: AppModel;
 
-const rootNode = document.getElementById("react-app");
+const rootNode = document.getElementById("epi-content-usage-root");
 
 ReactDOM.render(<App model={appModel} />, rootNode);

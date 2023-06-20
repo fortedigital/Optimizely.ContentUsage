@@ -1,0 +1,29 @@
+.epi-content-usage {
+  position: relative;
+
+  .epi-content-usage-grid {
+    .epi-content-usage-table {
+      & > tbody {
+        & > tr {
+          &:hover {
+            cursor: pointer;
+
+            & > td {
+              background-color: var(--grey-25);
+            }
+          } 
+
+          &.hover--disabled:hover {
+            & > td {
+              background: inherit;
+            }
+          }
+        }
+      }
+
+      .oui-spinner {
+        margin: 30px;
+      }
+    }
+  }
+}
