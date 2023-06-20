@@ -1,31 +1,16 @@
 export function debounce<Args extends unknown[]>(
-  callback: (...args: Args) => void,
-  delay: number
+  func: (...args: Args) => void,
+  duration: number
 ) {
-  let timeoutID: number | undefined;
-  let lastArgs: Args | undefined;
+  let timeout: NodeJS.Timeout;
 
-  const run = () => {
-    if (lastArgs) {
-      callback(...lastArgs);
-      lastArgs = undefined;
-    }
+  return function (...args: Args) {
+    const effect = () => {
+      timeout = null;
+      return func.apply(this, args);
+    };
+
+    clearTimeout(timeout);
+    timeout = setTimeout(effect, duration);
   };
-
-  const debounced = (...args: Args) => {
-    clearTimeout(timeoutID);
-    lastArgs = args;
-    timeoutID = window.setTimeout(run, delay);
-  };
-
-  debounced.flush = () => {
-    clearTimeout(timeoutID);
-    run();
-  };
-
-  debounced.cancel = () => {
-    clearTimeout(timeoutID);
-  };
-
-  return debounced;
 }

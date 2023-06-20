@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { ROWS_PER_PAGE_DEFAULT_OPTIONS } from "../../Components/Filters/NumberOfRowsFilter";
 import { ContentTypeBase, SortDirection, TableColumn } from "../../types";
@@ -55,7 +55,7 @@ export function useFilteredTableData<TableDataType>({
   currentPage: number;
   goToPage: (page: number) => void;
 } {
-  const [triggerUpdate, setTriggerUpdate] = useState<boolean>(false);
+  const triggerUpdate = useRef<boolean>(false);
   const [datasetChanged, setDatasetChanged] = useState<boolean>(false);
   const [searchFieldValue, setSearchFieldValue] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -79,6 +79,117 @@ export function useFilteredTableData<TableDataType>({
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
 
+  const debouncedSetSearchParams = useDebounce<
+    (prev: URLSearchParams) => URLSearchParams
+  >(
+    (callback) => {
+      setSearchParams(callback);
+    },
+    300,
+    []
+  );
+
+  const [changesTracker, setChangesTracker] = useState({
+    currentPage: false,
+    searchQuery: false,
+    tableColumns: false,
+    sortBy: false,
+    sortDirection: false,
+    rowsPerPage: false,
+    contentTypeBases: false,
+  });
+
+  useEffect(() => {
+    if (Object.values(changesTracker).filter((change) => change).length === 0) {
+      return;
+    }
+
+    debouncedSetSearchParams((prevSearchParams) => {
+      //Current Page
+      if (changesTracker.currentPage) {
+        if (typeof currentPage === "number") {
+          prevSearchParams.set(
+            FilteredTableDataQueryParam.Page,
+            currentPage.toString()
+          );
+        } else prevSearchParams.delete(FilteredTableDataQueryParam.Page);
+      }
+
+      //Search query
+      if (changesTracker.searchQuery) {
+        if (searchQuery)
+          prevSearchParams.set(FilteredTableDataQueryParam.Query, searchQuery);
+        else prevSearchParams.delete(FilteredTableDataQueryParam.Query);
+      }
+
+      //TableColumns - ShowColumn
+      if (changesTracker.tableColumns) {
+        prevSearchParams.delete(FilteredTableDataQueryParam.ShowColumn);
+        tableColumns
+          .filter((column) => column.visible)
+          .forEach((column) =>
+            prevSearchParams.append(
+              FilteredTableDataQueryParam.ShowColumn,
+              column.id.toString()
+            )
+          );
+      }
+
+      //SortBy + SortDirection
+      if (changesTracker.sortBy) {
+        prevSearchParams.set(
+          FilteredTableDataQueryParam.SortBy,
+          sortBy.toString()
+        );
+      }
+      if (changesTracker.sortDirection) {
+        prevSearchParams.set(FilteredTableDataQueryParam.Order, sortDirection);
+      }
+
+      //Rows per page
+      if (changesTracker.rowsPerPage) {
+        prevSearchParams.set(
+          FilteredTableDataQueryParam.RowsPerPage,
+          rowsPerPage.toString()
+        );
+      }
+
+      //Content type bases
+      if (changesTracker.contentTypeBases) {
+        prevSearchParams.delete(FilteredTableDataQueryParam.ContentTypeBase);
+        contentTypeBases
+          .filter((contentTypeBase) => contentTypeBase.visible)
+          .forEach((contentTypeBase) =>
+            prevSearchParams.append(
+              FilteredTableDataQueryParam.ContentTypeBase,
+              contentTypeBase.name
+            )
+          );
+      }
+
+      triggerUpdate.current = false;
+      setChangesTracker({
+        currentPage: false,
+        searchQuery: false,
+        tableColumns: false,
+        sortBy: false,
+        sortDirection: false,
+        rowsPerPage: false,
+        contentTypeBases: false,
+      });
+
+      return prevSearchParams;
+    });
+  }, [
+    currentPage,
+    searchQuery,
+    tableColumns,
+    sortBy,
+    sortDirection,
+    rowsPerPage,
+    contentTypeBases,
+  ]);
+
   const useTableColumns = useCallback(
     (callbackFn: (...args: boolean[]) => string) => {
       const columns = tableColumns.map((column) => column.visible);
@@ -87,37 +198,35 @@ export function useFilteredTableData<TableDataType>({
     [tableColumns]
   );
 
+  const setPageToStart = useCallback(() => {
+    setCurrentPage(1);
+  }, []);
+
   const handlePageChange = useCallback(
-    (page?: number) => {
-      setTriggerUpdate(false);
-      setSearchParams((prevSearchParams) => {
-        if (typeof page === "number")
-          prevSearchParams.set(
-            FilteredTableDataQueryParam.Page,
-            page.toString()
-          );
-        else prevSearchParams.delete(FilteredTableDataQueryParam.Page);
-        return prevSearchParams;
+    (page: number) => {
+      triggerUpdate.current = false;
+      setCurrentPage(page);
+      setChangesTracker({
+        ...changesTracker,
+        currentPage: true,
       });
-      setCurrentPage(page ?? 1);
     },
-    [setCurrentPage, setSearchParams]
+    [setCurrentPage]
   );
 
   const handleSearch = useDebounce(
     (value: string) => {
-      setTriggerUpdate(false);
-      setSearchParams((prevSearchParams) => {
-        if (value)
-          prevSearchParams.set(FilteredTableDataQueryParam.Query, value);
-        else prevSearchParams.delete(FilteredTableDataQueryParam.Query);
-        return prevSearchParams;
+      setChangesTracker({
+        ...changesTracker,
+        searchQuery: true,
+        currentPage: true,
       });
-      handlePageChange();
+      triggerUpdate.current = false;
+      setPageToStart();
       setSearchQuery(value);
     },
     300,
-    [handlePageChange, setSearchParams, setSearchQuery]
+    []
   );
 
   const onSearchValueChange: React.KeyboardEventHandler<HTMLInputElement> =
@@ -149,21 +258,12 @@ export function useFilteredTableData<TableDataType>({
       newTableColumns[columnIndex].visible = visible;
       if (!visible && newTableColumns[columnIndex].id === sortBy)
         setSortBy(null);
-
-      setTriggerUpdate(false);
-      setSearchParams((prevSearchParams) => {
-        prevSearchParams.delete(FilteredTableDataQueryParam.ShowColumn);
-        newTableColumns
-          .filter((column) => column.visible)
-          .forEach((column) =>
-            prevSearchParams.append(
-              FilteredTableDataQueryParam.ShowColumn,
-              column.id.toString()
-            )
-          );
-        return prevSearchParams;
-      });
+      triggerUpdate.current = false;
       setTableColumns(newTableColumns);
+      setChangesTracker({
+        ...changesTracker,
+        tableColumns: true,
+      });
     },
     [tableColumns, setTableColumns, setSortBy, sortBy]
   );
@@ -189,19 +289,16 @@ export function useFilteredTableData<TableDataType>({
       if (sortBy === column.id) {
         newOrder = sortToggleMap[sortDirection];
       }
-
-      setTriggerUpdate(false);
-      setSearchParams((prevSearchParams) => {
-        prevSearchParams.set(
-          FilteredTableDataQueryParam.SortBy,
-          column.id.toString()
-        );
-        prevSearchParams.set(FilteredTableDataQueryParam.Order, newOrder);
-        return prevSearchParams;
-      });
+      triggerUpdate.current = false;
       setSortBy(column.id as keyof TableDataType);
       setSortDirection(newOrder);
-      handlePageChange(1);
+      setPageToStart();
+      setChangesTracker({
+        ...changesTracker,
+        sortBy: true,
+        sortDirection: true,
+        currentPage: true,
+      });
     },
     [
       tableColumns,
@@ -210,24 +307,21 @@ export function useFilteredTableData<TableDataType>({
       setSortDirection,
       sortBy,
       sortDirection,
-      setSearchParams,
     ]
   );
 
   const onRowsPerPageChange = useCallback(
     (option: number) => {
-      setTriggerUpdate(false);
-      setSearchParams((prevSearchParams) => {
-        prevSearchParams.set(
-          FilteredTableDataQueryParam.RowsPerPage,
-          option.toString()
-        );
-        return prevSearchParams;
-      });
+      triggerUpdate.current = false;
       setRowsPerPage(option);
-      handlePageChange(1);
+      setPageToStart();
+      setChangesTracker({
+        ...changesTracker,
+        rowsPerPage: true,
+        currentPage: true,
+      });
     },
-    [handlePageChange, setSearchParams]
+    [handlePageChange]
   );
 
   const onContentTypeBaseChange = useCallback(
@@ -243,26 +337,17 @@ export function useFilteredTableData<TableDataType>({
         );
 
         newContentTypeBases[contentTypeBaseIndex].visible = !visible;
-
-        handlePageChange(1);
-        setTriggerUpdate(false);
-        setSearchParams((prevSearchParams) => {
-          prevSearchParams.delete(FilteredTableDataQueryParam.ContentTypeBase);
-          newContentTypeBases
-            .filter((contentTypeBase) => contentTypeBase.visible)
-            .forEach((contentTypeBase) =>
-              prevSearchParams.append(
-                FilteredTableDataQueryParam.ContentTypeBase,
-                contentTypeBase.name
-              )
-            );
-          return prevSearchParams;
-        });
-
+        setPageToStart();
+        triggerUpdate.current = false;
         setContentTypeBases(newContentTypeBases);
+        setChangesTracker({
+          ...changesTracker,
+          contentTypeBases: true,
+          currentPage: true,
+        });
       }
     },
-    [contentTypeBases, handlePageChange, setSearchParams]
+    [contentTypeBases, handlePageChange]
   );
 
   const filteredItems = useMemo(() => {
@@ -453,7 +538,7 @@ export function useFilteredTableData<TableDataType>({
           setCurrentPage(number);
         }
       } else {
-        setCurrentPage(1);
+        setPageToStart();
       }
     },
     [
@@ -475,8 +560,11 @@ export function useFilteredTableData<TableDataType>({
   );
 
   useEffect(() => {
-    if (triggerUpdate && (currentPage < 0 || currentPage > totalPages)) {
-      handlePageChange();
+    if (
+      triggerUpdate.current &&
+      (currentPage < 0 || currentPage > totalPages)
+    ) {
+      setPageToStart();
     }
   }, [currentPage]);
 
@@ -496,15 +584,15 @@ export function useFilteredTableData<TableDataType>({
     if (datasetChanged && rows.length > 0 && totalPages > 0) {
       setDatasetChanged(false);
       handleUpdateQueryParams(searchParams);
-      setTriggerUpdate(true);
+      triggerUpdate.current = true;
     }
   }, [datasetChanged, rows]);
 
   useEffect(() => {
-    if (triggerUpdate) {
+    if (triggerUpdate.current) {
       handleUpdateQueryParams(searchParams);
     } else {
-      setTriggerUpdate(true);
+      triggerUpdate.current = true;
     }
   }, [datasetChanged, location]);
 
