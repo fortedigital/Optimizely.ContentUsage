@@ -353,14 +353,13 @@ export function useFilteredTableData<TableDataType>({
   const filteredItems = useMemo(() => {
     return rows
       .filter((row) => {
-        if (
-          contentTypeBases &&
-          contentTypeBaseColumnId &&
-          row[contentTypeBaseColumnId as keyof TableDataType]
-        ) {
-          const type = row[
-            contentTypeBaseColumnId as keyof TableDataType
-          ] as unknown;
+        const type = row[
+          contentTypeBaseColumnId as keyof TableDataType
+        ] as unknown;
+
+        if (type === null) return false;
+
+        if (contentTypeBases && contentTypeBaseColumnId && type) {
           const contentTypeBase = contentTypeBases
             .filter((contentTypeBase) => contentTypeBase.visible)
             .find((contentTypeBase) => contentTypeBase.name === type);
