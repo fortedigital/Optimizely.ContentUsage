@@ -8,13 +8,20 @@ namespace Forte.EpiContentUsage.Api.Services;
 public class ContentTypeService
 {
     private readonly IContentTypeRepository _contentTypeRepository;
+    private readonly ContentTypeBaseService _contentTypeBaseService;
 
-    public ContentTypeService(IContentTypeRepository contentTypeRepository) =>
+    public ContentTypeService(IContentTypeRepository contentTypeRepository, ContentTypeBaseService contentTypeBaseService)
+    {
         _contentTypeRepository = contentTypeRepository;
+        _contentTypeBaseService = contentTypeBaseService;
+    }
 
     public IEnumerable<ContentType> GetAll(ContentTypesFilterCriteria? filterCriteria)
     {
-        var contentTypes = _contentTypeRepository.List();
+        var contentTypeBases = _contentTypeBaseService.GetAll();
+        
+        var contentTypes = _contentTypeRepository.List()
+            .Where(type => contentTypeBases.Any(ctb => ctb == type.Base));
 
         if (filterCriteria != null)
         {
