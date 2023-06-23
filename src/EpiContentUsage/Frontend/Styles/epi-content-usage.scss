@@ -1,8 +1,18 @@
+@use 'sass:map';
+@import "./utils";
+
 .epi-content-usage {
   position: relative;
 
   .epi-content-usage-grid {
+    .epi-content-usage-table-container {
+      overflow-x: auto;
+    }
+
     .epi-content-usage-table {
+      min-width: max-content;
+      font-size: 13px;
+
       & > tbody {
         & > tr {
           &:hover {

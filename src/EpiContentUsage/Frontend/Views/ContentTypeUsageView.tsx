@@ -27,6 +27,7 @@ import { APIResponse } from "../Lib/EpiContentUsageAPIClient";
 import Header from "../Components/Header";
 import { useTranslations } from "../Contexts/TranslationsProvider";
 import Filters from "../Components/Filters/Filters";
+import { useScroll } from "../Lib/hooks/useScroll";
 
 enum ContentTypeUsageTableColumn {
   ID = "id",
@@ -75,7 +76,7 @@ const ContentTypeUsageDiscloseTableRow = ({
       key={row.id}
     >
       <div className="flex soft-double--sides">
-        <div>
+        <div className="epi-content-usage-table-overflow">
           <Table>
             <Table.THead>
               <Table.TR>
@@ -174,6 +175,7 @@ const ContentTypeUsageView = () => {
   );
   const location = useLocation();
   const gridContainerRef = useRef<HTMLElement | null>();
+  const { scrollTo } = useScroll();
 
   const {
     views: {
@@ -216,7 +218,6 @@ const ContentTypeUsageView = () => {
     onSearchChange,
     onClearButtonClick,
     tableColumns,
-    useTableColumns,
     onTableColumnChange,
     selectedRowsPerPage,
     onRowsPerPageChange,
@@ -227,52 +228,12 @@ const ContentTypeUsageView = () => {
     goToPage,
   } = useFilteredTableData({ rows: contentTypeUsages, initialTableColumns });
 
-  const scrollToTop = useCallback(
-    () => gridContainerRef.current?.scrollIntoView({ behavior: "smooth" }),
-    []
-  );
-
   const handlePageChange = useCallback(
     (page: number) => {
       goToPage(page);
-      scrollToTop();
+      scrollTo(gridContainerRef.current);
     },
-    [goToPage, scrollToTop]
-  );
-
-  const tableColumnsWidthMap = useMemo(
-    () =>
-      new Map([
-        [
-          ContentTypeUsageTableColumn.ID,
-          useTableColumns((id, name, languageBranch, pageUrl) => {
-            if (!name && !languageBranch && !pageUrl) return "auto";
-            return "60px";
-          }),
-        ],
-        [ContentTypeUsageTableColumn.Name, "auto"],
-        [
-          ContentTypeUsageTableColumn.LanguageBranch,
-          useTableColumns((id, name, languageBranch, pageUrl) => {
-            if (!pageUrl) return "auto";
-            return "100px";
-          }),
-        ],
-        [
-          ContentTypeUsageTableColumn.PageUrl,
-          useTableColumns((id, name, languageBranch, pageUrl) => {
-            return "auto";
-            // return "340px";
-          }),
-        ],
-        [
-          ContentTypeUsageTableColumn.Actions,
-          useTableColumns((id, name, languageBranch, pageUrl) => {
-            return "60px";
-          }),
-        ],
-      ]),
-    [useTableColumns]
+    [goToPage]
   );
 
   const breadcrumbItems = useMemo(
@@ -361,7 +322,7 @@ const ContentTypeUsageView = () => {
             ) : null}
           </GridCell>
 
-          <GridCell large={8} medium={6} small={2}>
+          <GridCell large={12} medium={8} small={4}>
             <Filters
               searchValue={searchValue}
               onSearchChange={onSearchChange}
@@ -374,68 +335,63 @@ const ContentTypeUsageView = () => {
           </GridCell>
 
           <GridCell large={12}>
-            <DiscloseTable className="epi-content-usage-table">
-              <Table.THead>
-                <Table.TR>
-                  {hasDiscloseTableRows && (
-                    <Table.TH
-                      isCollapsed={true}
-                      style={{ paddingRight: "30px" }}
-                    />
-                  )}
-                  {tableColumns
-                    .filter((column) => column.visible)
-                    .map((column) => (
+            <div className="epi-content-usage-table-container">
+              <DiscloseTable className="epi-content-usage-table">
+                <Table.THead>
+                  <Table.TR>
+                    {hasDiscloseTableRows && (
                       <Table.TH
-                        width={tableColumnsWidthMap.get(
-                          ContentTypeUsageTableColumn.ID
-                        )}
-                        sorting={{
-                          canSort: true,
-                          handleSort: () => onSortChange(column),
-                          order: sortDirection,
-                        }}
-                        key={column.id}
-                      >
-                        {column.name}
-                      </Table.TH>
-                    ))}
-                  <Table.TH
-                    width={tableColumnsWidthMap.get(
-                      ContentTypeUsageTableColumn.Actions
+                        isCollapsed={true}
+                        style={{ paddingRight: "30px" }}
+                      />
                     )}
-                  />
-                </Table.TR>
-              </Table.THead>
-
-              <Table.TBody>
-                {rows.length > 0 ? (
-                  rows.map((row) =>
-                    row.pageUrls.length > 1 ? (
-                      <ContentTypeUsageDiscloseTableRow
-                        key={`${row.id}-${row.languageBranch}`}
-                        {...row}
-                        tableColumns={tableColumns}
-                      />
-                    ) : (
-                      <ContentTypeUsageTableRow
-                        key={`${row.id}-${row.languageBranch}`}
-                        {...row}
-                        tableColumns={tableColumns}
-                        onRowClick={onTableRowClick(row.pageUrls[0])}
-                        onEditButtonClick={onTableRowClick(row.editUrl, true)}
-                        onViewWebsiteClick={onViewWebsiteClick(row.pageUrls[0])}
-                        hasDiscloseTableRows={hasDiscloseTableRows}
-                      />
-                    )
-                  )
-                ) : (
-                  <Table.TR noHover>
-                    <Table.TD colSpan={5}>{translations.noResults}</Table.TD>
+                    {tableColumns
+                      .filter((column) => column.visible)
+                      .map((column) => (
+                        <Table.TH
+                          sorting={{
+                            canSort: true,
+                            handleSort: () => onSortChange(column),
+                            order: sortDirection,
+                          }}
+                          key={column.id}
+                        >
+                          {column.name}
+                        </Table.TH>
+                      ))}
+                    <Table.TH width={100} />
                   </Table.TR>
-                )}
-              </Table.TBody>
-            </DiscloseTable>
+                </Table.THead>
+
+                <Table.TBody>
+                  {rows.length > 0 ? (
+                    rows.map((row) =>
+                      row.pageUrls.length > 1 ? (
+                        <ContentTypeUsageDiscloseTableRow
+                          key={`${row.id}-${row.languageBranch}`}
+                          {...row}
+                          tableColumns={tableColumns}
+                        />
+                      ) : (
+                        <ContentTypeUsageTableRow
+                          key={`${row.id}-${row.languageBranch}`}
+                          {...row}
+                          tableColumns={tableColumns}
+                          onRowClick={onTableRowClick(row.pageUrls[0])}
+                          onEditButtonClick={onTableRowClick(row.editUrl, true)}
+                          onViewWebsiteClick={onViewWebsiteClick(row.pageUrls[0])}
+                          hasDiscloseTableRows={hasDiscloseTableRows}
+                        />
+                      )
+                    )
+                  ) : (
+                    <Table.TR noHover>
+                      <Table.TD colSpan={5}>{translations.noResults}</Table.TD>
+                    </Table.TR>
+                  )}
+                </Table.TBody>
+              </DiscloseTable>
+            </div>
           </GridCell>
 
           {totalPages > 1 && (

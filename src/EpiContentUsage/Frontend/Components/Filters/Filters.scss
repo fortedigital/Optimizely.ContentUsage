@@ -36,5 +36,13 @@
     & > .oui-button {
       width: 100%;
     }
+
+    &.is-active {
+      & .oui-dropdown-children {
+        @include breakpoint(0, map.get($breakpoints, large)) {
+          width: 100% !important;
+        }
+      }
+    }
   }
 }
