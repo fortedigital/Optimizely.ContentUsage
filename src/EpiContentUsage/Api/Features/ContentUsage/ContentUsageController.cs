@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using EPiServer.Core;
 using EPiServer.DataAbstraction;
 using Forte.EpiContentUsage.Api.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -19,15 +18,12 @@ public class ContentUsageController : ControllerBase
 {
     public const string GetContentUsagesRouteName = "ContentUsages";
 
-    private readonly IContentModelUsage _contentModelUsage;
     private readonly IContentTypeRepository _contentTypeRepository;
     private readonly ContentUsageService _contentUsageService;
 
-    public ContentUsageController(IContentTypeRepository contentTypeRepository, IContentModelUsage contentModelUsage,
-        ContentUsageService contentUsageService)
+    public ContentUsageController(IContentTypeRepository contentTypeRepository, ContentUsageService contentUsageService)
     {
         _contentTypeRepository = contentTypeRepository;
-        _contentModelUsage = contentModelUsage;
         _contentUsageService = contentUsageService;
     }
 
@@ -39,12 +35,9 @@ public class ContentUsageController : ControllerBase
     {
         var contentType = _contentTypeRepository.Load(guid);
 
-        if (contentType == null)
-        {
-            return NotFound();
-        }
-        
-        var contentUsages = _contentModelUsage.ListContentOfContentType(contentType);
+        if (contentType == null) return NotFound();
+
+        var contentUsages = _contentUsageService.GetContentUsages(contentType);
 
         var contentUsagesDto = contentUsages.Select(contentUsage => new ContentUsageDto
         {
@@ -52,7 +45,7 @@ public class ContentUsageController : ControllerBase
             ContentTypeGuid = guid,
             Name = contentUsage.Name,
             LanguageBranch = contentUsage.LanguageBranch,
-            PageUrls = _contentUsageService.GetPageUrls(contentUsage.ContentLink),
+            PageUrls = _contentUsageService.GetPageUrls(contentUsage),
             EditUrl = _contentUsageService.GetEditUrl(contentUsage)
         });
 
