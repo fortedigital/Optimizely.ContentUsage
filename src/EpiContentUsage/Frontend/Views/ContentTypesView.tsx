@@ -187,7 +187,6 @@ const ContentTypesView = () => {
               <Table
                 className="epi-content-usage-table"
                 shouldAddHover={rows.length > 0}
-                tableLayoutAlgorithm="auto"
               >
                 <Table.THead>
                   <Table.TR>
