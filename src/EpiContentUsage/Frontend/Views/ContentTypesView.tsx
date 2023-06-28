@@ -61,14 +61,14 @@ const ContentTypesView = () => {
       filter: true,
     },
     {
-      id: ContentTypesTableColumn.DisplayName,
-      name: columns.displayName,
+      id: ContentTypesTableColumn.Name,
+      name: columns.name,
       visible: true,
       filter: true,
     },
     {
-      id: ContentTypesTableColumn.Name,
-      name: columns.name,
+      id: ContentTypesTableColumn.DisplayName,
+      name: columns.displayName,
       visible: true,
       filter: true,
     },
