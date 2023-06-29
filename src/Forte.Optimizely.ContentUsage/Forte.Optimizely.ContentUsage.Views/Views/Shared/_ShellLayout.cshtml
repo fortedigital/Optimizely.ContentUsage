@@ -1,0 +1,34 @@
+@using EPiServer.Framework.Web.Resources
+@using EPiServer.Shell.Navigation
+@model Forte.Optimizely.ContentUsage.ViewModels.MainViewViewModel
+
+@{
+    Layout = string.Empty;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Optimizely Content Usage</title>
+        
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="shortcut icon" href="/Util/images/favicon.ico" type="image/x-icon">
+        <!-- Shell -->
+        @ClientResources.RenderResources("ShellCore")
+
+        <!-- LightTheme -->
+        @ClientResources.RenderResources("ShellCoreLightTheme")
+
+        <!-- Admin -->
+        @ClientResources.RenderResources("Admin")
+    </head>
+    <body>
+        @Html.CreatePlatformNavigationMenu()
+        
+        <div @Html.ApplyPlatformNavigation()>
+            @RenderBody()
+        </div>
+    </body>
+</html>

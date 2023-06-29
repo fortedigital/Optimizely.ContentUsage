@@ -1,0 +1,29 @@
+.forte-optimizely-content-usage {
+  position: relative;
+
+  .forte-optimizely-content-usage-grid {
+    .forte-optimizely-content-usage-table {
+      & > tbody {
+        & > tr {
+          &:hover {
+            cursor: pointer;
+
+            & > td {
+              background-color: var(--grey-25);
+            }
+          } 
+
+          &.hover--disabled:hover {
+            & > td {
+              background: inherit;
+            }
+          }
+        }
+      }
+
+      .oui-spinner {
+        margin: 30px;
+      }
+    }
+  }
+}
