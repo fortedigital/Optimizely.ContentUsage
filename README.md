@@ -1,22 +1,22 @@
 
-# EpiContentUsage
+# Forte.Optimizely.ContentUsage
 
-EpiContentUsage is a small shell module for Optimizely CMS 12.
+Forte.Optimizely.ContentUsage is a small shell module for Optimizely CMS 12.
 
 It lists the available content types and its instances (blocks or pages), published throughout the website.
 
 ## How to use?
 
 To make it work in your CMS 12 web app:
-1. Install the `Forte.EpiContentUsage` NuGet
-2. Add `services.AddEpiContentUsage();` where you register services
+1. Install the `Forte.Optimizely.ContentUsage` NuGet
+2. Add `services.AddContentUsage();` where you register services
 
 ---
 
 ## Foundation 
 
 For demo purposes the solution uses [Foundation](https://github.com/episerver/Foundation).
-Foundation project consumes EpiContentUsage as a Nuget package.
+Foundation project consumes Forte.Optimizely.ContentUsage as a Nuget package.
 
 ---
 
@@ -46,11 +46,11 @@ Open command prompt as administrator
 
 ```
 git clone https://github.com/fortedigital/EpiContentUsage.git
-cd EpiContentUsage/src/EpiContentUsage
-dotnet build EpiContentUsage.csproj
+cd EpiContentUsage/src/Forte.Optimizely.ContentUsage
+dotnet build Forte.Optimizely.ContentUsage.csproj
 yarn install
 yarn build
-dotnet pack EpiContentUsage.csproj
+dotnet pack Forte.Optimizely.ContentUsage.csproj
 cd ../../
 setup.cmd 
 dotnet run --project src/Foundation/Foundation.csproj
