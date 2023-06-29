@@ -350,7 +350,7 @@ const ContentTypeUsageView = () => {
 
   return (
     <Layout>
-      <GridContainer ref={gridContainerRef} className="epi-content-usage-grid">
+      <GridContainer ref={gridContainerRef} className="forte-optimizely-content-usage-grid">
         <Grid>
           <GridCell large={12} medium={8} small={4}>
             <Header title={translations.title} />
@@ -374,7 +374,7 @@ const ContentTypeUsageView = () => {
           </GridCell>
 
           <GridCell large={12}>
-            <DiscloseTable className="epi-content-usage-table">
+            <DiscloseTable className="forte-optimizely-content-usage-table">
               <Table.THead>
                 <Table.TR>
                   {hasDiscloseTableRows && (

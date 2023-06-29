@@ -32,7 +32,7 @@ function Filters<TableDataType>({
   onRowsPerPageChange,
 }: FiltersProps<TableDataType>) {
   return (
-    <div className="epi-content-usage-filters">
+    <div className="forte-optimizely-content-usage-filters">
       <SearchInput
         value={searchValue}
         onChange={onSearchChange}

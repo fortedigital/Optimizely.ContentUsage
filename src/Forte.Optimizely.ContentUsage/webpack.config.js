@@ -4,7 +4,7 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 module.exports = (env, argv) => {
     return {
         entry: {
-            'epi-content-usage': './Frontend/index.tsx'
+            'forte-optimizely-content-usage': './Frontend/index.tsx'
         },
         devtool: 'cheap-module-source-map',
         module: {

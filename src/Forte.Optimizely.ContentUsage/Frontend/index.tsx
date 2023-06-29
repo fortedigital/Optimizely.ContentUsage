@@ -5,6 +5,6 @@ import { AppModel } from "./dtos";
 
 declare const appModel: AppModel;
 
-const rootNode = document.getElementById("epi-content-usage-root");
+const rootNode = document.getElementById("forte-optimizely-content-usage-root");
 
 ReactDOM.render(<App model={appModel} />, rootNode);
