@@ -8,6 +8,8 @@ using EPiServer.Web.Routing;
 
 namespace Forte.Optimizely.ContentUsage.Api.Services;
 
+using EPiServerContentUsage = EPiServer.DataAbstraction.ContentUsage;
+
 public class ContentUsageService
 {
     private readonly IContentLoader _contentLoader;
@@ -27,7 +29,7 @@ public class ContentUsageService
         _publishedStateAssessor = publishedStateAssessor;
     }
 
-    public IEnumerable<string> GetPageUrls(EPiServer.DataAbstraction.ContentUsage contentUsage)
+    public IEnumerable<string> GetPageUrls(EPiServerContentUsage contentUsage)
     {
         var contentLink = contentUsage.ContentLink;
         var url = _urlResolver.GetUrl(contentLink, contentUsage.LanguageBranch);
@@ -43,14 +45,14 @@ public class ContentUsageService
         return pageLinks.Select(pageLink => _urlResolver.GetUrl(pageLink, contentUsage.LanguageBranch));
     }
 
-    public string GetEditUrl(EPiServer.DataAbstraction.ContentUsage contentUsage)
+    public string GetEditUrl(EPiServerContentUsage contentUsage)
     {
         var latestVersionContentLink = contentUsage.ContentLink.ToReferenceWithoutVersion();
 
         return PageEditing.GetEditUrlForLanguage(latestVersionContentLink, contentUsage.LanguageBranch);
     }
 
-    public IEnumerable<EPiServer.DataAbstraction.ContentUsage> GetContentUsages(ContentType contentType)
+    public IEnumerable<EPiServerContentUsage> GetContentUsages(ContentType contentType)
     {
         var contentUsages = _contentModelUsage.ListContentOfContentType(contentType);
 
