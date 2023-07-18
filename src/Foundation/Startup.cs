@@ -8,7 +8,6 @@ using EPiServer.Data;
 using EPiServer.Framework.Web.Resources;
 using EPiServer.Labs.BlockEnhancements;
 using EPiServer.OpenIDConnect;
-using EPiServer.ServiceLocation;
 using EPiServer.Shell.Modules;
 using EPiServer.Web;
 using EPiServer.Web.Routing;
@@ -34,8 +33,8 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using System;
 using System.Linq;
-using Forte.EpiContentUsage.Api.Extensions;
-using Forte.EpiContentUsage.Initialization;
+using Forte.Optimizely.ContentUsage.Api.Extensions;
+using Forte.Optimizely.ContentUsage.Initialization;
 using UNRVLD.ODP.VisitorGroups.Initilization;
 
 namespace Foundation
@@ -199,12 +198,12 @@ namespace Foundation
             services.AddAdvancedReviews();
             services.AddGetaCategories();
             services.AddODPVisitorGroups();
-            services.AddEpiContentUsage();
+            services.AddContentUsage();
 
             if (_webHostingEnvironment.IsDevelopment())
             {
-                services.AddEpiContentUsageDevServer("http://localhost:8080/");
-                services.AddEpiContentUsageSwagger();
+                services.AddContentUsageDevServer("http://localhost:8080/");
+                services.AddContentUsageSwagger();
             }
             
             // Add Welcome DAM
