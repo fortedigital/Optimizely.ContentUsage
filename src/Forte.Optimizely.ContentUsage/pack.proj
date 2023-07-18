@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="15.0">
+    
+    <PropertyGroup>
+        <TmpOutDir>$(SolutionDir)\tmp</TmpOutDir>
+        <OutputPath>bin/$(Configuration)</OutputPath>
+        <!-- NOTE! This is different between cms versions, the zip file needs to be named the same in the package -->
+        <ZipFile>$(OutputPath)/$(AssemblyName).zip</ZipFile>
+    </PropertyGroup>
+
+    <Target Name="CreateNugetPackage" AfterTargets="Build;Rebuild">
+        <Message Text="Creating Nuget Package" />
+        <!-- Safe tmp directory clean up-->
+        <RemoveDir Directories="$(TmpOutDir)"/>
+        <!-- Create the Versioned out dir for the client resources-->
+        <!-- Copy -->
+        <ItemGroup>
+            <ClientResources Include="$(ProjectDir)/module/ClientResources/**/*" />
+        </ItemGroup>
+        <Copy SourceFiles="$(ProjectDir)/module/module.config" DestinationFolder="$(TmpOutDir)/content" />
+        <Copy SourceFiles="@(ClientResources)" DestinationFiles="@(ClientResources -> '$(TmpOutDir)/content/ClientResources/%(RecursiveDir)%(Filename)%(Extension)')" />
+        <!-- Delete old Zip file -->
+        <Delete Files="$(ZipFile)" />
+        <!-- Create the Zip file -->
+        <ZipDirectory SourceDirectory="$(TmpOutDir)/content" DestinationFile="$(ZipFile)" Overwrite="true" />
+        <!-- Cleanup -->
+        <RemoveDir Directories="$(TmpOutDir)"/>
+
+    </Target>
+
+    <ItemGroup>
+        <Content Include="$(ZipFile)" >
+            <Pack>true</Pack>
+            <PackagePath>content\modules\_protected\$(AssemblyName)\;contentFiles\any\any\modules\_protected\$(AssemblyName)\</PackagePath>
+            <PackageCopyToOutput>true</PackageCopyToOutput>
+            <BuildAction>None</BuildAction>
+        </Content>
+        <Content Include="$(MSBuildProjectDirectory)\InstallModule.targets" >
+            <Pack>true</Pack>
+            <PackagePath>build\net6.0\$(AssemblyName).targets</PackagePath>
+            <PackageCopyToOutput>true</PackageCopyToOutput>
+            <BuildAction>None</BuildAction>
+        </Content>
+    </ItemGroup>
+    
+</Project>
