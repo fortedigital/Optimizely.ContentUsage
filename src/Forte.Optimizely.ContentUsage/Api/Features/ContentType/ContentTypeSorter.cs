@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Forte.EpiContentUsage.Api.Common;
 
-namespace Forte.EpiContentUsage.Api.Features.ContentType;
+namespace Forte.Optimizely.ContentUsage.Api.Features.ContentType;
 
 public class ContentTypeSorter : CollectionSorter<ContentTypeDto>
 {
