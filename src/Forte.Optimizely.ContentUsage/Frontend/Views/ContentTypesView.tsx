@@ -36,7 +36,6 @@ enum ContentTypesTableColumn {
 }
 
 const ContentTypesView = () => {
-  const [dataLoaded, setDataLoaded] = useState<boolean>(false);
   const translations = useTranslations();
   const [initialContentTypeBases, setInitialContentTypeBases] = useState<
     ContentTypeBaseDto[]
@@ -188,7 +187,7 @@ const ContentTypesView = () => {
   ];
 
   useEffect(() => {
-    if (!dataLoaded && response && Array.isArray(response)) {
+    if (response && Array.isArray(response)) {
       const [contentTypeBasesResponse, contentTypesResponse] = response;
 
       if (
@@ -206,10 +205,8 @@ const ContentTypesView = () => {
       if (!contentTypesResponse.hasErrors && contentTypesResponse.data) {
         setContentTypes(contentTypesResponse.data);
       }
-
-      setDataLoaded(true);
     }
-  }, [response, dataLoaded]);
+  }, [response]);
 
   return (
     <Layout>
@@ -248,7 +245,7 @@ const ContentTypesView = () => {
                         sorting={{
                           canSort: true,
                           handleSort: () => onSortChange(column),
-                          order: sortDirection,
+                          order: sortDirection.toLowerCase(),
                         }}
                         key={column.id}
                       >

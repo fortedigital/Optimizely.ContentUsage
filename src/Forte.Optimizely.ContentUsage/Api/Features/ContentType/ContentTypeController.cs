@@ -19,12 +19,17 @@ public class ContentTypeController : ControllerBase
     public const string GetContentTypesRouteName = "ContentTypes";
 
     private readonly ContentTypeMapper _contentTypeMapper;
+    private readonly ContentTypeSorter _contentTypeSorter;
     private readonly ContentTypeService _contentTypeService;
 
-    public ContentTypeController(ContentTypeService contentTypeService, ContentTypeMapper contentTypeMapper)
+    public ContentTypeController(
+        ContentTypeService contentTypeService,
+        ContentTypeMapper contentTypeMapper,
+        ContentTypeSorter contentTypeSorter)
     {
         _contentTypeService = contentTypeService;
         _contentTypeMapper = contentTypeMapper;
+        _contentTypeSorter = contentTypeSorter;
     }
 
     [HttpGet]
@@ -53,12 +58,7 @@ public class ContentTypeController : ControllerBase
 
         var contentTypeDtos = contentTypes.Select(_contentTypeMapper.Map);
 
-        contentTypeDtos = query?.SortBy switch
-        {
-            ContentTypesSorting.Name => contentTypeDtos.OrderBy(dto => dto.DisplayName ?? dto.Name),
-            ContentTypesSorting.UsageCount => contentTypeDtos.OrderBy(dto => dto.UsageCount),
-            _ => contentTypeDtos
-        };
+        contentTypeDtos = _contentTypeSorter.Sort(contentTypeDtos, query);
 
         return Ok(contentTypeDtos);
     }

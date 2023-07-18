@@ -6,7 +6,6 @@ using Forte.Optimizely.ContentUsage.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Forte.Optimizely.ContentUsage.Api.Features.ContentUsage;
@@ -20,20 +19,22 @@ public class ContentUsageController : ControllerBase
 
     private readonly IContentTypeRepository _contentTypeRepository;
     private readonly ContentUsageService _contentUsageService;
+    private readonly ContentUsageSorter _contentUsageSorter;
 
-    public ContentUsageController(IContentTypeRepository contentTypeRepository, ContentUsageService contentUsageService)
+    public ContentUsageController(IContentTypeRepository contentTypeRepository, ContentUsageService contentUsageService, ContentUsageSorter contentUsageSorter)
     {
         _contentTypeRepository = contentTypeRepository;
         _contentUsageService = contentUsageService;
+        _contentUsageSorter = contentUsageSorter;
     }
 
     [HttpGet]
     [SwaggerResponse(StatusCodes.Status200OK, null, typeof(IEnumerable<ContentUsageDto>))]
     [SwaggerResponse(StatusCodes.Status404NotFound)]
     [Route("[action]", Name = GetContentUsagesRouteName)]
-    public ActionResult GetContentUsages([FromQuery] [BindRequired] Guid guid)
+    public ActionResult GetContentUsages([FromQuery] GetContentUsagesQuery query)
     {
-        var contentType = _contentTypeRepository.Load(guid);
+        var contentType = _contentTypeRepository.Load(query.Guid);
 
         if (contentType == null) return NotFound();
 
@@ -42,12 +43,14 @@ public class ContentUsageController : ControllerBase
         var contentUsagesDto = contentUsages.Select(contentUsage => new ContentUsageDto
         {
             Id = contentUsage.ContentLink.ID,
-            ContentTypeGuid = guid,
+            ContentTypeGuid = query.Guid,
             Name = contentUsage.Name,
             LanguageBranch = contentUsage.LanguageBranch,
             PageUrls = _contentUsageService.GetPageUrls(contentUsage),
             EditUrl = _contentUsageService.GetEditUrl(contentUsage)
         });
+
+        contentUsagesDto = _contentUsageSorter.Sort(contentUsagesDto, query);
 
         return Ok(contentUsagesDto);
     }

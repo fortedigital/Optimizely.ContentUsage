@@ -50,19 +50,25 @@ export default class ContentUsageAPIClient {
     } as APIResponse<ResponseSchema>;
   }
 
-  public async getContentTypeBases() {
-    return this.get<ContentTypeBaseDto[]>(this.endpoints.contentTypeBases);
+  public async getContentTypeBases(query: Record<string, string>) {
+    return this.get<ContentTypeBaseDto[]>(
+      this.endpoints.contentTypeBases,
+      query
+    );
   }
 
-  public async getContentTypes() {
-    return this.get<ContentTypeDto[]>(this.endpoints.contentTypes);
+  public async getContentTypes(query: Record<string, string>) {
+    return this.get<ContentTypeDto[]>(this.endpoints.contentTypes, query);
   }
 
   public async getContentType(guid: string) {
     return this.get<ContentTypeDto>(this.endpoints.contentType, { guid });
   }
 
-  public async getContentTypeUsages(guid: string) {
-    return this.get<ContentUsageDto[]>(this.endpoints.contentUsages, { guid });
+  public async getContentTypeUsages(query: Record<string, string>) {
+    return this.get<ContentUsageDto[]>(
+      `${this.endpoints.contentUsages}`,
+      query
+    );
   }
 }

@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useSearchParams } from "react-router-dom";
 import { ROWS_PER_PAGE_DEFAULT_OPTIONS } from "../../Components/Filters/NumberOfRowsFilter";
-import { ContentTypeBase, SortDirection, TableColumn } from "../../types";
+import { ContentTypeBase, TableColumn } from "../../types";
+import { SortDirection } from "../../dtos";
 import { useDebounce } from "./useDebounce";
 
 enum FilteredTableDataQueryParam {
@@ -33,7 +34,7 @@ export function useFilteredTableData<TableDataType>({
   initialContentTypeBases,
   contentTypeBaseColumnId = FilteredTableDataQueryParam.ContentTypeBase,
   initialTableColumns,
-  initialSortDirection = SortDirection.Ascending,
+  initialSortDirection = SortDirection.Asc,
   rowsPerPageOptions = ROWS_PER_PAGE_DEFAULT_OPTIONS,
   sortCompareFn,
   filterFn,
@@ -281,10 +282,10 @@ export function useFilteredTableData<TableDataType>({
       if (!tableColumns.find(({ id }) => id === column.id)) return;
       // If the user isn't switching sort columns, toggle the sort direction
       const sortToggleMap = {
-        [SortDirection.Ascending]: SortDirection.Descending,
-        [SortDirection.Descending]: SortDirection.Ascending,
+        [SortDirection.Asc]: SortDirection.Desc,
+        [SortDirection.Desc]: SortDirection.Asc,
       };
-      let newOrder = SortDirection.Ascending;
+      let newOrder = SortDirection.Asc;
 
       if (sortBy === column.id) {
         newOrder = sortToggleMap[sortDirection];
@@ -351,67 +352,51 @@ export function useFilteredTableData<TableDataType>({
   );
 
   const filteredItems = useMemo(() => {
-    return rows
-      .filter((row) => {
-        if (
-          contentTypeBases &&
-          contentTypeBaseColumnId &&
-          row[contentTypeBaseColumnId as keyof TableDataType]
-        ) {
-          const type = row[
-            contentTypeBaseColumnId as keyof TableDataType
-          ] as unknown;
-          const contentTypeBase = contentTypeBases
-            .filter((contentTypeBase) => contentTypeBase.visible)
-            .find((contentTypeBase) => contentTypeBase.name === type);
+    return rows.filter((row) => {
+      if (
+        contentTypeBases &&
+        contentTypeBaseColumnId &&
+        row[contentTypeBaseColumnId as keyof TableDataType]
+      ) {
+        const type = row[
+          contentTypeBaseColumnId as keyof TableDataType
+        ] as unknown;
+        const contentTypeBase = contentTypeBases
+          .filter((contentTypeBase) => contentTypeBase.visible)
+          .find((contentTypeBase) => contentTypeBase.name === type);
 
-          if (!contentTypeBase) return false;
+        if (!contentTypeBase) return false;
+      }
+
+      const parsedSearchValue = searchQuery.toLocaleLowerCase().trim();
+      if (!parsedSearchValue) return true;
+
+      if (filterFn) return filterFn(row, searchQuery);
+
+      for (const column in row) {
+        const tableColumn = tableColumns.find(({ id }) => id === column);
+
+        if (tableColumn && tableColumn.filter && tableColumn.visible) {
+          const value = row[column];
+
+          if (
+            value &&
+            value
+              .toString()
+              .toLocaleLowerCase()
+              .includes(parsedSearchValue.toLocaleLowerCase())
+          )
+            return true;
         }
+      }
 
-        const parsedSearchValue = searchQuery.toLocaleLowerCase().trim();
-        if (!parsedSearchValue) return true;
-
-        if (filterFn) return filterFn(row, searchQuery);
-
-        for (const column in row) {
-          const tableColumn = tableColumns.find(({ id }) => id === column);
-
-          if (tableColumn && tableColumn.filter && tableColumn.visible) {
-            const value = row[column];
-
-            if (
-              value &&
-              value
-                .toString()
-                .toLocaleLowerCase()
-                .includes(parsedSearchValue.toLocaleLowerCase())
-            )
-              return true;
-          }
-        }
-
-        return false;
-      })
-      .sort((prevValue, nextValue) => {
-        if (!sortBy) return 0;
-
-        if (sortCompareFn) return sortCompareFn(prevValue, nextValue);
-
-        if (!prevValue[sortBy]) return 1;
-
-        if (sortDirection === SortDirection.Descending)
-          return prevValue[sortBy] > nextValue[sortBy] ? -1 : 1;
-        else if (sortDirection === SortDirection.Ascending)
-          return prevValue[sortBy] > nextValue[sortBy] ? 1 : -1;
-        else return 0;
-      });
+      return false;
+    });
   }, [
     contentTypeBases,
     contentTypeBaseColumnId,
     rows,
     tableColumns,
-    sortDirection,
-    sortBy,
     searchQuery,
     sortCompareFn,
   ]);
@@ -449,10 +434,7 @@ export function useFilteredTableData<TableDataType>({
 
       if (queryParams.has(FilteredTableDataQueryParam.Order)) {
         const param = queryParams.get(FilteredTableDataQueryParam.Order);
-        if (
-          param === SortDirection.Ascending ||
-          param === SortDirection.Descending
-        )
+        if (param === SortDirection.Asc || param === SortDirection.Desc)
           setSortDirection(param);
       } else {
         setSortDirection(initialSortDirection);

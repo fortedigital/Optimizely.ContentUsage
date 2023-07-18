@@ -27,9 +27,11 @@ interface LoadDataFunction {
   ): Promise<any> | Response;
 }
 
-const contentTypesLoader: LoadDataFunction = (api) => {
-  const contentTypeBases = api.getContentTypeBases();
-  const contentTypes = api.getContentTypes();
+const contentTypesLoader: LoadDataFunction = (api, _, { request }) => {
+  const query = Object.fromEntries(new URL(request.url).searchParams.entries());
+
+  const contentTypeBases = api.getContentTypeBases(query);
+  const contentTypes = api.getContentTypes(query);
 
   return Promise.all([contentTypeBases, contentTypes]);
 };
@@ -37,11 +39,16 @@ const contentTypesLoader: LoadDataFunction = (api) => {
 const contentTypeUsagesLoader: LoadDataFunction = (
   api,
   initialLoad,
-  { params }
+  { request, params }
 ) => {
   if (!params.guid) return redirect(routes.index);
 
-  const contentTypeUsages = api.getContentTypeUsages(params.guid);
+  const query = Object.fromEntries(new URL(request.url).searchParams.entries());
+
+  const contentTypeUsages = api.getContentTypeUsages({
+    guid: params.guid,
+    ...query,
+  });
 
   if (initialLoad) {
     const contentType = api.getContentType(params.guid);
