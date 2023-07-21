@@ -21,7 +21,6 @@ public class ContentTypeMapper
             Name = contentType.Name,
             Guid = contentType.GUID,
             Type = contentType.Base.ToString(),
-            UsageCount = _contentUsageService.GetContentUsages(contentType).Count()
         };
 
         return dto;

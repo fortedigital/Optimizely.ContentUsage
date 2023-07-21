@@ -2,15 +2,22 @@
 using System.Collections.Generic;
 using System.Linq;
 using EPiServer.DataAbstraction;
+using EPiServer.ServiceLocation;
+using Forte.Optimizely.ContentUsage.Api.Features.ContentType;
 
 namespace Forte.Optimizely.ContentUsage.Api.Services;
 
 public class ContentTypeService
 {
     private readonly IContentTypeRepository _contentTypeRepository;
+    private readonly ServiceAccessor<ContentTypeUsagesDB> _contentTypeUsagesDBAccessor;
 
-    public ContentTypeService(IContentTypeRepository contentTypeRepository) =>
+
+    public ContentTypeService(IContentTypeRepository contentTypeRepository, ServiceAccessor<ContentTypeUsagesDB> contentTypeUsagesDbAccessor)
+    {
         _contentTypeRepository = contentTypeRepository;
+        _contentTypeUsagesDBAccessor = contentTypeUsagesDbAccessor;
+    }
 
     public IEnumerable<ContentType> GetAll(ContentTypesFilterCriteria? filterCriteria)
     {
@@ -21,6 +28,12 @@ public class ContentTypeService
             contentTypes = Filter(contentTypes, filterCriteria);
         }
 
+        return contentTypes;
+    }
+    
+    public IEnumerable<ContentTypeUsageCounter> GetAllCounters()
+    {
+        var contentTypes = _contentTypeUsagesDBAccessor().ListContentTypesUsagesCounters();
         return contentTypes;
     }
     
