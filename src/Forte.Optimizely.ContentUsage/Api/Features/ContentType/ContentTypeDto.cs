@@ -6,6 +6,7 @@ namespace Forte.Optimizely.ContentUsage.Api.Features.ContentType;
 [TsInterface]
 public class ContentTypeDto
 {
+    public int ID { get; set; }
     public Guid Guid { get; set; }
     public string DisplayName { get; set; }
     public string Name { get; set; }

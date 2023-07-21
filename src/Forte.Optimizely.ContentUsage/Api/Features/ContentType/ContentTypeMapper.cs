@@ -16,6 +16,7 @@ public class ContentTypeMapper
     {
         var dto = new ContentTypeDto
         {
+            ID = contentType.ID,
             DisplayName = contentType.DisplayName,
             Name = contentType.Name,
             Guid = contentType.GUID,
