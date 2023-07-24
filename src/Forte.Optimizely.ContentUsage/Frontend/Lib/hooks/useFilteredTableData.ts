@@ -45,7 +45,6 @@ export function useFilteredTableData<TableDataType>({
   contentTypeBases: ContentTypeBase[];
   onContentTypeBaseChange: (contentTypeBase: ContentTypeBase) => void;
   tableColumns: TableColumn<TableDataType>[];
-  useTableColumns: (callbackFn: (...args: boolean[]) => string) => string;
   onTableColumnChange: (column: string, visible: boolean) => void;
   selectedRowsPerPage: number;
   onRowsPerPageChange: (option: number) => void;
@@ -189,14 +188,6 @@ export function useFilteredTableData<TableDataType>({
     rowsPerPage,
     contentTypeBases,
   ]);
-
-  const useTableColumns = useCallback(
-    (callbackFn: (...args: boolean[]) => string) => {
-      const columns = tableColumns.map((column) => column.visible);
-      return callbackFn(...columns);
-    },
-    [tableColumns]
-  );
 
   const setPageToStart = useCallback(() => {
     setCurrentPage(1);
@@ -604,7 +595,6 @@ export function useFilteredTableData<TableDataType>({
     contentTypeBases,
     onContentTypeBaseChange,
     tableColumns,
-    useTableColumns,
     onTableColumnChange: onColumnVisiblityChange,
     selectedRowsPerPage: rowsPerPage,
     onRowsPerPageChange: onRowsPerPageChange,
