@@ -183,9 +183,9 @@ const ContentTypesView = () => {
           </GridCell>
 
           <GridCell large={12} medium={8} small={4}>
-            <div className="forte-optimizely-content-usage-table">
+            <div className="forte-optimizely-content-usage-table-container">
               <Table
-                className="epi-content-usage-table"
+                className="forte-optimizely-content-usage-table"
                 shouldAddHover={rows.length > 0}
               >
                 <Table.THead>

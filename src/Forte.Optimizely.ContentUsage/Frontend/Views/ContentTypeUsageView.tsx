@@ -76,7 +76,7 @@ const ContentTypeUsageDiscloseTableRow = ({
       key={row.id}
     >
       <div className="flex soft-double--sides">
-        <div className="epi-content-usage-table-overflow">
+        <div className="forte-optimizely-content-usage-table-container">
           <Table>
             <Table.THead>
               <Table.TR>
