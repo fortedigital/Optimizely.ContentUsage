@@ -1,5 +1,5 @@
 {
-  "name": "epi-content-usage",
+  "name": "forte-optimizely-content-usage",
   "version": "1.0.0",
   "main": "Frontend/index.tsx",
   "license": "MIT",
