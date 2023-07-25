@@ -1,19 +1,17 @@
 using System.Collections.Generic;
-using System.Linq;
 using Forte.EpiContentUsage.Api.Common;
 
-namespace Forte.EpiContentUsage.Api.Features.ContentUsage;
+namespace Forte.Optimizely.ContentUsage.Api.Features.ContentUsage;
 
-public class ContentUsageSorter : CollectionSorter<ContentUsageDto>
+public static class ContentUsageSorter
 {
-    public IEnumerable<ContentUsageDto> Sort(IEnumerable<ContentUsageDto> collection, GetContentUsagesQuery query)
+    public static IEnumerable<EPiServer.DataAbstraction.ContentUsage> Sort(this IEnumerable<EPiServer.DataAbstraction.ContentUsage> collection, GetContentUsagesQuery query)
     {
         return query?.SortBy switch
         {
-            ContentUsageSorting.Id => SortBy(collection,dto => dto.Id, query.Order),
-            ContentUsageSorting.Name => SortBy(collection,dto => dto.Name, query.Order),
-            ContentUsageSorting.LanguageBranch => SortBy(collection,dto => dto.LanguageBranch, query.Order),
-            ContentUsageSorting.PageUrl => SortBy(collection,dto => dto.PageUrls.Count(), query.Order),
+            ContentUsageSorting.Id => collection.SortBy(dto => dto.ContentLink.ID, query.Order),
+            ContentUsageSorting.Name => collection.SortBy(dto => dto.Name, query.Order),
+            ContentUsageSorting.LanguageBranch => collection.SortBy(dto => dto.LanguageBranch, query.Order),
             _ => collection
         };
     }

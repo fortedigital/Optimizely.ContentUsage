@@ -19,13 +19,11 @@ public class ContentUsageController : ControllerBase
 
     private readonly IContentTypeRepository _contentTypeRepository;
     private readonly ContentUsageService _contentUsageService;
-    private readonly ContentUsageSorter _contentUsageSorter;
 
-    public ContentUsageController(IContentTypeRepository contentTypeRepository, ContentUsageService contentUsageService, ContentUsageSorter contentUsageSorter)
+    public ContentUsageController(IContentTypeRepository contentTypeRepository, ContentUsageService contentUsageService)
     {
         _contentTypeRepository = contentTypeRepository;
         _contentUsageService = contentUsageService;
-        _contentUsageSorter = contentUsageSorter;
     }
 
     [HttpGet]

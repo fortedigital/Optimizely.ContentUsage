@@ -2,6 +2,7 @@
 using System.Linq;
 using EPiServer.Shell.Modules;
 using Forte.Optimizely.ContentUsage.Api.Features.ContentType;
+using Forte.Optimizely.ContentUsage.Api.Features.ContentUsage;
 using Forte.Optimizely.ContentUsage.Api.Services;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -17,8 +18,6 @@ public static class ServiceCollectionExtensions
 
         services.AddTransient<ContentTypeMapper>();
         
-        services.AddTransient<ContentUsageSorter>();
-
         services.AddTransient<IPathsResolver, DefaultPathsResolver>();
 
         services.Configure<ProtectedModuleOptions>(options =>
