@@ -21,7 +21,7 @@ import {
 import { useLoaderData, useLocation } from "react-router-dom";
 import Layout from "../Components/Layout";
 import { getRoutePath, navigateTo, viewContentTypes } from "../routes";
-import { ContentTypeDto, ContentUsageDto } from "../dtos";
+import { ContentTypeDto, ContentUsageDto, GetContentUsagesResponse } from "../dtos";
 import { useFilteredTableData } from "../Lib/hooks/useFilteredTableData";
 import { APIResponse } from "../Lib/ContentUsageAPIClient";
 import Header from "../Components/Header";
@@ -206,7 +206,7 @@ const ContentTypeUsageView = () => {
       id: ContentTypeUsageTableColumn.PageUrl,
       name: columns.pageUrl,
       visible: true,
-      filter: true,
+      // filter: true,
     },
   ] as TableColumn<ContentUsageDto>[];
 
@@ -218,14 +218,19 @@ const ContentTypeUsageView = () => {
     tableColumns,
     useTableColumns,
     onTableColumnChange,
-    selectedRowsPerPage,
-    onRowsPerPageChange,
     sortDirection,
     onSortChange,
-    totalPages,
     currentPage,
     goToPage,
-  } = useFilteredTableData({ rows: contentTypeUsages, initialTableColumns });
+  } = useFilteredTableData({
+    rows: contentTypeUsages,
+    initialTableColumns,
+    disableFrontendFiltering: true,
+    disableFrontendPagination: true,
+    disableFrontendSorting: true,
+  });
+
+  const [totalPages, setTotalPages] = useState<number>();
 
   const scrollToTop = useCallback(
     () => gridContainerRef.current?.scrollIntoView({ behavior: "smooth" }),
@@ -321,8 +326,8 @@ const ContentTypeUsageView = () => {
   );
 
   const response = useLoaderData() as
-    | APIResponse<ContentUsageDto[]>
-    | [APIResponse<ContentTypeDto>, APIResponse<ContentUsageDto[]>];
+    | APIResponse<GetContentUsagesResponse>
+    | [APIResponse<ContentTypeDto>, APIResponse<GetContentUsagesResponse>];
 
   useEffect(() => {
     if (response) {
@@ -332,8 +337,10 @@ const ContentTypeUsageView = () => {
         if (
           contentTypeUsagesResponse.data &&
           !contentTypeUsagesResponse.hasErrors
-        )
-          setContentTypeUsages(contentTypeUsagesResponse.data);
+        ) {
+          setContentTypeUsages(contentTypeUsagesResponse.data.contentUsages);
+          setTotalPages(contentTypeUsagesResponse.data.totalPages);
+        }
 
         if (contentTypeResponse.data && !contentTypeResponse.hasErrors)
           setContentTypeDisplayName(
@@ -342,11 +349,14 @@ const ContentTypeUsageView = () => {
           );
       } else if (response.data && !response.hasErrors) {
         setContentTypeDisplayName(location.state?.contentType?.displayName);
-        setContentTypeUsages(response.data);
+        setContentTypeUsages(response.data.contentUsages);
+        setTotalPages(response.data.totalPages);
       }
       setDataLoaded(true);
     }
   }, [response]);
+
+  console.log("Rows: ", rows);
 
   return (
     <Layout>
@@ -368,8 +378,6 @@ const ContentTypeUsageView = () => {
               onClearButtonClick={onClearButtonClick}
               columns={tableColumns}
               onTableColumnChange={onTableColumnChange}
-              selectedRowsPerPage={selectedRowsPerPage}
-              onRowsPerPageChange={onRowsPerPageChange}
             />
           </GridCell>
 

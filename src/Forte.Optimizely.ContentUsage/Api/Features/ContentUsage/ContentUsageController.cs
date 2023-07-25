@@ -6,6 +6,7 @@ using Forte.Optimizely.ContentUsage.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Reinforced.Typings.Attributes;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Forte.Optimizely.ContentUsage.Api.Features.ContentUsage;
@@ -30,26 +31,45 @@ public class ContentUsageController : ControllerBase
     [SwaggerResponse(StatusCodes.Status200OK, null, typeof(IEnumerable<ContentUsageDto>))]
     [SwaggerResponse(StatusCodes.Status404NotFound)]
     [Route("[action]", Name = GetContentUsagesRouteName)]
-    public ActionResult GetContentUsages([FromQuery] GetContentUsagesQuery query)
+    public ActionResult GetContentUsages([FromQuery] GetContentUsagesQuery queryData)
     {
-        var contentType = _contentTypeRepository.Load(query.Guid);
+        var contentType = _contentTypeRepository.Load(queryData.Guid);
 
         if (contentType == null) return NotFound();
 
-        var contentUsages = _contentUsageService.GetContentUsages(contentType);
+        var contentUsagesQuery = _contentUsageService.GetContentUsages(contentType);
 
-        var contentUsagesDto = contentUsages.Select(contentUsage => new ContentUsageDto
+        contentUsagesQuery = string.IsNullOrEmpty(queryData.Query)
+            ? contentUsagesQuery
+            : contentUsagesQuery.Where(x => x.Name.ToLowerInvariant().Contains(queryData.Query.ToLowerInvariant()));
+        
+        const int itemsPerPage = 25;
+        var contentUsagesDto = contentUsagesQuery
+            .Sort(queryData)
+            .Skip(queryData.Page - 1 * itemsPerPage)
+            .Take(itemsPerPage)
+            .Select(contentUsage => new ContentUsageDto
         {
             Id = contentUsage.ContentLink.ID,
-            ContentTypeGuid = query.Guid,
+            ContentTypeGuid = queryData.Guid,
             Name = contentUsage.Name,
             LanguageBranch = contentUsage.LanguageBranch,
             PageUrls = _contentUsageService.GetPageUrls(contentUsage),
             EditUrl = _contentUsageService.GetEditUrl(contentUsage)
         });
 
-        contentUsagesDto = _contentUsageSorter.Sort(contentUsagesDto, query);
-
-        return Ok(contentUsagesDto);
+        var totalPages = contentUsagesQuery.Count() / itemsPerPage;
+        return Ok(new GetContentUsagesResponse
+        {
+            ContentUsages = contentUsagesDto,
+            TotalPages = totalPages
+        });
     }
+}
+
+[TsInterface]
+public class GetContentUsagesResponse
+{
+    public int TotalPages { get; set; }
+    public IEnumerable<ContentUsageDto> ContentUsages { get; set; }
 }
