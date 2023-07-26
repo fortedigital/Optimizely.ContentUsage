@@ -86,19 +86,17 @@ RIGHT OUTER JOIN (SELECT CT.pkID AS ID
 GROUP BY cT.ID, ContentTypeUsageTable.ContentTypeId";
 
             var contentTypeUsageCounters = new List<ContentTypeUsageCounter>();
-            using (DbDataReader dbDataReader = command1.ExecuteReader())
+            using var dbDataReader = command1.ExecuteReader();
+            while (dbDataReader.Read())
             {
-                while (dbDataReader.Read())
-                {
-                    var contentTypeUsageCounter = new ContentTypeUsageCounter
-                    {
+	            var contentTypeUsageCounter = new ContentTypeUsageCounter
+	            {
 
-                        ContentTypeId = (int)dbDataReader["ContentTypeId"],
-                        Count = (int)dbDataReader["Count"]
-                    };
+		            ContentTypeId = (int)dbDataReader["ContentTypeId"],
+		            Count = (int)dbDataReader["Count"]
+	            };
 
-                    contentTypeUsageCounters.Add(contentTypeUsageCounter);
-                }
+	            contentTypeUsageCounters.Add(contentTypeUsageCounter);
             }
 
             return contentTypeUsageCounters;
