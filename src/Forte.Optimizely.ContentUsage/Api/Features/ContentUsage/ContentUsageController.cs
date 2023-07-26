@@ -41,7 +41,7 @@ public class ContentUsageController : ControllerBase
 
         contentUsagesQuery = string.IsNullOrEmpty(queryData.Query)
             ? contentUsagesQuery
-            : contentUsagesQuery.Where(x => x.Name.ToLowerInvariant().Contains(queryData.Query.ToLowerInvariant()));
+            : contentUsagesQuery.Where(x => x.Name.Contains(queryData.Query, StringComparison.InvariantCultureIgnoreCase));
         
         var contentUsages = contentUsagesQuery.ToArray();
         
