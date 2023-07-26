@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using System.Reflection;
-using Forte.EpiContentUsage.Utils.TSGenerating;
 using Reinforced.Typings.Attributes;
 using Reinforced.Typings.Fluent;
 
@@ -19,6 +18,5 @@ public static class ReinforcedTypingsConfiguration
         
         builder.ExportAsInterfaces(tsInterfaces, interfaceExportBuilder => interfaceExportBuilder.AutoI(false));
         builder.Global(config => config.CamelCaseForProperties().AutoOptionalProperties().UseModules());
-        builder.ExportAsEnums(tsEnums, exportBuilder => exportBuilder.WithCodeGenerator<CamelcaseEnumStringGenerator>());
     }
 }

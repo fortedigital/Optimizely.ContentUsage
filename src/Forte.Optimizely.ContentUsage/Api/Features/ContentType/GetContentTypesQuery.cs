@@ -1,8 +1,6 @@
-﻿using Reinforced.Typings.Attributes;
-
+﻿
 namespace Forte.Optimizely.ContentUsage.Api.Features.ContentType;
 
-[TsInterface]
 public class GetContentTypesQuery
 {
     public string? Name { get; set; }
@@ -10,7 +8,6 @@ public class GetContentTypesQuery
     public ContentTypesSorting? SortBy { get; set; }
 }
 
-[TsEnum(UseString = true)]
 public enum ContentTypesSorting
 {
     Name = 0,
