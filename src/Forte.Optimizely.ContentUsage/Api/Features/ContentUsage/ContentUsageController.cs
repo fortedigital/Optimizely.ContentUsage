@@ -43,8 +43,10 @@ public class ContentUsageController : ControllerBase
             ? contentUsagesQuery
             : contentUsagesQuery.Where(x => x.Name.ToLowerInvariant().Contains(queryData.Query.ToLowerInvariant()));
         
+        var contentUsages = contentUsagesQuery.ToArray();
+        
         const int itemsPerPage = 25;
-        var contentUsagesDto = contentUsagesQuery
+        var contentUsagesDto = contentUsages
             .Sort(queryData)
             .Skip(queryData.Page - 1 * itemsPerPage)
             .Take(itemsPerPage)
@@ -58,7 +60,7 @@ public class ContentUsageController : ControllerBase
             EditUrl = _contentUsageService.GetEditUrl(contentUsage)
         });
 
-        var totalPages = contentUsagesQuery.Count() / itemsPerPage;
+        var totalPages = contentUsages.Count() / itemsPerPage;
         return Ok(new GetContentUsagesResponse
         {
             ContentUsages = contentUsagesDto,
