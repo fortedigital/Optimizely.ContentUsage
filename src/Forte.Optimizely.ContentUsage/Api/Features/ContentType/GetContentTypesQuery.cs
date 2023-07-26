@@ -7,9 +7,3 @@ public class GetContentTypesQuery
     public string? Type { get; set; }
     public ContentTypesSorting? SortBy { get; set; }
 }
-
-public enum ContentTypesSorting
-{
-    Name = 0,
-    UsageCount = 1
-}
