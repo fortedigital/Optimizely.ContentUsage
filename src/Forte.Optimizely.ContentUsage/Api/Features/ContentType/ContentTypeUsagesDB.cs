@@ -105,9 +105,3 @@ GROUP BY cT.ID, ContentTypeUsageTable.ContentTypeId";
         }));
     }
 }
-
-public class ContentTypeUsageCounter
-{
-    public int ContentTypeId { get; set; }
-    public int Count { get; set; }
-}
