@@ -14,6 +14,8 @@ public static class ServiceCollectionExtensions
     {
         services.AddTransient<ContentTypeBaseService>();
         services.AddTransient<ContentTypeService>();
+        services.AddSingleton<ContentTypeUsagesDB>();
+        
         services.AddTransient<ContentUsageService>();
 
         services.AddTransient<ContentTypeMapper>();

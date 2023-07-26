@@ -5,24 +5,24 @@ using EPiServer.Construction;
 using EPiServer.Core;
 using EPiServer.Data;
 using EPiServer.DataAbstraction;
-using EPiServer.DataAccess.Internal;
 using EPiServer.Framework.Blobs;
 using EPiServer.ServiceLocation;
 using EPiServer.Web;
 
 namespace Forte.Optimizely.ContentUsage.Api.Features.ContentType;
 
-[ServiceConfiguration(Lifecycle = ServiceInstanceScope.Singleton)]
-// ReSharper disable once InconsistentNaming
-public class ContentTypeUsagesDB : ContentDB
+public class ContentTypeUsagesDB 
 {
-    public ContentTypeUsagesDB(ServiceAccessor<IDatabaseExecutor> databaseHandlerAccessor, IPermanentLinkMapper permanentLinkMapper, ILanguageBranchRepository languageBranchRepository, IPropertyDataFactory propertyDataFactory, IContentTypeRepository contentTypeRepository, IPropertyDefinitionRepository propertyDefinitionRepository, IPropertyDefinitionTypeRepository propertyDefinitionTypeRepository, IContentFactory contentFactory, IBlobFactory blobFactory, PropertyValueConverterFactory propertyValueConverterFactory, DatabaseDateTimeHandler databaseDateTimeHandler) : base(databaseHandlerAccessor, permanentLinkMapper, languageBranchRepository, propertyDataFactory, contentTypeRepository, propertyDefinitionRepository, propertyDefinitionTypeRepository, contentFactory, blobFactory, propertyValueConverterFactory, databaseDateTimeHandler)
+	private readonly ServiceAccessor<IDatabaseExecutor> _dataExecutorAccessor;
+
+    public ContentTypeUsagesDB(ServiceAccessor<IDatabaseExecutor> dataExecutorAccessor)
     {
+	    _dataExecutorAccessor = dataExecutorAccessor;
     }
 
     public IList<ContentTypeUsageCounter> ListContentTypesUsagesCounters()
     {
-        IDatabaseExecutor executor = GetExecutor();
+        IDatabaseExecutor executor = _dataExecutorAccessor();
         return executor.Execute((Func<IList<ContentTypeUsageCounter>>)(() =>
         {
             DbCommand command1 = executor.CreateCommand();
