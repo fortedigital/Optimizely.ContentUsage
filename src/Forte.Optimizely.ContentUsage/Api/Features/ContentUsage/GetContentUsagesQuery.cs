@@ -11,10 +11,3 @@ public class GetContentUsagesQuery
     public ContentUsageSorting SortBy { get; set; }
     public SortDirection Order { get; set; }
 }
-
-public enum ContentUsageSorting
-{
-    Id,
-    Name,
-    LanguageBranch
-}
