@@ -22,10 +22,10 @@ public class ContentTypeUsagesDB
 
     public IList<ContentTypeUsageCounter> ListContentTypesUsagesCounters()
     {
-        IDatabaseExecutor executor = _dataExecutorAccessor();
+        var executor = _dataExecutorAccessor();
         return executor.Execute((Func<IList<ContentTypeUsageCounter>>)(() =>
         {
-            DbCommand command1 = executor.CreateCommand();
+            var command1 = executor.CreateCommand();
             command1.CommandText = @"DECLARE @Results TABLE (
 	ContentTypeId INT,
 	Scope NVARCHAR(255)
