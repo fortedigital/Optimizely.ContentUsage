@@ -1,28 +1,26 @@
 using System;
 using System.Collections.Generic;
-using System.Data.Common;
-using EPiServer.Construction;
-using EPiServer.Core;
+using System.Threading;
+using System.Threading.Tasks;
 using EPiServer.Data;
-using EPiServer.DataAbstraction;
-using EPiServer.Framework.Blobs;
 using EPiServer.ServiceLocation;
 
 namespace Forte.Optimizely.ContentUsage.Api.Features.ContentType;
 
 public class ContentTypeUsagesRepository 
 {
-	private readonly ServiceAccessor<IDatabaseExecutor> _dataExecutorAccessor;
+	private readonly ServiceAccessor<IAsyncDatabaseExecutor> dataExecutorAccessor;
 
-    public ContentTypeUsagesRepository(ServiceAccessor<IDatabaseExecutor> dataExecutorAccessor)
+    public ContentTypeUsagesRepository(ServiceAccessor<IAsyncDatabaseExecutor> dataExecutorAccessor)
     {
-	    _dataExecutorAccessor = dataExecutorAccessor;
+	    this.dataExecutorAccessor = dataExecutorAccessor;
     }
 
-    public IList<ContentTypeUsageCounter> ListContentTypesUsagesCounters()
+    public async Task<IList<ContentTypeUsageCounter>> ListContentTypesUsagesCounters(
+	    CancellationToken cancellationToken)
     {
-        var executor = _dataExecutorAccessor();
-        return executor.Execute((Func<IList<ContentTypeUsageCounter>>)(() =>
+        var executor = this.dataExecutorAccessor();
+        return await executor.ExecuteAsync((Func<Task<IList<ContentTypeUsageCounter>>>)(async () =>
         {
             var command1 = executor.CreateCommand();
             command1.CommandText = @"DECLARE @Results TABLE (
@@ -85,8 +83,8 @@ RIGHT OUTER JOIN (SELECT CT.pkID AS ID
 GROUP BY cT.ID, ContentTypeUsageTable.ContentTypeId";
 
             var contentTypeUsageCounters = new List<ContentTypeUsageCounter>();
-            using var dbDataReader = command1.ExecuteReader();
-            while (dbDataReader.Read())
+            await using var dbDataReader = await command1.ExecuteReaderAsync(cancellationToken);
+            while (await dbDataReader.ReadAsync(cancellationToken))
             {
 	            var contentTypeUsageCounter = new ContentTypeUsageCounter
 	            {

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using EPiServer.DataAbstraction;
 using Forte.Optimizely.ContentUsage.Api.Features.ContentType;
 
@@ -30,9 +32,9 @@ public class ContentTypeService
         return contentTypes;
     }
     
-    public IEnumerable<ContentTypeUsageCounter> GetAllCounters()
+    public async Task<IList<ContentTypeUsageCounter>> GetAllCounters(CancellationToken cancellationToken)
     {
-        return this.contentTypeUsagesRepository.ListContentTypesUsagesCounters();
+        return await contentTypeUsagesRepository.ListContentTypesUsagesCounters(cancellationToken);
     }
     
     public ContentType? Get(Guid guid)
