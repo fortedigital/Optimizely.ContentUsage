@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using EPiServer.DataAbstraction;
+using Forte.Optimizely.ContentUsage.Api.Common;
 using Forte.Optimizely.ContentUsage.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -50,8 +51,7 @@ public class ContentUsageController : ControllerBase
         const int itemsPerPage = 25;
         var contentUsagesDto = contentUsages
             .Sort(queryData)
-            .Skip(currentPage * itemsPerPage)
-            .Take(itemsPerPage)
+            .Paginate(currentPage, itemsPerPage)
             .Select(contentUsage => new ContentUsageDto
         {
             Id = contentUsage.ContentLink.ID,
