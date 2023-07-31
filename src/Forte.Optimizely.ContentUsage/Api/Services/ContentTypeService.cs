@@ -9,13 +9,13 @@ namespace Forte.Optimizely.ContentUsage.Api.Services;
 public class ContentTypeService
 {
     private readonly IContentTypeRepository _contentTypeRepository;
-    private readonly ContentTypeUsagesDB _contentTypeUsagesDB;
+    private readonly ContentTypeUsagesRepository contentTypeUsagesRepository;
 
 
-    public ContentTypeService(IContentTypeRepository contentTypeRepository, ContentTypeUsagesDB contentTypeUsagesDb)
+    public ContentTypeService(IContentTypeRepository contentTypeRepository, ContentTypeUsagesRepository contentTypeUsagesRepository)
     {
         _contentTypeRepository = contentTypeRepository;
-        _contentTypeUsagesDB = contentTypeUsagesDb;
+        this.contentTypeUsagesRepository = contentTypeUsagesRepository;
     }
 
     public IEnumerable<ContentType> GetAll(ContentTypesFilterCriteria? filterCriteria)
@@ -32,7 +32,7 @@ public class ContentTypeService
     
     public IEnumerable<ContentTypeUsageCounter> GetAllCounters()
     {
-        return _contentTypeUsagesDB.ListContentTypesUsagesCounters();
+        return this.contentTypeUsagesRepository.ListContentTypesUsagesCounters();
     }
     
     public ContentType? Get(Guid guid)

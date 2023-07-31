@@ -7,15 +7,14 @@ using EPiServer.Data;
 using EPiServer.DataAbstraction;
 using EPiServer.Framework.Blobs;
 using EPiServer.ServiceLocation;
-using EPiServer.Web;
 
 namespace Forte.Optimizely.ContentUsage.Api.Features.ContentType;
 
-public class ContentTypeUsagesDB 
+public class ContentTypeUsagesRepository 
 {
 	private readonly ServiceAccessor<IDatabaseExecutor> _dataExecutorAccessor;
 
-    public ContentTypeUsagesDB(ServiceAccessor<IDatabaseExecutor> dataExecutorAccessor)
+    public ContentTypeUsagesRepository(ServiceAccessor<IDatabaseExecutor> dataExecutorAccessor)
     {
 	    _dataExecutorAccessor = dataExecutorAccessor;
     }
