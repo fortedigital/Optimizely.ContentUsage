@@ -45,7 +45,7 @@ public class ContentUsageController : ControllerBase
         
         var contentUsages = contentUsagesQuery.ToArray();
         
-        var currentPage = queryData.Page <= 0 ? 0 : queryData.Page - 1;
+        var currentPage = queryData.Page - 1;
         
         const int itemsPerPage = 25;
         var contentUsagesDto = contentUsages
