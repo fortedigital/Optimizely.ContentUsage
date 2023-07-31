@@ -62,7 +62,7 @@ public class ContentUsageController : ControllerBase
             EditUrl = _contentUsageService.GetEditUrl(contentUsage)
         });
 
-        var totalPages = contentUsages.Count() / itemsPerPage;
+        var totalPages = (int) Math.Ceiling(contentUsages.Length / (itemsPerPage * 1.0));
         return Ok(new GetContentUsagesResponse
         {
             ContentUsages = contentUsagesDto,
