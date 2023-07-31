@@ -21,7 +21,11 @@ import {
 import { useLoaderData, useLocation } from "react-router-dom";
 import Layout from "../Components/Layout";
 import { getRoutePath, navigateTo, viewContentTypes } from "../routes";
-import { ContentTypeDto, ContentUsageDto, GetContentUsagesResponse } from "../dtos";
+import {
+  ContentTypeDto,
+  ContentUsageDto,
+  GetContentUsagesResponse,
+} from "../dtos";
 import { useFilteredTableData } from "../Lib/hooks/useFilteredTableData";
 import { APIResponse } from "../Lib/ContentUsageAPIClient";
 import Header from "../Components/Header";

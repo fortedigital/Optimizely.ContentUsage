@@ -1,8 +1,10 @@
 using System;
 using Forte.EpiContentUsage.Api.Common;
+using Reinforced.Typings.Attributes;
 
 namespace Forte.Optimizely.ContentUsage.Api.Features.ContentUsage;
 
+[TsInterface]
 public class GetContentUsagesQuery
 {
     public string Query { get; set; }
