@@ -40,9 +40,9 @@ public class ContentUsageController : ControllerBase
 
         var contentUsagesQuery = _contentUsageService.GetContentUsages(contentType);
 
-        contentUsagesQuery = string.IsNullOrEmpty(queryData.Query)
+        contentUsagesQuery = string.IsNullOrEmpty(queryData.NamePhrase)
             ? contentUsagesQuery
-            : contentUsagesQuery.Where(x => x.Name.Contains(queryData.Query, StringComparison.InvariantCultureIgnoreCase));
+            : contentUsagesQuery.Where(x => x.Name.Contains(queryData.NamePhrase, StringComparison.InvariantCultureIgnoreCase));
         
         var contentUsages = contentUsagesQuery.ToArray();
         

@@ -7,7 +7,7 @@ import { useDebounce } from "./useDebounce";
 enum FilteredTableDataQueryParam {
   SortBy = "sortBy",
   Order = "order",
-  Query = "query",
+  NamePhrase = "namePhrase",
   ContentTypeBase = "type",
   ShowColumn = "showColumn",
   Page = "page",
@@ -124,8 +124,8 @@ export function useFilteredTableData<TableDataType>({
       //Search query
       if (changesTracker.searchQuery) {
         if (searchQuery)
-          prevSearchParams.set(FilteredTableDataQueryParam.Query, searchQuery);
-        else prevSearchParams.delete(FilteredTableDataQueryParam.Query);
+          prevSearchParams.set(FilteredTableDataQueryParam.NamePhrase, searchQuery);
+        else prevSearchParams.delete(FilteredTableDataQueryParam.NamePhrase);
       }
 
       //TableColumns - ShowColumn
@@ -470,8 +470,8 @@ export function useFilteredTableData<TableDataType>({
         setSortDirection(initialSortDirection);
       }
 
-      if (queryParams.has(FilteredTableDataQueryParam.Query)) {
-        const param = queryParams.get(FilteredTableDataQueryParam.Query);
+      if (queryParams.has(FilteredTableDataQueryParam.NamePhrase)) {
+        const param = queryParams.get(FilteredTableDataQueryParam.NamePhrase);
         const value = decodeURIComponent(param);
         setSearchFieldValue(value);
         setSearchQuery(encodeURIComponent(value));

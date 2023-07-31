@@ -7,7 +7,7 @@ namespace Forte.Optimizely.ContentUsage.Api.Features.ContentUsage;
 [TsInterface]
 public class GetContentUsagesQuery
 {
-    public string Query { get; set; }
+    public string NamePhrase { get; set; }
     public Guid Guid { get; set; }
     public int Page { get; set; }
     public ContentUsageSorting SortBy { get; set; }
