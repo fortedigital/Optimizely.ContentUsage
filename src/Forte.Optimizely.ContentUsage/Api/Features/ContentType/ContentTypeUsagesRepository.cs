@@ -16,11 +16,11 @@ public class ContentTypeUsagesRepository
 	    this.dataExecutorAccessor = dataExecutorAccessor;
     }
 
-    public async Task<IList<ContentTypeUsageCounter>> ListContentTypesUsagesCounters(
+    public async Task<IEnumerable<ContentTypeUsageCounter>> ListContentTypesUsagesCounters(
 	    CancellationToken cancellationToken)
     {
         var executor = this.dataExecutorAccessor();
-        return await executor.ExecuteAsync((Func<Task<IList<ContentTypeUsageCounter>>>)(async () =>
+        return await executor.ExecuteAsync((Func<Task<IEnumerable<ContentTypeUsageCounter>>>)(async () =>
         {
             var command1 = executor.CreateCommand();
             command1.CommandText = @"DECLARE @Results TABLE (
