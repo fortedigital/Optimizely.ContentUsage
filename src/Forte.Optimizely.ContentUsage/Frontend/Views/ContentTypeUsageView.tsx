@@ -16,6 +16,7 @@ import {
   GridContainer,
   Link,
   PaginationControls,
+  Spinner,
   Table,
 } from "optimizely-oui";
 import { useLoaderData, useLocation } from "react-router-dom";
@@ -31,6 +32,8 @@ import { APIResponse } from "../Lib/ContentUsageAPIClient";
 import Header from "../Components/Header";
 import { useTranslations } from "../Contexts/TranslationsProvider";
 import Filters from "../Components/Filters/Filters";
+
+import "./ContentTypeUsageView.scss";
 
 enum ContentTypeUsageTableColumn {
   ID = "id",
@@ -244,6 +247,7 @@ const ContentTypeUsageView = () => {
   const handlePageChange = useCallback(
     (page: number) => {
       goToPage(page);
+      setDataLoaded(false);
       scrollToTop();
     },
     [goToPage, scrollToTop]
@@ -360,8 +364,6 @@ const ContentTypeUsageView = () => {
     }
   }, [response]);
 
-  console.log("Rows: ", rows);
-
   return (
     <Layout>
       <GridContainer ref={gridContainerRef} className="forte-optimizely-content-usage-grid">
@@ -384,73 +386,80 @@ const ContentTypeUsageView = () => {
               onTableColumnChange={onTableColumnChange}
             />
           </GridCell>
-
           <GridCell large={12}>
-            <DiscloseTable className="forte-optimizely-content-usage-table">
-              <Table.THead>
-                <Table.TR>
-                  {hasDiscloseTableRows && (
-                    <Table.TH
-                      isCollapsed={true}
-                      style={{ paddingRight: "30px" }}
-                    />
-                  )}
-                  {tableColumns
-                    .filter((column) => column.visible)
-                    .map((column) => (
+            {dataLoaded ? (
+              <DiscloseTable className="forte-optimizely-content-usage-table">
+                <Table.THead>
+                  <Table.TR>
+                    {hasDiscloseTableRows && (
                       <Table.TH
-                        width={tableColumnsWidthMap.get(
-                          ContentTypeUsageTableColumn.ID
-                        )}
-                        sorting={{
-                          canSort: true,
-                          handleSort: () => onSortChange(column),
-                          order: sortDirection.toLowerCase(),
-                        }}
-                        key={column.id}
-                      >
-                        {column.name}
-                      </Table.TH>
-                    ))}
-                  <Table.TH
-                    width={tableColumnsWidthMap.get(
-                      ContentTypeUsageTableColumn.Actions
+                        isCollapsed={true}
+                        style={{ paddingRight: "30px" }}
+                      />
                     )}
-                  />
-                </Table.TR>
-              </Table.THead>
-
-              <Table.TBody>
-                {rows.length > 0 ? (
-                  rows.map((row) =>
-                    row.pageUrls.length > 1 ? (
-                      <ContentTypeUsageDiscloseTableRow
-                        key={`${row.id}-${row.languageBranch}`}
-                        {...row}
-                        tableColumns={tableColumns}
-                      />
-                    ) : (
-                      <ContentTypeUsageTableRow
-                        key={`${row.id}-${row.languageBranch}`}
-                        {...row}
-                        tableColumns={tableColumns}
-                        onRowClick={onTableRowClick(row.pageUrls[0])}
-                        onEditButtonClick={onTableRowClick(row.editUrl, true)}
-                        onViewWebsiteClick={onViewWebsiteClick(row.pageUrls[0])}
-                        hasDiscloseTableRows={hasDiscloseTableRows}
-                      />
-                    )
-                  )
-                ) : (
-                  <Table.TR noHover>
-                    <Table.TD colSpan={5}>{translations.noResults}</Table.TD>
+                    {tableColumns
+                      .filter((column) => column.visible)
+                      .map((column) => (
+                        <Table.TH
+                          width={tableColumnsWidthMap.get(
+                            ContentTypeUsageTableColumn.ID
+                          )}
+                          sorting={{
+                            canSort: true,
+                            handleSort: () => onSortChange(column),
+                            order: sortDirection.toLowerCase(),
+                          }}
+                          key={column.id}
+                        >
+                          {column.name}
+                        </Table.TH>
+                      ))}
+                    <Table.TH
+                      width={tableColumnsWidthMap.get(
+                        ContentTypeUsageTableColumn.Actions
+                      )}
+                    />
                   </Table.TR>
-                )}
-              </Table.TBody>
-            </DiscloseTable>
+                </Table.THead>
+
+                <Table.TBody>
+                  {rows.length > 0 ? (
+                    rows.map((row) =>
+                      row.pageUrls.length > 1 ? (
+                        <ContentTypeUsageDiscloseTableRow
+                          key={`${row.id}-${row.languageBranch}`}
+                          {...row}
+                          tableColumns={tableColumns}
+                        />
+                      ) : (
+                        <ContentTypeUsageTableRow
+                          key={`${row.id}-${row.languageBranch}`}
+                          {...row}
+                          tableColumns={tableColumns}
+                          onRowClick={onTableRowClick(row.pageUrls[0])}
+                          onEditButtonClick={onTableRowClick(row.editUrl, true)}
+                          onViewWebsiteClick={onViewWebsiteClick(
+                            row.pageUrls[0]
+                          )}
+                          hasDiscloseTableRows={hasDiscloseTableRows}
+                        />
+                      )
+                    )
+                  ) : (
+                    <Table.TR noHover>
+                      <Table.TD colSpan={5}>{translations.noResults}</Table.TD>
+                    </Table.TR>
+                  )}
+                </Table.TBody>
+              </DiscloseTable>
+            ) : (
+              <div className="forte-optimizely-content-usage-spinner__center">
+                <Spinner />
+              </div>
+            )}
           </GridCell>
 
-          {totalPages > 1 && (
+          {totalPages > 1 && dataLoaded && (
             <GridCell large={12} medium={8} small={4}>
               <PaginationControls
                 currentPage={currentPage}
