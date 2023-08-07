@@ -213,7 +213,6 @@ const ContentTypeUsageView = () => {
       id: ContentTypeUsageTableColumn.PageUrl,
       name: columns.pageUrl,
       visible: true,
-      // filter: true,
     },
   ] as TableColumn<ContentUsageDto>[];
 
