@@ -51,6 +51,15 @@ interface ContentTypeUsageTableRowProps<TableDataType> extends ContentUsageDto {
   hasDiscloseTableRows?: boolean;
 }
 
+type ContentTypeUsageViewResponse =
+  | APIResponse<GetContentUsagesResponse>
+  | ContentTypeUsageViewInitialResponse;
+
+type ContentTypeUsageViewInitialResponse = [
+  APIResponse<ContentTypeDto>,
+  APIResponse<GetContentUsagesResponse>
+];
+
 const ContentTypeUsageDiscloseTableRow = ({
   tableColumns,
   onRowClick,
@@ -336,32 +345,38 @@ const ContentTypeUsageView = () => {
     [rows]
   );
 
-  const response = useLoaderData() as
-    | APIResponse<GetContentUsagesResponse>
-    | [APIResponse<ContentTypeDto>, APIResponse<GetContentUsagesResponse>];
+  const response = useLoaderData() as ContentTypeUsageViewResponse;
+
+  const setDataFromInitialResponse = useCallback(
+    (response: ContentTypeUsageViewInitialResponse) => {
+      const [contentTypeResponse, contentTypeUsagesResponse] = response;
+
+      if (
+        contentTypeUsagesResponse.data &&
+        !contentTypeUsagesResponse.hasErrors
+      ) {
+        setContentTypeUsages(contentTypeUsagesResponse.data.contentUsages);
+        setTotalPages(contentTypeUsagesResponse.data.totalPages);
+      }
+
+      if (contentTypeResponse.data && !contentTypeResponse.hasErrors)
+        setContentTypeDisplayName(
+          contentTypeResponse.data.displayName || contentTypeResponse.data.name
+        );
+    },
+    []
+  );
 
   useEffect(() => {
     if (response) {
       if (Array.isArray(response)) {
-        const [contentTypeResponse, contentTypeUsagesResponse] = response;
-
-        if (
-          contentTypeUsagesResponse.data &&
-          !contentTypeUsagesResponse.hasErrors
-        ) {
-          setContentTypeUsages(contentTypeUsagesResponse.data.contentUsages);
-          setTotalPages(contentTypeUsagesResponse.data.totalPages);
-        }
-
-        if (contentTypeResponse.data && !contentTypeResponse.hasErrors)
-          setContentTypeDisplayName(
-            contentTypeResponse.data.displayName ||
-              contentTypeResponse.data.name
-          );
+        setDataFromInitialResponse(response);
       } else if (response.data && !response.hasErrors) {
-        setContentTypeDisplayName(location.state?.contentType?.displayName);
         setContentTypeUsages(response.data.contentUsages);
         setTotalPages(response.data.totalPages);
+
+        if (!contentTypeDisplayName)
+          setContentTypeDisplayName(location.state?.contentType?.displayName);
       }
       setDataLoaded(true);
     }
@@ -369,7 +384,10 @@ const ContentTypeUsageView = () => {
 
   return (
     <Layout>
-      <GridContainer ref={gridContainerRef} className="forte-optimizely-content-usage-grid">
+      <GridContainer
+        ref={gridContainerRef}
+        className="forte-optimizely-content-usage-grid"
+      >
         <Grid>
           <GridCell large={12} medium={8} small={4}>
             <Header title={translations.title} />
