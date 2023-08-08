@@ -8,6 +8,7 @@ export interface TableColumn<TableDataType> {
   name: string;
   visible?: boolean;
   filter?: boolean;
+  sorting?: boolean;
 }
 
 export interface ContentTypeBase {

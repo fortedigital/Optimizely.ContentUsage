@@ -12,6 +12,10 @@ public static class ReinforcedTypingsConfiguration
         var tsInterfaces = typeof(ReinforcedTypingsConfiguration).Assembly.GetTypes()
             .Where(type => type.GetCustomAttribute<TsInterfaceAttribute>() != null);
 
+        var tsEnums = typeof(ReinforcedTypingsConfiguration).Assembly.GetTypes()
+            .Where(type => type.GetCustomAttribute<TsEnumAttribute>() != null);
+
+        
         builder.ExportAsInterfaces(tsInterfaces, interfaceExportBuilder => interfaceExportBuilder.AutoI(false));
         builder.Global(config => config.CamelCaseForProperties().AutoOptionalProperties().UseModules());
     }

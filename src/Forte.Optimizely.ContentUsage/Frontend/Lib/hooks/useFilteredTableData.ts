@@ -7,7 +7,7 @@ import { useDebounce } from "./useDebounce";
 enum FilteredTableDataQueryParam {
   SortBy = "sortBy",
   Order = "order",
-  Query = "query",
+  NamePhrase = "namePhrase",
   ContentTypeBase = "type",
   ShowColumn = "showColumn",
   Page = "page",
@@ -26,6 +26,9 @@ interface FilteredTableDataHookOptions<TableDataType> {
     nextValue: TableDataType
   ) => number;
   filterFn?: (row: TableDataType, searchValue: string) => boolean;
+  disableFrontendFiltering?: boolean;
+  disableFrontendPagination?: boolean;
+  disableFrontendSorting?: boolean;
 }
 
 export function useFilteredTableData<TableDataType>({
@@ -37,6 +40,9 @@ export function useFilteredTableData<TableDataType>({
   rowsPerPageOptions = ROWS_PER_PAGE_DEFAULT_OPTIONS,
   sortCompareFn,
   filterFn,
+  disableFrontendFiltering = false,
+  disableFrontendPagination = false,
+  disableFrontendSorting = false,
 }: FilteredTableDataHookOptions<TableDataType>): {
   rows: TableDataType[];
   searchValue: string;
@@ -117,8 +123,8 @@ export function useFilteredTableData<TableDataType>({
       //Search query
       if (changesTracker.searchQuery) {
         if (searchQuery)
-          prevSearchParams.set(FilteredTableDataQueryParam.Query, searchQuery);
-        else prevSearchParams.delete(FilteredTableDataQueryParam.Query);
+          prevSearchParams.set(FilteredTableDataQueryParam.NamePhrase, searchQuery);
+        else prevSearchParams.delete(FilteredTableDataQueryParam.NamePhrase);
       }
 
       //TableColumns - ShowColumn
@@ -344,6 +350,8 @@ export function useFilteredTableData<TableDataType>({
   const filteredItems = useMemo(() => {
     return rows
       .filter((row) => {
+        if (disableFrontendFiltering) return true;
+
         if (
           contentTypeBases &&
           contentTypeBaseColumnId &&
@@ -384,6 +392,8 @@ export function useFilteredTableData<TableDataType>({
         return false;
       })
       .sort((prevValue, nextValue) => {
+        if (disableFrontendSorting) return 0;
+
         if (!sortBy) return 0;
 
         if (sortCompareFn) return sortCompareFn(prevValue, nextValue);
@@ -409,10 +419,12 @@ export function useFilteredTableData<TableDataType>({
 
   const tableRows = useMemo(
     () =>
-      filteredItems.slice(
-        (currentPage - 1) * rowsPerPage,
-        (currentPage - 1) * rowsPerPage + rowsPerPage
-      ),
+      disableFrontendPagination
+        ? filteredItems
+        : filteredItems.slice(
+            (currentPage - 1) * rowsPerPage,
+            (currentPage - 1) * rowsPerPage + rowsPerPage
+          ),
     [filteredItems, currentPage, rowsPerPage]
   );
 
@@ -449,8 +461,8 @@ export function useFilteredTableData<TableDataType>({
         setSortDirection(initialSortDirection);
       }
 
-      if (queryParams.has(FilteredTableDataQueryParam.Query)) {
-        const param = queryParams.get(FilteredTableDataQueryParam.Query);
+      if (queryParams.has(FilteredTableDataQueryParam.NamePhrase)) {
+        const param = queryParams.get(FilteredTableDataQueryParam.NamePhrase);
         const value = decodeURIComponent(param);
         setSearchFieldValue(value);
         setSearchQuery(encodeURIComponent(value));

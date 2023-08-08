@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using EPiServer.DataAbstraction;
+using Forte.Optimizely.ContentUsage.Api.Common;
 using Forte.Optimizely.ContentUsage.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Reinforced.Typings.Attributes;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace Forte.Optimizely.ContentUsage.Api.Features.ContentUsage;
@@ -31,24 +32,48 @@ public class ContentUsageController : ControllerBase
     [SwaggerResponse(StatusCodes.Status200OK, null, typeof(IEnumerable<ContentUsageDto>))]
     [SwaggerResponse(StatusCodes.Status404NotFound)]
     [Route("[action]", Name = GetContentUsagesRouteName)]
-    public ActionResult GetContentUsages([FromQuery] [BindRequired] Guid guid)
+    public ActionResult GetContentUsages([FromQuery] GetContentUsagesQuery queryData)
     {
-        var contentType = _contentTypeRepository.Load(guid);
+        var contentType = _contentTypeRepository.Load(queryData.Guid);
 
         if (contentType == null) return NotFound();
 
-        var contentUsages = _contentUsageService.GetContentUsages(contentType);
+        var contentUsagesQuery = _contentUsageService.GetContentUsages(contentType);
 
-        var contentUsagesDto = contentUsages.Select(contentUsage => new ContentUsageDto
+        contentUsagesQuery = string.IsNullOrEmpty(queryData.NamePhrase)
+            ? contentUsagesQuery
+            : contentUsagesQuery.Where(x => x.Name.Contains(queryData.NamePhrase, StringComparison.InvariantCultureIgnoreCase));
+        
+        var contentUsages = contentUsagesQuery.ToArray();
+        
+        var currentPage = queryData.Page - 1;
+        
+        const int itemsPerPage = 25;
+        var contentUsagesDto = contentUsages
+            .Sort(queryData)
+            .Paginate(currentPage, itemsPerPage)
+            .Select(contentUsage => new ContentUsageDto
         {
             Id = contentUsage.ContentLink.ID,
-            ContentTypeGuid = guid,
+            ContentTypeGuid = queryData.Guid,
             Name = contentUsage.Name,
             LanguageBranch = contentUsage.LanguageBranch,
             PageUrls = _contentUsageService.GetPageUrls(contentUsage),
             EditUrl = _contentUsageService.GetEditUrl(contentUsage)
         });
 
-        return Ok(contentUsagesDto);
+        var totalPages = (int) Math.Ceiling(contentUsages.Length / (itemsPerPage * 1.0));
+        return Ok(new GetContentUsagesResponse
+        {
+            ContentUsages = contentUsagesDto,
+            TotalPages = totalPages
+        });
     }
+}
+
+[TsInterface]
+public class GetContentUsagesResponse
+{
+    public int TotalPages { get; set; }
+    public IEnumerable<ContentUsageDto> ContentUsages { get; set; }
 }
