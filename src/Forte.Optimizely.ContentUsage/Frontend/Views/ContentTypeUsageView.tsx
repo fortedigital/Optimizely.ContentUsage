@@ -196,23 +196,27 @@ const ContentTypeUsageView = () => {
       name: columns.id,
       visible: true,
       filter: true,
+      sorting: true,
     },
     {
       id: ContentTypeUsageTableColumn.Name,
       name: columns.name,
       visible: true,
       filter: true,
+      sorting: true,
     },
     {
       id: ContentTypeUsageTableColumn.LanguageBranch,
       name: columns.languageBranch,
       visible: true,
       filter: true,
+      sorting: true,
     },
     {
       id: ContentTypeUsageTableColumn.PageUrl,
       name: columns.pageUrl,
       visible: true,
+      sorting: false,
     },
   ] as TableColumn<ContentUsageDto>[];
 
@@ -404,8 +408,11 @@ const ContentTypeUsageView = () => {
                             ContentTypeUsageTableColumn.ID
                           )}
                           sorting={{
-                            canSort: true,
-                            handleSort: () => onSortChange(column),
+                            canSort: column.sorting,
+                            handleSort: () => {
+                              setDataLoaded(false);
+                              onSortChange(column);
+                            },
                             order: sortDirection.toLowerCase(),
                           }}
                           key={column.id}
