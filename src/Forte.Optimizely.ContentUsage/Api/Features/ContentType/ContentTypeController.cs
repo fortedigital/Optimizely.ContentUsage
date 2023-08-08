@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Forte.Optimizely.ContentUsage.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -46,12 +48,22 @@ public class ContentTypeController : ControllerBase
     [HttpGet]
     [Route("[action]", Name = GetContentTypesRouteName)]
     [SwaggerResponse(StatusCodes.Status200OK, null, typeof(IEnumerable<ContentTypeDto>))]
-    public ActionResult GetContentTypes([FromQuery] GetContentTypesQuery? query)
+    public async Task<ActionResult> GetContentTypes([FromQuery] GetContentTypesQuery? query, CancellationToken cancellationToken)
     {
+        var contentTypesFilterCriteria = new ContentTypesFilterCriteria { Name = query?.Name, Type = query?.Type };
+        
         var contentTypes =
-            _contentTypeService.GetAll(new ContentTypesFilterCriteria { Name = query?.Name, Type = query?.Type });
+            _contentTypeService.GetAll(contentTypesFilterCriteria);
 
+        var contentTypesUsageCounters = await _contentTypeService.GetAllCounters(cancellationToken);
         var contentTypeDtos = contentTypes.Select(_contentTypeMapper.Map);
+
+        contentTypeDtos = contentTypeDtos.Join(contentTypesUsageCounters, type => type.ID, counter => counter.ContentTypeId, (type, counter) =>
+        {
+            type.UsageCount = counter.Count;
+            return type;
+        });
+
 
         contentTypeDtos = query?.SortBy switch
         {
@@ -59,6 +71,8 @@ public class ContentTypeController : ControllerBase
             ContentTypesSorting.UsageCount => contentTypeDtos.OrderBy(dto => dto.UsageCount),
             _ => contentTypeDtos
         };
+        
+        
 
         return Ok(contentTypeDtos);
     }
