@@ -1,7 +1,6 @@
 import React, {
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
@@ -25,6 +24,7 @@ import { APIResponse } from "../Lib/ContentUsageAPIClient";
 import { useTranslations } from "../Contexts/TranslationsProvider";
 import { useFilteredTableData } from "../Lib/hooks/useFilteredTableData";
 import { TableColumn } from "../types";
+import { useScroll } from "../Lib/hooks/useScroll";
 
 enum ContentTypesTableColumn {
   GUID = "guid",
@@ -44,6 +44,7 @@ const ContentTypesView = () => {
   const [contentTypes, setContentTypes] = useState<ContentTypeDto[]>([]);
   const navigate = useNavigate();
   const gridContainerRef = useRef<HTMLElement | null>();
+  const { scrollTo } = useScroll();
 
   const {
     views: {
@@ -108,7 +109,6 @@ const ContentTypesView = () => {
     contentTypeBases,
     onContentTypeBaseChange,
     tableColumns,
-    useTableColumns,
     onTableColumnChange,
     selectedRowsPerPage,
     onRowsPerPageChange,
@@ -123,63 +123,12 @@ const ContentTypesView = () => {
     initialContentTypeBases,
   });
 
-  const scrollToTop = useCallback(
-    () =>
-      setTimeout(
-        () => gridContainerRef.current?.scrollIntoView({ behavior: "smooth" }),
-        0
-      ),
-    []
-  );
-
   const handlePageChange = useCallback(
     (page: number) => {
       goToPage(page);
-      scrollToTop();
+      scrollTo(gridContainerRef.current);
     },
-    [goToPage, scrollToTop]
-  );
-
-  const tableColumnsWidthMap = useMemo(
-    () =>
-      new Map([
-        [
-          ContentTypesTableColumn.GUID,
-          useTableColumns((guid, displayName, name, type, usageCount) => {
-            if (!displayName && !name) return "auto";
-            return "320px";
-          }),
-        ],
-        [
-          ContentTypesTableColumn.DisplayName,
-          useTableColumns((guid, displayName, name, type, usageCount) => {
-            if (!guid) return "auto";
-            return "200px";
-          }),
-        ],
-        ["name", "auto"],
-        [
-          ContentTypesTableColumn.Type,
-          useTableColumns((guid, displayName, name, type, usageCount) => {
-            if (!guid || !displayName) return "auto";
-            return "150px";
-          }),
-        ],
-        [
-          ContentTypesTableColumn.UsageCount,
-          useTableColumns((guid, displayName, name, type, usageCount) => {
-            if (!guid || !displayName) return "auto";
-            return "120px";
-          }),
-        ],
-        [
-          ContentTypesTableColumn.Actions,
-          useTableColumns((guid, displayName, name, type, usageCount) => {
-            return "100px";
-          }),
-        ],
-      ]),
-    [useTableColumns]
+    [goToPage]
   );
 
   const response = useLoaderData() as [
@@ -219,7 +168,7 @@ const ContentTypesView = () => {
             <Header title={translations.title} />
           </GridCell>
 
-          <GridCell large={8} medium={6} small={2}>
+          <GridCell large={12} medium={8} small={4}>
             <Filters
               searchValue={searchValue}
               onSearchChange={onSearchChange}
@@ -233,97 +182,96 @@ const ContentTypesView = () => {
             />
           </GridCell>
 
-          <GridCell large={12}>
-            <Table
-              className="forte-optimizely-content-usage-table"
-              shouldAddHover={rows.length > 0}
-            >
-              <Table.THead>
-                <Table.TR>
-                  {tableColumns
-                    .filter((column) => column.visible)
-                    .map((column) => (
-                      <Table.TH
-                        width={tableColumnsWidthMap.get(column.id)}
-                        sorting={{
-                          canSort: true,
-                          handleSort: () => onSortChange(column),
-                          order: sortDirection,
-                        }}
-                        key={column.id}
-                      >
-                        {column.name}
-                      </Table.TH>
-                    ))}
-                  <Table.TH
-                    width={tableColumnsWidthMap.get(
-                      ContentTypesTableColumn.Actions
-                    )}
-                  />
-                </Table.TR>
-              </Table.THead>
-
-              <Table.TBody>
-                {rows.length > 0 ? (
-                  rows.map((row) => (
-                    <Table.TR
-                      key={row.guid}
-                      onRowClick={onTableRowClick(
-                        row.guid,
-                        row.displayName || row.name
-                      )}
-                    >
-                      {tableColumns
-                        .filter((column) => column.visible)
-                        .map((column) => (
-                          <Table.TD key={column.id}>{row[column.id]}</Table.TD>
-                        ))}
-                      <Table.TD verticalAlign="middle">
-                        <Dropdown
-                          activator={
-                            <ButtonIcon
-                              iconName="ellipsis"
-                              size="small"
-                              style="plain"
-                              title={actions.title}
-                            />
-                          }
+          <GridCell large={12} medium={8} small={4}>
+            <div className="forte-optimizely-content-usage-table-container">
+              <Table
+                className="forte-optimizely-content-usage-table"
+                shouldAddHover={rows.length > 0}
+              >
+                <Table.THead>
+                  <Table.TR>
+                    {tableColumns
+                      .filter((column) => column.visible)
+                      .map((column) => (
+                        <Table.TH
+                          sorting={{
+                            canSort: true,
+                            handleSort: () => onSortChange(column),
+                            order: sortDirection,
+                          }}
+                          key={column.id}
                         >
-                          <Dropdown.Contents>
-                            <Dropdown.ListItem
-                              onClick={onTableRowClick(
-                                row.guid,
-                                row.displayName || row.name,
-                                true
-                              )}
-                            >
-                              <Dropdown.BlockLink>
-                                <Dropdown.BlockLinkText
-                                  text={actions.viewUsages}
-                                />
-                              </Dropdown.BlockLink>
-                            </Dropdown.ListItem>
-                            <Dropdown.ListItem onClick={null}>
-                              <CopyToClipboard text={row.guid}>
+                          {column.name}
+                        </Table.TH>
+                      ))}
+                    <Table.TH width={100} />
+                  </Table.TR>
+                </Table.THead>
+
+                <Table.TBody>
+                  {rows.length > 0 ? (
+                    rows.map((row) => (
+                      <Table.TR
+                        key={row.guid}
+                        onRowClick={onTableRowClick(
+                          row.guid,
+                          row.displayName || row.name
+                        )}
+                      >
+                        {tableColumns
+                          .filter((column) => column.visible)
+                          .map((column) => (
+                            <Table.TD key={column.id}>
+                              {row[column.id]}
+                            </Table.TD>
+                          ))}
+                        <Table.TD verticalAlign="middle">
+                          <Dropdown
+                            activator={
+                              <ButtonIcon
+                                iconName="ellipsis"
+                                size="small"
+                                style="plain"
+                                title={actions.title}
+                              />
+                            }
+                          >
+                            <Dropdown.Contents>
+                              <Dropdown.ListItem
+                                onClick={onTableRowClick(
+                                  row.guid,
+                                  row.displayName || row.name,
+                                  true
+                                )}
+                              >
                                 <Dropdown.BlockLink>
                                   <Dropdown.BlockLinkText
-                                    text={actions.copyGuid}
+                                    text={actions.viewUsages}
                                   />
                                 </Dropdown.BlockLink>
-                              </CopyToClipboard>
-                            </Dropdown.ListItem>
-                          </Dropdown.Contents>
-                        </Dropdown>
-                      </Table.TD>
+                              </Dropdown.ListItem>
+                              <Dropdown.ListItem>
+                                <CopyToClipboard text={row.guid}>
+                                  <Dropdown.BlockLink>
+                                    <Dropdown.BlockLinkText
+                                      text={actions.copyGuid}
+                                    />
+                                  </Dropdown.BlockLink>
+                                </CopyToClipboard>
+                              </Dropdown.ListItem>
+                            </Dropdown.Contents>
+                          </Dropdown>
+                        </Table.TD>
+                      </Table.TR>
+                    ))
+                  ) : (
+                    <Table.TR noHover>
+                      <Table.TD colSpan={6}>{translations.noResults}</Table.TD>
                     </Table.TR>
-                  ))
-                ) : (
-                  <Table.TR noHover>
-                    <Table.TD colSpan={6}>{translations.noResults}</Table.TD>
-                  </Table.TR>
-                )}
-              </Table.TBody>
-            </Table>
+                  )}
+                </Table.TBody>
+              </Table>
+            </div>
           </GridCell>
 
           {totalPages > 1 && (

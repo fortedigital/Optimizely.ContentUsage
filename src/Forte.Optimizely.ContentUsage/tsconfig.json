@@ -1,4 +1,4 @@
-{
+{  
   "compilerOptions": {
     "outDir": "./dist/",
     "noImplicitAny": true,
@@ -8,6 +8,6 @@
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "moduleResolution": "Node",
-    "lib": ["DOM"]
-  }
+    "lib": ["DOM"],
+  },
 }
