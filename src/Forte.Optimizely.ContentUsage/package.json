@@ -15,7 +15,7 @@
     "react": "^16.11.0",
     "react-copy-to-clipboard": "^5.1.0",
     "react-dom": "^16.11.0",
-    "react-router-dom": "^6.4.1"
+    "react-router-dom": "^6.14.2"
   },
   "devDependencies": {
     "@types/react": "^16.11.0",

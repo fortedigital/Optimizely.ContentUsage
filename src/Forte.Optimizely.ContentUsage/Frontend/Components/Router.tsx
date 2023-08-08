@@ -85,16 +85,10 @@ const Router = ({ baseUrl }: RouterProps) => {
           loader={loadData(api, contentTypesLoader)}
         />
         <Route
-          path={routes.contentTypeUsages}
+          path={`${routes.contentTypeUsages}/:guid?`}
           element={<ContentTypeUsageView />}
           loader={loadData(api, contentTypeUsagesLoader)}
-        >
-          <Route
-            path=":guid"
-            element={<ContentTypeUsageView />}
-            loader={loadData(api, contentTypeUsagesLoader)}
-          />
-        </Route>
+        />
       </>
     )
   );
