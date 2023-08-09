@@ -2,3 +2,19 @@
     display: flex;
     justify-content: center;
 }
+
+.forte-optimizely-content-usage-page-url {
+    padding: 0 8px;
+    width: 100%;
+    &:hover {
+        background-color: var(--grey-50);
+    }
+}
+
+.oui-disclose.is-active{
+    .oui-disclose__content {
+        & > .forte-optimizely-content-usage-page-url:last-child {
+            padding-bottom: 0;
+        }
+    }
+}

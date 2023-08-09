@@ -9,6 +9,7 @@ export interface TableColumn<TableDataType> {
   visible?: boolean;
   filter?: boolean;
   sorting?: boolean;
+  columnSpanWidth?: number;
 }
 
 export interface ContentTypeBase {
