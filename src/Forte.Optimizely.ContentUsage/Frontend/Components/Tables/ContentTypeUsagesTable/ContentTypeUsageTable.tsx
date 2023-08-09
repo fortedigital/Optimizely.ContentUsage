@@ -35,7 +35,7 @@ const ContentTypeUsagesTable = ({
         const target = event.target as HTMLTableCellElement | undefined;
 
         if ((target && target.tagName === "TD") || alwaysTriggerClick) {
-          navigateTo(url);
+          navigateTo(url, true);
         }
       },
     [navigateTo]

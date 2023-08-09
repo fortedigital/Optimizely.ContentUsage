@@ -19,8 +19,12 @@ export const removeTrailingSlash = (url: string) => url.replace(/\/$/, "");
 export const getRoutePath = (route: string) =>
   removeTrailingSlash(getBaseUrl()) + baseViewPath + "#" + route;
 
-export const navigateTo = (url: string | URL) => {
+export const navigateTo = (url: string | URL, newWindow = false) => {
   if (typeof window !== "undefined") {
+    if (newWindow) {
+      window.open(url, "_blank");
+      return;
+    }
     window.location.assign(url);
   }
 };
