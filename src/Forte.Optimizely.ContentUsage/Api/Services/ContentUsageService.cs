@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using EPiServer;
 using EPiServer.Core;
@@ -37,12 +38,26 @@ public class ContentUsageService
         if (!string.IsNullOrEmpty(url)) 
             return CheckIsPublished(contentLink) ? new[] { url } : new string[] { };
 
-        var pageLinks = _contentSoftLinkRepository.Load(contentLink, true)
+        var pageUrls = this.SearchForPageUrls(contentLink, contentUsage.LanguageBranch);
+
+        return pageUrls;
+    }
+
+    private IEnumerable<string> SearchForPageUrls(ContentReference contentLink, string languageBranch)
+    {
+        var softLinks = this._contentSoftLinkRepository.Load(contentLink, true);
+        var pageLinks = softLinks
             .Where(softLink => softLink.SoftLinkType == ReferenceType.PageLinkReference)
             .Select(softLink => softLink.OwnerContentLink)
-            .Where(ownerContentLink => ownerContentLink != null && CheckIsPublished(ownerContentLink));
+            .Where(ownerContentLink => ownerContentLink != null && this.CheckIsPublished(ownerContentLink));
 
-        return pageLinks.Select(pageLink => _urlResolver.GetUrl(pageLink, contentUsage.LanguageBranch));
+        var pageUrls = pageLinks.SelectMany(pageLink =>
+        {
+            var contentUrl = this._urlResolver.GetUrl(pageLink, languageBranch);
+            return string.IsNullOrEmpty(contentUrl) ? this.SearchForPageUrls(pageLink, languageBranch) : new[] { contentUrl };
+        });
+        
+        return pageUrls;
     }
 
     public string GetEditUrl(EPiServerContentUsage contentUsage)
