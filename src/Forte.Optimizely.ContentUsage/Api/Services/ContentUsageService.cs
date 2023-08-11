@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using EPiServer;
 using EPiServer.Core;
@@ -38,23 +37,23 @@ public class ContentUsageService
         if (!string.IsNullOrEmpty(url)) 
             return CheckIsPublished(contentLink) ? new[] { url } : new string[] { };
 
-        var pageUrls = this.SearchForPageUrls(contentLink, contentUsage.LanguageBranch);
+        var pageUrls = SearchForPageUrls(contentLink, contentUsage.LanguageBranch);
 
         return pageUrls;
     }
 
     private IEnumerable<string> SearchForPageUrls(ContentReference contentLink, string languageBranch)
     {
-        var softLinks = this._contentSoftLinkRepository.Load(contentLink, true);
+        var softLinks = _contentSoftLinkRepository.Load(contentLink, true);
         var pageLinks = softLinks
             .Where(softLink => softLink.SoftLinkType == ReferenceType.PageLinkReference)
             .Select(softLink => softLink.OwnerContentLink)
-            .Where(ownerContentLink => ownerContentLink != null && this.CheckIsPublished(ownerContentLink));
+            .Where(ownerContentLink => ownerContentLink != null && CheckIsPublished(ownerContentLink));
 
         var pageUrls = pageLinks.SelectMany(pageLink =>
         {
-            var contentUrl = this._urlResolver.GetUrl(pageLink, languageBranch);
-            return string.IsNullOrEmpty(contentUrl) ? this.SearchForPageUrls(pageLink, languageBranch) : new[] { contentUrl };
+            var contentUrl = _urlResolver.GetUrl(pageLink, languageBranch);
+            return string.IsNullOrEmpty(contentUrl) ? SearchForPageUrls(pageLink, languageBranch) : new[] { contentUrl };
         });
         
         return pageUrls;
