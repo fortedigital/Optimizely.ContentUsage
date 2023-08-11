@@ -32,11 +32,7 @@ public class ContentUsageService
     public IEnumerable<string> GetPageUrls(EPiServerContentUsage contentUsage)
     {
         var contentLink = contentUsage.ContentLink;
-        var url = _urlResolver.GetUrl(contentLink, contentUsage.LanguageBranch);
-
-        if (!string.IsNullOrEmpty(url)) 
-            return CheckIsPublished(contentLink) ? new[] { url } : new string[] { };
-
+     
         var pageUrls = SearchForPageUrls(contentLink, contentUsage.LanguageBranch);
 
         return pageUrls;
@@ -44,17 +40,18 @@ public class ContentUsageService
 
     private IEnumerable<string> SearchForPageUrls(ContentReference contentLink, string languageBranch)
     {
+        var url = _urlResolver.GetUrl(contentLink, languageBranch);
+
+        if (!string.IsNullOrEmpty(url)) 
+            return CheckIsPublished(contentLink) ? new[] { url } : new string[] { };
+
         var softLinks = _contentSoftLinkRepository.Load(contentLink, true);
         var pageLinks = softLinks
             .Where(softLink => softLink.SoftLinkType == ReferenceType.PageLinkReference)
             .Select(softLink => softLink.OwnerContentLink)
             .Where(ownerContentLink => ownerContentLink != null && CheckIsPublished(ownerContentLink));
 
-        var pageUrls = pageLinks.SelectMany(pageLink =>
-        {
-            var contentUrl = _urlResolver.GetUrl(pageLink, languageBranch);
-            return string.IsNullOrEmpty(contentUrl) ? SearchForPageUrls(pageLink, languageBranch) : new[] { contentUrl };
-        });
+        var pageUrls = pageLinks.SelectMany(pageLink => SearchForPageUrls(pageLink, languageBranch));
         
         return pageUrls;
     }
