@@ -32,17 +32,28 @@ public class ContentUsageService
     public IEnumerable<string> GetPageUrls(EPiServerContentUsage contentUsage)
     {
         var contentLink = contentUsage.ContentLink;
-        var url = _urlResolver.GetUrl(contentLink, contentUsage.LanguageBranch);
+     
+        var pageUrls = SearchForPageUrls(contentLink, contentUsage.LanguageBranch);
+
+        return pageUrls;
+    }
+
+    private IEnumerable<string> SearchForPageUrls(ContentReference contentLink, string languageBranch)
+    {
+        var url = _urlResolver.GetUrl(contentLink, languageBranch);
 
         if (!string.IsNullOrEmpty(url)) 
             return CheckIsPublished(contentLink) ? new[] { url } : new string[] { };
 
-        var pageLinks = _contentSoftLinkRepository.Load(contentLink, true)
+        var softLinks = _contentSoftLinkRepository.Load(contentLink, true);
+        var pageLinks = softLinks
             .Where(softLink => softLink.SoftLinkType == ReferenceType.PageLinkReference)
             .Select(softLink => softLink.OwnerContentLink)
             .Where(ownerContentLink => ownerContentLink != null && CheckIsPublished(ownerContentLink));
 
-        return pageLinks.Select(pageLink => _urlResolver.GetUrl(pageLink, contentUsage.LanguageBranch));
+        var pageUrls = pageLinks.SelectMany(pageLink => SearchForPageUrls(pageLink, languageBranch));
+        
+        return pageUrls;
     }
 
     public string GetEditUrl(EPiServerContentUsage contentUsage)
