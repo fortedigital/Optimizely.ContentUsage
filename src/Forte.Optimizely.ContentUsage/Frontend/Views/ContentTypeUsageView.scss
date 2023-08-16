@@ -11,10 +11,8 @@
     }
 }
 
-.oui-disclose.is-active{
-    .oui-disclose__content {
-        & > .forte-optimizely-content-usage-page-url:last-child {
-            padding-bottom: 0;
-        }
+.oui-disclose {
+    & .soft-half {
+      padding: 0 4px !important;
     }
 }
