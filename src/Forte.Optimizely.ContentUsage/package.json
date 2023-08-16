@@ -1,0 +1,42 @@
+{
+  "name": "forte-optimizely-content-usage",
+  "version": "1.0.0",
+  "main": "Frontend/index.tsx",
+  "license": "MIT",
+  "scripts": {
+    "start": "webpack-dev-server --mode=development",
+    "watch": "webpack --mode=development --watch",
+    "build": "webpack --mode=production"
+  },
+  "dependencies": {
+    "@episerver/ui-framework": "^0.17.1",
+    "axios": "^0.27.2",
+    "optimizely-oui": "^49.0.0",
+    "react": "^16.11.0",
+    "react-copy-to-clipboard": "^5.1.0",
+    "react-dom": "^16.11.0",
+    "react-router-dom": "^6.14.2"
+  },
+  "devDependencies": {
+    "@types/react": "^16.11.0",
+    "@types/react-copy-to-clipboard": "^5.0.4",
+    "@types/react-dom": "^16.9.0",
+    "@typescript-eslint/eslint-plugin": "^5.38.1",
+    "@typescript-eslint/parser": "^5.38.1",
+    "css-loader": "^6.7.1",
+    "eslint": "^8.23.1",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.2.1",
+    "eslint-plugin-react": "^7.31.8",
+    "mini-css-extract-plugin": "^2.7.2",
+    "prettier": "^2.7.1",
+    "prop-types": "^15.8.1",
+    "sass": "^1.56.2",
+    "sass-loader": "^13.2.0",
+    "ts-loader": "^9.3.1",
+    "typescript": "^4.7.4",
+    "webpack": "^5.74.0",
+    "webpack-cli": "^4.10.0",
+    "webpack-dev-server": "^4.11.1"
+  }
+}

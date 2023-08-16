@@ -1,0 +1,39 @@
+@use 'sass:map';
+@import "./utils";
+
+.forte-optimizely-content-usage {
+  position: relative;
+
+  .forte-optimizely-content-usage-grid {
+    .forte-optimizely-content-usage-table-container {
+      overflow-x: auto;
+    }
+
+    .forte-optimizely-content-usage-table {
+      min-width: 1000px;
+      font-size: 13px;
+
+      & > tbody {
+        & > tr {
+          &:hover {
+            cursor: pointer;
+
+            & > td {
+              background-color: var(--grey-25);
+            }
+          } 
+
+          &.hover--disabled:hover {
+            & > td {
+              background: inherit;
+            }
+          }
+        }
+      }
+
+      .oui-spinner {
+        margin: 30px;
+      }
+    }
+  }
+}

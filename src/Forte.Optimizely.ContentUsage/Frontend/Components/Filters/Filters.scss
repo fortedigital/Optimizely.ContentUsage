@@ -1,0 +1,48 @@
+@use 'sass:map';
+@import "../../Styles/utils";
+
+.forte-optimizely-content-usage-filters {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: spacer(1);
+
+  @include breakpoint(map.get($breakpoints, medium)) {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .oui-text-input-with-icon--left {
+    display: inline-block;
+    width: 100%;
+
+    @include breakpoint(map.get($breakpoints, large)) {
+      width: 350px;
+    }
+  }
+
+  .oui-dropdown-group {
+    margin-top: spacer(2);
+
+    @include breakpoint(map.get($breakpoints, medium)) {
+      flex: 1 1 auto;
+    }
+
+    @include breakpoint(map.get($breakpoints, large)) {
+      flex: 0 1 auto;
+      margin-top: 0;
+      margin-left: spacer(1);
+    }
+
+    & > .oui-button {
+      width: 100%;
+    }
+
+    &.is-active {
+      & .oui-dropdown-children {
+        @include breakpoint(0, map.get($breakpoints, large)) {
+          width: 100% !important;
+        }
+      }
+    }
+  }
+}

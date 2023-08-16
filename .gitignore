@@ -93,5 +93,5 @@ src/Foundation/modules/
 /src/Foundation/wwwroot/scss/main.min.css.map
 /log.txt
 
-/src/EpiContentUsage/module/ClientResources/
-/src/EpiContentUsage/Frontend/dtos.ts
+/src/Forte.Optimizely.ContentUsage/module/ClientResources/
+/src/Forte.Optimizely.ContentUsage/Frontend/dtos.ts
