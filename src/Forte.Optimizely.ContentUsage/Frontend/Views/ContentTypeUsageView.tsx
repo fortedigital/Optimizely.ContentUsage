@@ -220,7 +220,10 @@ const ContentTypeUsageView = () => {
           <GridCell large={12}>
             {dataLoaded ? (
               <div className="forte-optimizely-content-usage-table-container">
-                <ContentTypeUsagesTable rows={rows} tableColumns={tableColumns} sortDirection={sortDirection.toLowerCase()} onSortChange={handleSortChange}/>
+                <ContentTypeUsagesTable rows={rows}
+                                        tableColumns={tableColumns}
+                                        sortDirection={sortDirection.toLowerCase()}
+                                        onSortChange={handleSortChange}/>
               </div>
             ) : (
               <div className="forte-optimizely-content-usage-spinner__center">
