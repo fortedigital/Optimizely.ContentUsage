@@ -2,7 +2,11 @@ import { Disclose } from "optimizely-oui";
 import React from "react";
 import PageUrlLink from "./PageUrlLink/PageUrlLink";
 
-const PageUrlCell = ({pageUrls}:{pageUrls: string[]}) => {
+interface PageUrlCellProps {
+    pageUrls: string[];
+}
+
+const PageUrlCell = ({pageUrls}: PageUrlCellProps) => {
     const isManyUrls = pageUrls.length > 1;
   
     return isManyUrls ? (
