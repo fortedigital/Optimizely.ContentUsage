@@ -26,7 +26,7 @@ const ContentTypeUsageTableRow = ({
     } = useTranslations();
 
     const [isUrlHovered, urlHoveredHandlers] = useHoverTrackingHandlers();
-    const actionLabel = isUrlHovered ? "Edit": "View";
+    const actionLabel = isUrlHovered ? "View" : "Edit";
 
     return (
       <Table.TR class="forte-optimizely-content-usage-table-row" onRowClick={onRowClick}>
