@@ -5,6 +5,7 @@
 
 .forte-optimizely-content-usage-action-label {
     display: block;
+    color: var(--muted-color);
     text-align: center;
     opacity: 0;
     transition: opacity 150ms ease-in-out;
@@ -26,6 +27,7 @@
 
 .oui-disclose {
     & .soft-half {
+      color: var(--muted-color);
       padding: 0 4px !important;
     }
 }
