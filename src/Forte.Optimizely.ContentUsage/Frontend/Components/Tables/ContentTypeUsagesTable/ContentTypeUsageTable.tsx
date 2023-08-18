@@ -51,7 +51,6 @@ const ContentTypeUsagesTable = ({
           {tableColumns
             .filter((column) => column.visible)
             .map((column) => (
-              <>
                 <Table.TH
                   colSpan={column.columnSpanWidth}
                   sorting={{
@@ -63,7 +62,6 @@ const ContentTypeUsagesTable = ({
                 >
                   {column.name}
                 </Table.TH>
-              </>
             ))}
             <Table.TH colSpan={1}/>
         </Table.TR>

@@ -26,14 +26,14 @@ const ContentTypeUsageTableRow = ({
     } = useTranslations();
 
     const [isUrlHovered, urlHoveredHandlers] = useHoverTrackingHandlers();
-    const actionLabel = isUrlHovered ? "View" : "Edit";
+    const actionLabel = isUrlHovered ? actions.view : actions.edit;
 
     return (
-      <Table.TR class="forte-optimizely-content-usage-table-row" onRowClick={onRowClick}>
+      <Table.TR className="forte-optimizely-content-usage-table-row" onRowClick={onRowClick}>
         { tableColumns
           .filter((column) => column.visible)
           .map((column) =>
-          <Table.TD colSpan={column.columnSpanWidth}>
+          <Table.TD key={column.id} colSpan={column.columnSpanWidth}>
             { column.id.toString() === ContentTypeUsageTableColumn.PageUrl &&
             row.pageUrls.length > 0 ? (
                 <PageUrlCell pageUrls={row.pageUrls} urlHoveredHandlers={urlHoveredHandlers}/>
