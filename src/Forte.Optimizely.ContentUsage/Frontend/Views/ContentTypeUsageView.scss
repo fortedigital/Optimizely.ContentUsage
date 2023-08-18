@@ -30,4 +30,10 @@
       color: var(--muted-color);
       padding: 0 4px !important;
     }
+
+    &:not(.is-active){
+      & .oui-disclose__symbol {
+        top: 0;
+      }
+    }
 }
