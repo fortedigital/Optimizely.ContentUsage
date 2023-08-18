@@ -65,6 +65,7 @@ const ContentTypeUsagesTable = ({
                 </Table.TH>
               </>
             ))}
+            <Table.TH colSpan={1}/>
         </Table.TR>
       </Table.THead>
 

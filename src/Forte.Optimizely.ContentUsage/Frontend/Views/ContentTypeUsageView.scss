@@ -3,6 +3,19 @@
     justify-content: center;
 }
 
+.forte-optimizely-content-usage-action-label {
+    display: block;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 150ms ease-in-out;
+}
+
+.forte-optimizely-content-usage-table-row:hover {
+    & .forte-optimizely-content-usage-action-label {
+        opacity: 1;
+    }
+}
+
 .forte-optimizely-content-usage-page-url {
     padding: 0 8px;
     width: 100%;

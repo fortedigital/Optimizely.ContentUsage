@@ -5,11 +5,12 @@ import { TableColumn } from "../../../../types";
 import PageUrlCell from "../../PageUrlCell/PageUrlCell";
 import React from "react";
 import { ContentTypeUsageTableColumn } from "../ContentTypeUsageTable";
+import { useHoverTrackingHandlers } from "../../../../Lib/hooks/useHoverTrackingHandlers";
 
 interface ContentTypeUsageTableRowProps<TableDataType> extends ContentUsageDto {
     tableColumns: TableColumn<TableDataType>[];
     onRowClick?: (event: React.PointerEvent) => void;
-  }
+}
 
 const ContentTypeUsageTableRow = ({
     tableColumns,
@@ -23,21 +24,25 @@ const ContentTypeUsageTableRow = ({
         },
       },
     } = useTranslations();
-  
+
+    const [isUrlHovered, urlHoveredHandlers] = useHoverTrackingHandlers();
+    const actionLabel = isUrlHovered ? "Edit": "View";
+
     return (
-      <Table.TR onRowClick={onRowClick}>
+      <Table.TR class="forte-optimizely-content-usage-table-row" onRowClick={onRowClick}>
         { tableColumns
           .filter((column) => column.visible)
           .map((column) =>
           <Table.TD colSpan={column.columnSpanWidth}>
             { column.id.toString() === ContentTypeUsageTableColumn.PageUrl &&
             row.pageUrls.length > 0 ? (
-                <PageUrlCell pageUrls={row.pageUrls} />
+                <PageUrlCell pageUrls={row.pageUrls} urlHoveredHandlers={urlHoveredHandlers}/>
             ) : (
                 row[column.id]
             )}
           </Table.TD>
         )}
+        <Table.TD colSpan={1}><span className="forte-optimizely-content-usage-action-label">{actionLabel + " >"}</span></Table.TD>
       </Table.TR>
     );
   };
