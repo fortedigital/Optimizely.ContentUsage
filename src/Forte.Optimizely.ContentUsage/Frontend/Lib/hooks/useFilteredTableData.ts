@@ -29,6 +29,7 @@ interface FilteredTableDataHookOptions<TableDataType> {
   disableFrontendFiltering?: boolean;
   disableFrontendPagination?: boolean;
   disableFrontendSorting?: boolean;
+  defaultVisiableColumn: keyof TableDataType;
 }
 
 export function useFilteredTableData<TableDataType>({
@@ -43,6 +44,7 @@ export function useFilteredTableData<TableDataType>({
   disableFrontendFiltering = false,
   disableFrontendPagination = false,
   disableFrontendSorting = false,
+  defaultVisiableColumn,
 }: FilteredTableDataHookOptions<TableDataType>): {
   rows: TableDataType[];
   searchValue: string;
@@ -271,7 +273,7 @@ export function useFilteredTableData<TableDataType>({
         changeColumnVisibility(id, visible);
       else {
         const displayNameColumn = tableColumns.find(
-          (c) => c.id === "displayName"
+          (c) => c.id === defaultVisiableColumn
         );
 
         changeColumnVisibility(id, visible);
@@ -354,13 +356,15 @@ export function useFilteredTableData<TableDataType>({
   );
 
   const filteredItems = useMemo(() => {
-    return rows
-      .filter((row) => {
+    if (filterFn) {
+      return rows.filter((row) => {
         if (disableFrontendFiltering) return true;
 
-        if (filterFn) return filterFn(row, searchQuery);
-        return true;
-      })
+        return filterFn(row, searchQuery);
+      });
+    }
+
+    return rows
       .filter((row) => {
         if (contentTypeBases && contentTypeBaseColumnId) {
           const allSelected = contentTypeBases.every(

@@ -51,7 +51,7 @@ function ColumnsFilter<TableDataType>({
                 : undefined
             }
           >
-            <Dropdown.BlockLinkText text="All" />
+            <Dropdown.BlockLinkText text={translations.filters.all} />
           </Dropdown.BlockLink>
         </Dropdown.ListItem>
         {columns.map(({ id, name, visible }) => (
