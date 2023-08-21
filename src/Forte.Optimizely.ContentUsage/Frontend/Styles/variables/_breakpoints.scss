@@ -1,0 +1,13 @@
+@use 'sass:map';
+
+$breakpoints: (
+  large: 1024px,
+  medium: 580px,
+  small: 0px,
+);
+
+:export {
+  large: map.get($breakpoints, large);
+  medium: map.get($breakpoints, medium);
+  small: map.get($breakpoints, small);
+}
