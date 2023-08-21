@@ -411,7 +411,7 @@ export function useFilteredTableData<TableDataType>({
 
       return false;
     })
-  }, [disableFrontendFiltering, filterFn])
+  }, [disableFrontendFiltering, contentTypeBases, filterFn])
 
   const filteredItems = useMemo(() => {
     return filterItems(rows)
