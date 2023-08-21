@@ -55,7 +55,7 @@ function ContentTypeBasesFilter({
                 : undefined
             }
           >
-            <Dropdown.BlockLinkText text={isAllSelected ? translations.filters.all : translations.filters.none} />
+            <Dropdown.BlockLinkText text={translations.filters.all} />
           </Dropdown.BlockLink>
         </Dropdown.ListItem>
         {contentTypeBases.map((contentTypeBase) => (
