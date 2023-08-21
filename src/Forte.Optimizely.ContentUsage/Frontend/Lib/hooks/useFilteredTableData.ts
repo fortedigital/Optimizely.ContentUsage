@@ -342,15 +342,10 @@ export function useFilteredTableData<TableDataType>({
           (contentTypeBase) => contentTypeBase.name === name
         );
         newContentTypeBases[contentTypeBaseIndex].visible = !visible;
-        setPageToStart();
-        triggerUpdate.current = false;
-        setContentTypeBases(newContentTypeBases);
-        setChangesTracker({
-          ...changesTracker,
-          contentTypeBases: true,
-          currentPage: true,
-        });
       }
+
+      setPageToStart();
+      setContentTypeBases(newContentTypeBases);
     },
     [contentTypeBases, handlePageChange]
   );
