@@ -121,6 +121,7 @@ const ContentTypesView = () => {
     rows: contentTypes,
     initialTableColumns,
     initialContentTypeBases,
+    defaultVisiableColumn: "displayName"
   });
 
   const handlePageChange = useCallback(

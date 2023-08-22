@@ -248,6 +248,7 @@ const ContentTypeUsageView = () => {
     disableFrontendFiltering: true,
     disableFrontendPagination: true,
     disableFrontendSorting: true,
+    defaultVisiableColumn: "name"
   });
 
   const [totalPages, setTotalPages] = useState<number>();
