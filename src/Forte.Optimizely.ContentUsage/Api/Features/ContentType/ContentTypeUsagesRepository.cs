@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
 using EPiServer.Data;
@@ -16,13 +17,17 @@ public class ContentTypeUsagesRepository
 	    _dataExecutorAccessor = dataExecutorAccessor;
     }
 
-    public async Task<IEnumerable<ContentTypeUsageCounter>> ListContentTypesUsagesCounters(
+    public async Task<IEnumerable<ContentTypeUsageCounter>> ListContentTypesUsagesCounters(bool includeDeleted,
 	    CancellationToken cancellationToken)
     {
         var executor = _dataExecutorAccessor();
         return await executor.ExecuteAsync((Func<Task<IEnumerable<ContentTypeUsageCounter>>>)(async () =>
         {
-            var command1 = executor.CreateCommand();
+	        var deletedParam = executor.CreateParameter("Deleted", DbType.Byte, ParameterDirection.Input, includeDeleted);
+
+	        var command1 = executor.CreateCommand();
+            command1.CommandType = CommandType.Text;
+            command1.Parameters.Add(deletedParam);
             command1.CommandText = @"DECLARE @Results TABLE (
 	ContentTypeId INT,
 	Scope NVARCHAR(255)
@@ -75,6 +80,7 @@ SELECT
 			tblPageLanguage ON tblWorkPage.fkPageID=tblPageLanguage.fkPageID 
 		INNER JOIN
 			tblLanguageBranch ON tblLanguageBranch.pkID=tblWorkPage.fkLanguageBranchID
+		WHERE (tblPage.Deleted = @Deleted AND @Deleted = 0) OR @Deleted = 1
 		GROUP BY tblPage.fkPageTypeID, tblPage.pkID, tblLanguageBranch.LanguageID
 ) as ContentTypeUsageTable
 RIGHT OUTER JOIN (SELECT CT.pkID AS ID
