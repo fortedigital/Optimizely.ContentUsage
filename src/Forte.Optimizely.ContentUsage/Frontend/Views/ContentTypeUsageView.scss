@@ -2,3 +2,38 @@
     display: flex;
     justify-content: center;
 }
+
+.forte-optimizely-content-usage-action-label {
+    display: block;
+    color: var(--muted-color);
+    text-align: center;
+    opacity: 0;
+    transition: opacity 150ms ease-in-out;
+}
+
+.forte-optimizely-content-usage-table-row:hover {
+    & .forte-optimizely-content-usage-action-label {
+        opacity: 1;
+    }
+}
+
+.forte-optimizely-content-usage-page-url {
+    padding: 0 8px;
+    width: 100%;
+    &:hover {
+        background-color: var(--grey-50);
+    }
+}
+
+.oui-disclose {
+    & .soft-half {
+      color: var(--muted-color);
+      padding: 0 4px !important;
+    }
+
+    &:not(.is-active){
+      & .oui-disclose__symbol {
+        top: 0;
+      }
+    }
+}
