@@ -24,6 +24,8 @@ function ColumnsFilter<TableDataType>({
     return translations.filters.mixed;
   }, [columns, translations]);
 
+  const isAllSelected = columns.every((c) => c.visible);
+
   return (
     <Dropdown
       arrowIcon="down"
@@ -35,6 +37,23 @@ function ColumnsFilter<TableDataType>({
       shouldHideChildrenOnClick={false}
     >
       <Dropdown.Contents>
+        <Dropdown.ListItem key="All">
+          <Dropdown.BlockLink
+            isItemSelected={isAllSelected}
+            isMultiSelect={true}
+            onClick={
+              onChange
+                ? () => {
+                    columns.forEach((c) => {
+                      onChange(c.id, !isAllSelected);
+                    });
+                  }
+                : undefined
+            }
+          >
+            <Dropdown.BlockLinkText text={translations.filters.all} />
+          </Dropdown.BlockLink>
+        </Dropdown.ListItem>
         {columns.map(({ id, name, visible }) => (
           <Dropdown.ListItem key={name}>
             <Dropdown.BlockLink

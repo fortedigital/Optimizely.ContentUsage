@@ -9,17 +9,17 @@ namespace Forte.Optimizely.ContentUsage.Api.Features.ContentType;
 
 public class ContentTypeUsagesRepository 
 {
-	private readonly ServiceAccessor<IAsyncDatabaseExecutor> dataExecutorAccessor;
+	private readonly ServiceAccessor<IAsyncDatabaseExecutor> _dataExecutorAccessor;
 
     public ContentTypeUsagesRepository(ServiceAccessor<IAsyncDatabaseExecutor> dataExecutorAccessor)
     {
-	    this.dataExecutorAccessor = dataExecutorAccessor;
+	    _dataExecutorAccessor = dataExecutorAccessor;
     }
 
     public async Task<IEnumerable<ContentTypeUsageCounter>> ListContentTypesUsagesCounters(
 	    CancellationToken cancellationToken)
     {
-        var executor = this.dataExecutorAccessor();
+        var executor = _dataExecutorAccessor();
         return await executor.ExecuteAsync((Func<Task<IEnumerable<ContentTypeUsageCounter>>>)(async () =>
         {
             var command1 = executor.CreateCommand();

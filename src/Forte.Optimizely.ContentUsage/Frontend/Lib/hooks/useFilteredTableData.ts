@@ -29,6 +29,7 @@ interface FilteredTableDataHookOptions<TableDataType> {
   disableFrontendFiltering?: boolean;
   disableFrontendPagination?: boolean;
   disableFrontendSorting?: boolean;
+  defaultVisiableColumn: keyof TableDataType;
 }
 
 export function useFilteredTableData<TableDataType>({
@@ -43,6 +44,7 @@ export function useFilteredTableData<TableDataType>({
   disableFrontendFiltering = false,
   disableFrontendPagination = false,
   disableFrontendSorting = false,
+  defaultVisiableColumn,
 }: FilteredTableDataHookOptions<TableDataType>): {
   rows: TableDataType[];
   searchValue: string;
@@ -269,6 +271,14 @@ export function useFilteredTableData<TableDataType>({
     (id: string, visible: boolean) => {
       if (tableColumns.filter((column) => column.visible).length > 1 || visible)
         changeColumnVisibility(id, visible);
+      else {
+        const displayNameColumn = tableColumns.find(
+          (c) => c.id === defaultVisiableColumn
+        );
+
+        changeColumnVisibility(id, visible);
+        changeColumnVisibility(displayNameColumn.id as string, true);
+      }
     },
     [tableColumns, changeColumnVisibility]
   );
@@ -322,75 +332,89 @@ export function useFilteredTableData<TableDataType>({
   );
 
   const onContentTypeBaseChange = useCallback(
-    ({ name, visible }: ContentTypeBase) => {
-      if (
-        contentTypeBases.filter((contentTypeBase) => contentTypeBase.visible)
-          .length > 1 ||
-        !visible
-      ) {
-        const newContentTypeBases = contentTypeBases.slice(0);
+    ({ name, visible }: ContentTypeBase, valueForAll?: boolean) => {
+      const newContentTypeBases = contentTypeBases.slice(0);
+
+      if (valueForAll) {
+        newContentTypeBases.forEach((v) => (v.visible = valueForAll));
+      } else {
         const contentTypeBaseIndex = newContentTypeBases.findIndex(
           (contentTypeBase) => contentTypeBase.name === name
         );
-
         newContentTypeBases[contentTypeBaseIndex].visible = !visible;
-        setPageToStart();
-        triggerUpdate.current = false;
-        setContentTypeBases(newContentTypeBases);
-        setChangesTracker({
-          ...changesTracker,
-          contentTypeBases: true,
-          currentPage: true,
-        });
       }
+
+      setPageToStart();
+      setContentTypeBases(newContentTypeBases);
     },
     [contentTypeBases, handlePageChange]
   );
 
-  const filteredItems = useMemo(() => {
-    return rows
-      .filter((row) => {
-        if (disableFrontendFiltering) return true;
+  const filterItems = useCallback((rows: TableDataType[]) => {
+    if (disableFrontendFiltering) return rows;
 
-        if (
-          contentTypeBases &&
-          contentTypeBaseColumnId &&
-          row[contentTypeBaseColumnId as keyof TableDataType]
-        ) {
-          const type = row[
-            contentTypeBaseColumnId as keyof TableDataType
-          ] as unknown;
-          const contentTypeBase = contentTypeBases
-            .filter((contentTypeBase) => contentTypeBase.visible)
-            .find((contentTypeBase) => contentTypeBase.name === type);
+    if (filterFn) {
+      return rows.filter((row) => {
+        return filterFn(row, searchQuery);
+      });
+    }
 
-          if (!contentTypeBase) return false;
+    return rows.filter((row) => {
+      if (contentTypeBases && contentTypeBaseColumnId) {
+        const allSelected = contentTypeBases.every(
+          (contentTypeBase) => contentTypeBase.visible
+        );
+
+        if (allSelected) {
+          return true;
+        }
+        const type = row[
+          contentTypeBaseColumnId as keyof TableDataType
+        ] as unknown;
+
+        const allDeselected = contentTypeBases.every(
+          (contentTypeBase) => !contentTypeBase.visible
+        );
+
+        if (allDeselected) {
+          if (type && contentTypeBases.some((t) => t.name === type))
+            return false;
+          return true;
         }
 
+        const contentTypeBase = contentTypeBases
+          .filter((contentTypeBase) => contentTypeBase.visible)
+          .find((contentTypeBase) => contentTypeBase.name === type);
+
+        if (!contentTypeBase) return false;
+      }
+      return true;
+    })
+    .filter((row) => {
+      for (const column in row) {
         const parsedSearchValue = searchQuery.toLocaleLowerCase().trim();
-        if (!parsedSearchValue) return true;
+        const tableColumn = tableColumns.find(({ id }) => id === column);
 
-        if (filterFn) return filterFn(row, searchQuery);
+        if (tableColumn && tableColumn.filter && tableColumn.visible) {
+          const value = row[column];
 
-        for (const column in row) {
-          const tableColumn = tableColumns.find(({ id }) => id === column);
-
-          if (tableColumn && tableColumn.filter && tableColumn.visible) {
-            const value = row[column];
-
-            if (
-              value &&
-              value
-                .toString()
-                .toLocaleLowerCase()
-                .includes(parsedSearchValue.toLocaleLowerCase())
-            )
-              return true;
-          }
+          if (
+            value &&
+            value
+              .toString()
+              .toLocaleLowerCase()
+              .includes(parsedSearchValue.toLocaleLowerCase())
+          )
+            return true;
         }
+      }
 
-        return false;
-      })
+      return false;
+    })
+  }, [disableFrontendFiltering, contentTypeBases, filterFn, searchQuery, tableColumns])
+
+  const filteredItems = useMemo(() => {
+    return filterItems(rows)
       .sort((prevValue, nextValue) => {
         if (disableFrontendSorting) return 0;
 
