@@ -31,6 +31,19 @@
         }
       }
 
+      .forte-optimizely-content-usage-column {
+        .oui-arrow-inline--up, .oui-arrow-inline--down {
+          visibility: hidden;
+        }
+
+        &.forte-optimizely-content-usage-column--active {
+          color: var(--brand-blue-dark) !important;
+          .oui-arrow-inline--up, .oui-arrow-inline--down{
+            visibility: visible;
+          }
+        }
+      }
+
       .oui-spinner {
         margin: 30px;
       }

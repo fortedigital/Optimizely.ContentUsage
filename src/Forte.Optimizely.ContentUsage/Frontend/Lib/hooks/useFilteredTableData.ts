@@ -56,6 +56,7 @@ export function useFilteredTableData<TableDataType>({
   onTableColumnChange: (column: string, visible: boolean) => void;
   selectedRowsPerPage: number;
   onRowsPerPageChange: (option: number) => void;
+  sortBy: keyof TableDataType | null;
   sortDirection: SortDirection;
   onSortChange: (column: TableColumn<TableDataType>) => void;
   totalPages: number;
@@ -634,6 +635,7 @@ export function useFilteredTableData<TableDataType>({
     onTableColumnChange: onColumnVisiblityChange,
     selectedRowsPerPage: rowsPerPage,
     onRowsPerPageChange: onRowsPerPageChange,
+    sortBy,
     sortDirection,
     onSortChange: handleTableSort,
     totalPages,

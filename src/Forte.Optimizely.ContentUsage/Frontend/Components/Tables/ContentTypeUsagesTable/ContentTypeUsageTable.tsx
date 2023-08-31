@@ -18,6 +18,7 @@ interface ContentTypeUsagesTableProps {
   tableColumns: TableColumn<ContentUsageDto>[];
   rows: ContentUsageDto[];
   onSortChange: (column: TableColumn<ContentUsageDto>) => void;
+  sortBy: keyof ContentUsageDto;
   sortDirection: string;
 }
 
@@ -25,6 +26,7 @@ const ContentTypeUsagesTable = ({
   tableColumns,
   rows,
   onSortChange,
+  sortBy,
   sortDirection,
 }: ContentTypeUsagesTableProps) => {
   const onTableRowClick = useCallback(
@@ -41,6 +43,9 @@ const ContentTypeUsagesTable = ({
     [navigateTo]
   );
 
+  const columnHeaderClassName = "forte-optimizely-content-usage-column";
+  const activeColumnHeaderClassName = `${columnHeaderClassName} forte-optimizely-content-usage-column--active`;
+
   return (
     <Table
       tableLayoutAlgorithm="fixed"
@@ -53,10 +58,11 @@ const ContentTypeUsagesTable = ({
             .map((column) => (
                 <Table.TH
                   colSpan={column.columnSpanWidth}
+                  className={column.id === sortBy ? activeColumnHeaderClassName : columnHeaderClassName}
                   sorting={{
                     canSort: column.sorting,
                     handleSort: () => onSortChange(column),
-                    order: sortDirection,
+                    order: column.id === sortBy ? sortDirection : undefined,
                   }}
                   key={column.id}
                 >
