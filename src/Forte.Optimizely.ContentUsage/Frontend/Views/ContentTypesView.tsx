@@ -112,6 +112,7 @@ const ContentTypesView = () => {
     onTableColumnChange,
     selectedRowsPerPage,
     onRowsPerPageChange,
+    sortBy,
     sortDirection,
     onSortChange,
     totalPages,
@@ -161,6 +162,9 @@ const ContentTypesView = () => {
     }
   }, [response, dataLoaded]);
 
+  const columnHeaderClassName = "forte-optimizely-content-usage-column";
+  const activeColumnHeaderClassName = `${columnHeaderClassName} forte-optimizely-content-usage-column--active`;
+
   return (
     <Layout>
       <GridContainer ref={gridContainerRef} className="forte-optimizely-content-usage-grid">
@@ -195,10 +199,11 @@ const ContentTypesView = () => {
                       .filter((column) => column.visible)
                       .map((column) => (
                         <Table.TH
+                          className={column.id === sortBy ? activeColumnHeaderClassName : columnHeaderClassName}
                           sorting={{
                             canSort: true,
                             handleSort: () => onSortChange(column),
-                            order: sortDirection,
+                            order: column.id === sortBy ? sortDirection : undefined,
                           }}
                           key={column.id}
                         >

@@ -109,6 +109,7 @@ const ContentTypeUsageView = () => {
     onClearButtonClick,
     tableColumns,
     onTableColumnChange,
+    sortBy,
     sortDirection,
     onSortChange,
     currentPage,
@@ -223,6 +224,7 @@ const ContentTypeUsageView = () => {
               <div className="forte-optimizely-content-usage-table-container">
                 <ContentTypeUsagesTable rows={rows}
                                         tableColumns={tableColumns}
+                                        sortBy={sortBy}
                                         sortDirection={sortDirection.toLowerCase()}
                                         onSortChange={handleSortChange}/>
               </div>
