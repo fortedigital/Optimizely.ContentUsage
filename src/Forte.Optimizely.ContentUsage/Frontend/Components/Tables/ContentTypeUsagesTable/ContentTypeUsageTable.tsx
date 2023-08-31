@@ -28,7 +28,7 @@ const ContentTypeUsagesTable = ({
   sortDirection,
 }: ContentTypeUsagesTableProps) => {
   const onTableRowClick = useCallback(
-    (url?: string | null, alwaysTriggerClick = false) =>
+    (url?: string | null) =>
       (event: React.PointerEvent) => {
         if (!url) return;
 
