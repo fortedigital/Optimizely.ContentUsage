@@ -20,7 +20,7 @@ function TableRow<TItem>({
   tableColumns,
   onTableRowClick,
   additionalCellAtTheRowEnd,
-  specificCells,
+  specificCells = {},
 }: TableRowProps<TItem>) {
   const renderCell = useCallback(
     (column: TableColumn<TItem>, row: TItem) => {
