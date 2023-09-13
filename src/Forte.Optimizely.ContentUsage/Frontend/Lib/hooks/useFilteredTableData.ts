@@ -12,6 +12,7 @@ enum FilteredTableDataQueryParam {
   ShowColumn = "showColumn",
   Page = "page",
   RowsPerPage = "rowsPerPage",
+  IncludeDeleted = "includeDeleted"
 }
 
 interface FilteredTableDataHookOptions<TableDataType> {
@@ -61,6 +62,8 @@ export function useFilteredTableData<TableDataType>({
   totalPages: number;
   currentPage: number;
   goToPage: (page: number) => void;
+  includeDeleted: boolean;
+  onIncludeDeletedChange: React.ChangeEventHandler<HTMLInputElement>;
 } {
   const triggerUpdate = useRef<boolean>(false);
   const [datasetChanged, setDatasetChanged] = useState<boolean>(false);
@@ -84,6 +87,7 @@ export function useFilteredTableData<TableDataType>({
     }))
   );
   const [searchParams, setSearchParams] = useSearchParams();
+  const [includeDeleted, setIncludeDeleted] = useState<boolean>(false);
   const location = useLocation();
 
   const debouncedSetSearchParams = useDebounce<
@@ -104,6 +108,7 @@ export function useFilteredTableData<TableDataType>({
     sortDirection: false,
     rowsPerPage: false,
     contentTypeBases: false,
+    includeDeleted: false,
   });
 
   useEffect(() => {
@@ -174,6 +179,10 @@ export function useFilteredTableData<TableDataType>({
           );
       }
 
+      if (changesTracker.includeDeleted){
+        prevSearchParams.set(FilteredTableDataQueryParam.IncludeDeleted, String(includeDeleted));
+      }
+
       triggerUpdate.current = false;
       setChangesTracker({
         currentPage: false,
@@ -183,6 +192,7 @@ export function useFilteredTableData<TableDataType>({
         sortDirection: false,
         rowsPerPage: false,
         contentTypeBases: false,
+        includeDeleted: false,
       });
 
       return prevSearchParams;
@@ -195,6 +205,7 @@ export function useFilteredTableData<TableDataType>({
     sortDirection,
     rowsPerPage,
     contentTypeBases,
+    includeDeleted
   ]);
 
   const setPageToStart = useCallback(() => {
@@ -266,6 +277,15 @@ export function useFilteredTableData<TableDataType>({
     },
     [tableColumns, setTableColumns, setSortBy, sortBy]
   );
+
+  const onIncludeDeletedChange: React.ChangeEventHandler<HTMLInputElement> = useCallback((event) => {
+    const newIncludeDeletedValue = event.target.checked;
+    setIncludeDeleted(newIncludeDeletedValue);
+    setChangesTracker({
+      ...changesTracker,
+      includeDeleted: true
+    })
+  }, [changesTracker, setChangesTracker, setIncludeDeleted])
 
   const onColumnVisiblityChange = useCallback(
     (id: string, visible: boolean) => {
@@ -567,6 +587,13 @@ export function useFilteredTableData<TableDataType>({
       } else {
         setPageToStart();
       }
+
+      if (queryParams.has(FilteredTableDataQueryParam.IncludeDeleted)) {
+        const param = queryParams.get(FilteredTableDataQueryParam.IncludeDeleted).toLocaleLowerCase() === 'true';
+        setIncludeDeleted(param);
+      } else {
+        setIncludeDeleted(false);
+      }
     },
     [
       tableColumns,
@@ -579,6 +606,7 @@ export function useFilteredTableData<TableDataType>({
       setSearchQuery,
       setSortBy,
       setSortDirection,
+      setIncludeDeleted,
       initialSortDirection,
       initialContentTypeBases,
       initialTableColumns,
@@ -639,5 +667,7 @@ export function useFilteredTableData<TableDataType>({
     totalPages,
     currentPage,
     goToPage: handlePageChange,
+    includeDeleted,
+    onIncludeDeletedChange
   };
 }

@@ -32,9 +32,11 @@ public class ContentTypeService
         return contentTypes;
     }
     
-    public async Task<IEnumerable<ContentTypeUsageCounter>> GetAllCounters(CancellationToken cancellationToken)
+    public async Task<IEnumerable<ContentTypeUsageCounter>> GetAllCounters(
+        bool includeDeleted,
+        CancellationToken cancellationToken)
     {
-        return await _contentTypeUsagesRepository.ListContentTypesUsagesCounters(cancellationToken);
+        return await _contentTypeUsagesRepository.ListContentTypesUsagesCounters(includeDeleted, cancellationToken);
     }
     
     public ContentType? Get(Guid guid)

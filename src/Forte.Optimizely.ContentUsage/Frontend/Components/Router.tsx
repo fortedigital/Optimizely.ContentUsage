@@ -27,7 +27,8 @@ interface LoadDataFunction {
   ): Promise<any> | Response;
 }
 
-const contentTypesLoader: LoadDataFunction = (api) => {
+const contentTypesLoader: LoadDataFunction = (api, initialLoad) => {
+  if(!initialLoad) return Promise.resolve([{}, {}]);
   const contentTypeBases = api.getContentTypeBases();
   const contentTypes = api.getContentTypes();
 

@@ -9,6 +9,7 @@ export const translations = {
     numberOfRows: "Number of rows",
     search: "Search",
     none: "None",
+    includeDeleted: "Include deleted content",
   },
   views: {
     contentTypesView: {

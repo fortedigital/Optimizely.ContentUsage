@@ -48,14 +48,16 @@ public class ContentTypeController : ControllerBase
     [HttpGet]
     [Route("[action]", Name = GetContentTypesRouteName)]
     [SwaggerResponse(StatusCodes.Status200OK, null, typeof(IEnumerable<ContentTypeDto>))]
-    public async Task<ActionResult> GetContentTypes([FromQuery] GetContentTypesQuery? query, CancellationToken cancellationToken)
+    public async Task<ActionResult> GetContentTypes([FromQuery] GetContentTypesQuery query, CancellationToken cancellationToken)
     {
+        query!.IncludeDeleted ??= true;
+        
         var contentTypesFilterCriteria = new ContentTypesFilterCriteria { Name = query?.Name, Type = query?.Type };
         
         var contentTypes =
             _contentTypeService.GetAll(contentTypesFilterCriteria);
 
-        var contentTypesUsageCounters = await _contentTypeService.GetAllCounters(cancellationToken);
+        var contentTypesUsageCounters = await _contentTypeService.GetAllCounters(query.IncludeDeleted.Value, cancellationToken);
         var contentTypeDtos = contentTypes.Select(_contentTypeMapper.Map);
 
         contentTypeDtos = contentTypeDtos.Join(contentTypesUsageCounters, type => type.ID, counter => counter.ContentTypeId, (type, counter) =>

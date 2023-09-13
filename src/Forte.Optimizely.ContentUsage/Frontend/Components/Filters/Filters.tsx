@@ -5,6 +5,7 @@ import ContentTypeBasesFilter from "./ContentTypeBasesFilter";
 import "./Filters.scss";
 import NumberOfRowsFilter from "./NumberOfRowsFilter";
 import SearchInput from "./SearchInput";
+import IncludeDeletedFilter from "./IncludeDeletedFilter";
 
 interface FiltersProps<TableDataType> {
   searchValue?: string;
@@ -17,6 +18,8 @@ interface FiltersProps<TableDataType> {
   rowsPerPageOptions?: number[];
   selectedRowsPerPage?: number;
   onRowsPerPageChange?: (option: number) => void;
+  includeDeleted?: boolean;
+  onIncludeDeletedChange?: React.ChangeEventHandler<HTMLInputElement>;
 }
 
 function Filters<TableDataType>({
@@ -30,6 +33,8 @@ function Filters<TableDataType>({
   rowsPerPageOptions,
   selectedRowsPerPage,
   onRowsPerPageChange,
+  includeDeleted,
+  onIncludeDeletedChange,
 }: FiltersProps<TableDataType>) {
   return (
     <div className="forte-optimizely-content-usage-filters">
@@ -57,6 +62,14 @@ function Filters<TableDataType>({
           onChange={onRowsPerPageChange}
         />
       )}
+
+      {typeof includeDeleted !== "undefined" && !!onIncludeDeletedChange && (
+        <IncludeDeletedFilter
+          includeDeleted={includeDeleted}
+          onIncludeDeletedChange={onIncludeDeletedChange}
+        />
+      )}
+
     </div>
   );
 }

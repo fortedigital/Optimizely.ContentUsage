@@ -5,6 +5,7 @@ import {
   ContentTypeBaseDto,
   GetContentUsagesQuery,
   GetContentUsagesResponse,
+  GetContentTypesQuery,
 } from "../dtos";
 
 export interface ContentUsageAPIEndpoints {
@@ -59,8 +60,8 @@ export default class ContentUsageAPIClient {
     return this.get<ContentTypeBaseDto[]>(this.endpoints.contentTypeBases);
   }
 
-  public async getContentTypes() {
-    return this.get<ContentTypeDto[]>(this.endpoints.contentTypes);
+  public async getContentTypes(query?: Partial<GetContentTypesQuery>) {
+    return this.getWithQuerySchema<Partial<GetContentTypesQuery>, ContentTypeDto[]>(this.endpoints.contentTypes, query);
   }
 
   public async getContentType(guid: string) {
@@ -73,7 +74,7 @@ export default class ContentUsageAPIClient {
   ): Promise<APIResponse<ResponseSchema>> {
     const params = {} as Record<string, string>;
 
-    for (const [key, value] of Object.entries(query)) {
+    for (const [key, value] of Object.entries(query ?? {})) {
       params[key] = value.toString();
     }
 
