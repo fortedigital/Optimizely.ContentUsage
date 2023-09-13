@@ -8,17 +8,11 @@ import React, {
 import { Breadcrumb } from "@episerver/ui-framework";
 import { TableColumn } from "../types";
 import {
-  ButtonIcon,
-  Disclose,
-  DiscloseTable,
-  Dropdown,
   Grid,
   GridCell,
   GridContainer,
-  Link,
   PaginationControls,
   Spinner,
-  Table,
 } from "optimizely-oui";
 import { useLoaderData, useLocation } from "react-router-dom";
 import Layout from "../Components/Layout";
@@ -94,7 +88,7 @@ const ContentTypeUsageView = () => {
       columnSpanWidth: 2,
     },
     {
-      id: ContentTypeUsageTableColumn.PageUrl,
+      id: ContentTypeUsageTableColumn.PageUrls,
       name: columns.pageUrl,
       visible: true,
       sorting: false,

@@ -10,7 +10,7 @@ enum ContentTypeUsageTableColumn {
   ID = "id",
   Name = "name",
   LanguageBranch = "languageBranch",
-  PageUrl = "pageUrl",
+  PageUrls = "pageUrls",
   Actions = "actions",
 }
 
