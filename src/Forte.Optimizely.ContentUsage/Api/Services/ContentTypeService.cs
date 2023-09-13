@@ -12,17 +12,21 @@ public class ContentTypeService
 {
     private readonly IContentTypeRepository _contentTypeRepository;
     private readonly ContentTypeUsagesRepository _contentTypeUsagesRepository;
+    private readonly ContentTypeBaseService _contentTypeBaseService;
 
-
-    public ContentTypeService(IContentTypeRepository contentTypeRepository, ContentTypeUsagesRepository contentTypeUsagesRepository)
+    public ContentTypeService(IContentTypeRepository contentTypeRepository, ContentTypeBaseService contentTypeBaseService, ContentTypeUsagesRepository contentTypeUsagesRepository)
     {
         _contentTypeRepository = contentTypeRepository;
+        _contentTypeBaseService = contentTypeBaseService;
         _contentTypeUsagesRepository = contentTypeUsagesRepository;
     }
 
     public IEnumerable<ContentType> GetAll(ContentTypesFilterCriteria? filterCriteria)
     {
-        var contentTypes = _contentTypeRepository.List();
+        var contentTypeBases = _contentTypeBaseService.GetAll();
+        
+        var contentTypes = _contentTypeRepository.List()
+            .Where(type => contentTypeBases.Any(ctb => ctb == type.Base));
 
         if (filterCriteria != null)
         {
