@@ -1,7 +1,7 @@
 @use 'sass:map';
 @import "../../Styles/utils";
 
-.forte-optimizely-content-usage-filters {
+.#{$class-name-prefix}-filters {
   display: flex;
   flex-direction: column;
   margin-bottom: spacer(1);
@@ -42,6 +42,19 @@
         @include breakpoint(0, map.get($breakpoints, large)) {
           width: 100% !important;
         }
+      }
+    }
+
+    & input[type="checkbox"] {
+      margin-top: 0 !important;
+    }
+  }
+
+  & .#{$class-name-prefix}-filter-checkbox-container {
+    & > label {
+      & > div {
+        height: 100%;
+        align-items: center;
       }
     }
   }

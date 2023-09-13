@@ -11,6 +11,7 @@
   "dependencies": {
     "@episerver/ui-framework": "^0.17.1",
     "axios": "^0.27.2",
+    "classnames": "^2.3.2",
     "optimizely-oui": "^49.0.0",
     "react": "^16.11.0",
     "react-copy-to-clipboard": "^5.1.0",

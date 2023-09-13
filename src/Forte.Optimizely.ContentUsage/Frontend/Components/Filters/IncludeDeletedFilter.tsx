@@ -1,6 +1,8 @@
 import React, { FC } from "react";
-import { Checkbox } from "optimizely-oui";
 import { useTranslations } from "../../Contexts/TranslationsProvider";
+import Checkbox from "../Form/Checkbox/Checkbox";
+import classNames from "classnames";
+import { classNamePrefix } from "../../Utils/styles";
 
 interface IncludeDeletedFilterProps {
   includeDeleted?: boolean;
@@ -11,11 +13,16 @@ const IncludeDeletedFilter: FC<IncludeDeletedFilterProps> = ({
   includeDeleted,
   onIncludeDeletedChange,
 }) => {
-    const translations = useTranslations();
+  const translations = useTranslations();
 
   return (
-    <div className="oui-dropdown-group">
-        <Checkbox label={translations.filters.includeDeleted} checked={includeDeleted} onChange={onIncludeDeletedChange} />
+    <div className={classNames('oui-dropdown-group', classNamePrefix('filter-checkbox-container'))}>
+      <Checkbox
+        checked={includeDeleted}
+        onChange={onIncludeDeletedChange}
+      >
+        {translations.filters.includeDeleted}
+      </Checkbox>
     </div>
   );
 };
