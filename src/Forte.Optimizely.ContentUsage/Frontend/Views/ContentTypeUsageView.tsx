@@ -32,9 +32,7 @@ import { useScroll } from "../Lib/hooks/useScroll";
 import "./ContentTypeUsageView.scss";
 import ContentTypeUsagesTable, { ContentTypeUsageTableColumn } from "../Components/Tables/ContentTypeUsagesTable/ContentTypeUsageTable";
 
-type ContentTypeUsageViewResponse =
-  | APIResponse<GetContentUsagesResponse>
-  | ContentTypeUsageViewInitialResponse;
+type ContentTypeUsageViewResponse = ContentTypeUsageViewInitialResponse;
 
 type ContentTypeUsageViewInitialResponse = [
   APIResponse<ContentTypeDto>,
@@ -168,15 +166,7 @@ const ContentTypeUsageView = () => {
 
   useEffect(() => {
     if (response) {
-      if (Array.isArray(response)) {
-        setDataFromInitialResponse(response);
-      } else if (response.data && !response.hasErrors) {
-        setContentTypeUsages(response.data.contentUsages);
-        setTotalPages(response.data.totalPages);
-
-        if (!contentTypeDisplayName)
-          setContentTypeDisplayName(location.state?.contentType?.displayName);
-      }
+      setDataFromInitialResponse(response);
       setDataLoaded(true);
     }
   }, [response]);
