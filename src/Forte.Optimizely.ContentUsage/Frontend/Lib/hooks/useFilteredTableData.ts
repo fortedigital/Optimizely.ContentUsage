@@ -32,6 +32,8 @@ interface FilteredTableDataHookOptions<TableDataType> {
   defaultVisiableColumn: keyof TableDataType;
 }
 
+export type SortChangeHandler<TableDataType> = (column: TableColumn<TableDataType>) => void;
+
 export function useFilteredTableData<TableDataType>({
   rows,
   initialContentTypeBases,

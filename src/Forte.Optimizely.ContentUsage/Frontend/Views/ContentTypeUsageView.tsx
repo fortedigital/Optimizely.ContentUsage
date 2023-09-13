@@ -8,17 +8,11 @@ import React, {
 import { Breadcrumb } from "@episerver/ui-framework";
 import { TableColumn } from "../types";
 import {
-  ButtonIcon,
-  Disclose,
-  DiscloseTable,
-  Dropdown,
   Grid,
   GridCell,
   GridContainer,
-  Link,
   PaginationControls,
   Spinner,
-  Table,
 } from "optimizely-oui";
 import { useLoaderData, useLocation } from "react-router-dom";
 import Layout from "../Components/Layout";
@@ -38,9 +32,7 @@ import { useScroll } from "../Lib/hooks/useScroll";
 import "./ContentTypeUsageView.scss";
 import ContentTypeUsagesTable, { ContentTypeUsageTableColumn } from "../Components/Tables/ContentTypeUsagesTable/ContentTypeUsageTable";
 
-type ContentTypeUsageViewResponse =
-  | APIResponse<GetContentUsagesResponse>
-  | ContentTypeUsageViewInitialResponse;
+type ContentTypeUsageViewResponse = ContentTypeUsageViewInitialResponse;
 
 type ContentTypeUsageViewInitialResponse = [
   APIResponse<ContentTypeDto>,
@@ -94,7 +86,7 @@ const ContentTypeUsageView = () => {
       columnSpanWidth: 2,
     },
     {
-      id: ContentTypeUsageTableColumn.PageUrl,
+      id: ContentTypeUsageTableColumn.PageUrls,
       name: columns.pageUrl,
       visible: true,
       sorting: false,
@@ -174,15 +166,7 @@ const ContentTypeUsageView = () => {
 
   useEffect(() => {
     if (response) {
-      if (Array.isArray(response)) {
-        setDataFromInitialResponse(response);
-      } else if (response.data && !response.hasErrors) {
-        setContentTypeUsages(response.data.contentUsages);
-        setTotalPages(response.data.totalPages);
-
-        if (!contentTypeDisplayName)
-          setContentTypeDisplayName(location.state?.contentType?.displayName);
-      }
+      setDataFromInitialResponse(response);
       setDataLoaded(true);
     }
   }, [response]);

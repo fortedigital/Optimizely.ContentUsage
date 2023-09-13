@@ -22,7 +22,6 @@ interface RouterProps {
 interface LoadDataFunction {
   (
     apiClient: ContentUsageAPIClient,
-    initialLoad: boolean,
     args: LoaderFunctionArgs
   ): Promise<any> | Response;
 }
@@ -36,7 +35,6 @@ const contentTypesLoader: LoadDataFunction = (api) => {
 
 const contentTypeUsagesLoader: LoadDataFunction = (
   api,
-  initialLoad,
   { request, params }
 ) => {
   if (!params.guid) return redirect(routes.index);
@@ -48,18 +46,13 @@ const contentTypeUsagesLoader: LoadDataFunction = (
     ...query,
   });
 
-  if (initialLoad) {
-    const contentType = api.getContentType(params.guid);
+  const contentType = api.getContentType(params.guid);
 
-    return Promise.all([contentType, contentTypeUsages]);
-  }
-
-  return contentTypeUsages;
+  return Promise.all([contentType, contentTypeUsages]);
 };
 
 const Router = ({ baseUrl }: RouterProps) => {
   setBaseUrl(baseUrl);
-  const initialLoadRef = useRef<boolean>(true);
   const api = useAPI();
 
   const loadData = useCallback(
@@ -67,10 +60,8 @@ const Router = ({ baseUrl }: RouterProps) => {
       async (args: LoaderFunctionArgs) => {
         const data = await loaderFunction(
           apiClient,
-          initialLoadRef.current,
           args
         );
-        initialLoadRef.current = false;
         return data;
       },
     []

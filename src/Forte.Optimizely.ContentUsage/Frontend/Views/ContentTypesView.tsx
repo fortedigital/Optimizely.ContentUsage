@@ -1,9 +1,4 @@
-import React, {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ButtonIcon,
   Dropdown,
@@ -25,6 +20,8 @@ import { useTranslations } from "../Contexts/TranslationsProvider";
 import { useFilteredTableData } from "../Lib/hooks/useFilteredTableData";
 import { TableColumn } from "../types";
 import { useScroll } from "../Lib/hooks/useScroll";
+import ForteTable from "../Components/Tables/ForteTable";
+import ContentTypeTableRow from "../Components/Tables/ContentTypeTable/ContentTypeTableRow";
 
 enum ContentTypesTableColumn {
   GUID = "guid",
@@ -87,20 +84,6 @@ const ContentTypesView = () => {
     },
   ] as TableColumn<ContentTypeDto>[];
 
-  const onTableRowClick = useCallback(
-    (guid: string, displayName: string, alwaysTriggerClick = false) =>
-      (event: React.PointerEvent) => {
-        const target = event.target as HTMLTableCellElement | undefined;
-
-        if ((target && target.tagName === "TD") || alwaysTriggerClick) {
-          navigate(viewContentTypeUsages(guid), {
-            state: { contentType: { displayName: displayName } },
-          });
-        }
-      },
-    [navigate]
-  );
-
   const {
     rows,
     searchValue,
@@ -121,7 +104,7 @@ const ContentTypesView = () => {
     rows: contentTypes,
     initialTableColumns,
     initialContentTypeBases,
-    defaultVisiableColumn: "displayName"
+    defaultVisiableColumn: "displayName",
   });
 
   const handlePageChange = useCallback(
@@ -185,93 +168,15 @@ const ContentTypesView = () => {
 
           <GridCell large={12} medium={8} small={4}>
             <div className="forte-optimizely-content-usage-table-container">
-              <Table
-                className="forte-optimizely-content-usage-table"
-                shouldAddHover={rows.length > 0}
-              >
-                <Table.THead>
-                  <Table.TR>
-                    {tableColumns
-                      .filter((column) => column.visible)
-                      .map((column) => (
-                        <Table.TH
-                          sorting={{
-                            canSort: true,
-                            handleSort: () => onSortChange(column),
-                            order: sortDirection,
-                          }}
-                          key={column.id}
-                        >
-                          {column.name}
-                        </Table.TH>
-                      ))}
-                    <Table.TH width={100} />
-                  </Table.TR>
-                </Table.THead>
-
-                <Table.TBody>
-                  {rows.length > 0 ? (
-                    rows.map((row) => (
-                      <Table.TR
-                        key={row.guid}
-                        onRowClick={onTableRowClick(
-                          row.guid,
-                          row.displayName || row.name
-                        )}
-                      >
-                        {tableColumns
-                          .filter((column) => column.visible)
-                          .map((column) => (
-                            <Table.TD key={column.id}>
-                              {row[column.id]}
-                            </Table.TD>
-                          ))}
-                        <Table.TD verticalAlign="middle">
-                          <Dropdown
-                            activator={
-                              <ButtonIcon
-                                iconName="ellipsis"
-                                size="small"
-                                style="plain"
-                                title={actions.title}
-                              />
-                            }
-                          >
-                            <Dropdown.Contents>
-                              <Dropdown.ListItem
-                                onClick={onTableRowClick(
-                                  row.guid,
-                                  row.displayName || row.name,
-                                  true
-                                )}
-                              >
-                                <Dropdown.BlockLink>
-                                  <Dropdown.BlockLinkText
-                                    text={actions.viewUsages}
-                                  />
-                                </Dropdown.BlockLink>
-                              </Dropdown.ListItem>
-                              <Dropdown.ListItem>
-                                <CopyToClipboard text={row.guid}>
-                                  <Dropdown.BlockLink>
-                                    <Dropdown.BlockLinkText
-                                      text={actions.copyGuid}
-                                    />
-                                  </Dropdown.BlockLink>
-                                </CopyToClipboard>
-                              </Dropdown.ListItem>
-                            </Dropdown.Contents>
-                          </Dropdown>
-                        </Table.TD>
-                      </Table.TR>
-                    ))
-                  ) : (
-                    <Table.TR noHover>
-                      <Table.TD colSpan={6}>{translations.noResults}</Table.TD>
-                    </Table.TR>
-                  )}
-                </Table.TBody>
-              </Table>
+              <ForteTable
+                tableColumns={tableColumns}
+                rows={rows}
+                rowTemplate={(row, columns) => (
+                  <ContentTypeTableRow row={row} tableColumns={columns} />
+                )}
+                sortDirection={sortDirection}
+                onSortChange={onSortChange}
+              />
             </div>
           </GridCell>
 
