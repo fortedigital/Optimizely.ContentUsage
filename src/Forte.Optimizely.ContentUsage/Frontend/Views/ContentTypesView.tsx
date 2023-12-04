@@ -1,9 +1,4 @@
-import React, {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ButtonIcon,
   Dropdown,
@@ -25,6 +20,7 @@ import { useTranslations } from "../Contexts/TranslationsProvider";
 import { useFilteredTableData } from "../Lib/hooks/useFilteredTableData";
 import { TableColumn } from "../types";
 import { useScroll } from "../Lib/hooks/useScroll";
+import StatisticsCell from "../Components/Tables/StatisticsCell/StatisticsCell";
 
 enum ContentTypesTableColumn {
   GUID = "guid",
@@ -32,6 +28,7 @@ enum ContentTypesTableColumn {
   Name = "name",
   Type = "type",
   UsageCount = "usageCount",
+  Statistics = "statistics",
   Actions = "actions",
 }
 
@@ -85,6 +82,12 @@ const ContentTypesView = () => {
       visible: true,
       filter: true,
     },
+    {
+      id: ContentTypesTableColumn.Statistics,
+      name: columns.statistics,
+      visible: true,
+      filter: false,
+    },
   ] as TableColumn<ContentTypeDto>[];
 
   const onTableRowClick = useCallback(
@@ -121,7 +124,7 @@ const ContentTypesView = () => {
     rows: contentTypes,
     initialTableColumns,
     initialContentTypeBases,
-    defaultVisiableColumn: "displayName"
+    defaultVisiableColumn: "displayName",
   });
 
   const handlePageChange = useCallback(
@@ -223,7 +226,12 @@ const ContentTypesView = () => {
                           .filter((column) => column.visible)
                           .map((column) => (
                             <Table.TD key={column.id}>
-                              {row[column.id]}
+                              {column.id.toString() ===
+                              ContentTypesTableColumn.Statistics ? (
+                                <StatisticsCell statistics={row.statistics} />
+                              ) : (
+                                row[column.id]
+                              )}
                             </Table.TD>
                           ))}
                         <Table.TD verticalAlign="middle">
