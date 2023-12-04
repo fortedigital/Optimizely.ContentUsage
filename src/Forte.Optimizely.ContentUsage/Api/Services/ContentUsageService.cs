@@ -37,6 +37,19 @@ public class ContentUsageService
 
         return pageUrls;
     }
+    
+    public IEnumerable<PageData> GetUsagePages(EPiServerContentUsage contentUsage)
+    {
+        var usagePageLinks = SearchUsagePages(contentUsage.ContentLink);
+
+        var pages = usagePageLinks.Select(usagePageLink =>
+        {
+            _contentLoader.TryGet<PageData>(usagePageLink, out var page);
+            return page;
+        }).Where(page => page != null);
+        
+        return pages;
+    }
 
     private IEnumerable<string> SearchForPageUrls(ContentReference contentLink, string languageBranch)
     {
@@ -55,6 +68,17 @@ public class ContentUsageService
         
         return pageUrls;
     }
+
+    private IEnumerable<ContentReference> SearchUsagePages(ContentReference contentLink)
+    {
+        var softLinks = _contentSoftLinkRepository.Load(contentLink, true);
+        var pageLinks = softLinks
+            .Where(softLink => softLink.SoftLinkType == ReferenceType.PageLinkReference)
+            .Select(softLink => softLink.OwnerContentLink)
+            .Where(ownerContentLink => ownerContentLink != null && CheckIsPublished(ownerContentLink));
+
+        return pageLinks;
+    } 
 
     public string GetEditUrl(EPiServerContentUsage contentUsage)
     {

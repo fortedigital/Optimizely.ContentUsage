@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Forte.Optimizely.ContentUsage.Api.Common;
 using Forte.Optimizely.ContentUsage.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -22,11 +23,14 @@ public class ContentTypeController : ControllerBase
 
     private readonly ContentTypeMapper _contentTypeMapper;
     private readonly ContentTypeService _contentTypeService;
+    private readonly ContentUsageService _contentUsageService;
 
-    public ContentTypeController(ContentTypeService contentTypeService, ContentTypeMapper contentTypeMapper)
+    public ContentTypeController(ContentTypeService contentTypeService, ContentTypeMapper contentTypeMapper,
+        ContentUsageService contentUsageService)
     {
         _contentTypeService = contentTypeService;
         _contentTypeMapper = contentTypeMapper;
+        _contentUsageService = contentUsageService;
     }
 
     [HttpGet]
@@ -39,7 +43,7 @@ public class ContentTypeController : ControllerBase
 
         if (contentType == null)
             return NotFound();
-            
+
         var contentTypeDto = _contentTypeMapper.Map(contentType);
 
         return Ok(contentTypeDto);
@@ -48,31 +52,46 @@ public class ContentTypeController : ControllerBase
     [HttpGet]
     [Route("[action]", Name = GetContentTypesRouteName)]
     [SwaggerResponse(StatusCodes.Status200OK, null, typeof(IEnumerable<ContentTypeDto>))]
-    public async Task<ActionResult> GetContentTypes([FromQuery] GetContentTypesQuery? query, CancellationToken cancellationToken)
+    public async Task<ActionResult> GetContentTypes([FromQuery] GetContentTypesQuery? query,
+        CancellationToken cancellationToken)
     {
         var contentTypesFilterCriteria = new ContentTypesFilterCriteria { Name = query?.Name, Type = query?.Type };
-        
+
         var contentTypes =
             _contentTypeService.GetAll(contentTypesFilterCriteria);
 
+        var contentTypeWithDtos = contentTypes.Select(contentType =>
+            new { ContentType = contentType, Dto = _contentTypeMapper.Map(contentType) });
+
         var contentTypesUsageCounters = await _contentTypeService.GetAllCounters(cancellationToken);
-        var contentTypeDtos = contentTypes.Select(_contentTypeMapper.Map);
+        contentTypeWithDtos = contentTypeWithDtos.Join(contentTypesUsageCounters, type => type.ContentType.ID,
+            counter => counter.ContentTypeId, (type, counter) =>
+            {
+                type.Dto.UsageCount = counter.Count;
+                return type;
+            });
 
-        contentTypeDtos = contentTypeDtos.Join(contentTypesUsageCounters, type => type.ID, counter => counter.ContentTypeId, (type, counter) =>
+        contentTypeWithDtos = query?.SortBy switch
         {
-            type.UsageCount = counter.Count;
-            return type;
-        });
-
-
-        contentTypeDtos = query?.SortBy switch
-        {
-            ContentTypesSorting.Name => contentTypeDtos.OrderBy(dto => dto.DisplayName ?? dto.Name),
-            ContentTypesSorting.UsageCount => contentTypeDtos.OrderBy(dto => dto.UsageCount),
-            _ => contentTypeDtos
+            ContentTypesSorting.Name => contentTypeWithDtos.OrderBy(type => type.Dto.DisplayName ?? type.Dto.Name),
+            ContentTypesSorting.UsageCount => contentTypeWithDtos.OrderBy(dto => dto.Dto.UsageCount),
+            _ => contentTypeWithDtos
         };
-        
-        
+
+        const int itemsPerPage = 25;
+        var contentTypeDtos = contentTypeWithDtos
+            .Paginate(query?.Page ?? 0, itemsPerPage)
+            .Select(type =>
+        {
+            var usages = _contentUsageService.GetContentUsages(type.ContentType);
+
+            type.Dto.Statistics = usages.SelectMany(usage => _contentUsageService.GetUsagePages(usage)
+                .GroupBy(page => page.PageTypeName)
+                .Select(group => new UsageStatisticDto { PageTypeName = group.Key, UsageCount = group.Count() })
+                .OrderByDescending(statistic => statistic.UsageCount));
+
+            return type.Dto;
+        });
 
         return Ok(contentTypeDtos);
     }
