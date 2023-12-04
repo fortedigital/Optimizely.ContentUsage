@@ -224,16 +224,18 @@ const ContentTypesView = () => {
                       >
                         {tableColumns
                           .filter((column) => column.visible)
-                          .map((column) => (
-                            <Table.TD key={column.id}>
-                              {column.id.toString() ===
-                              ContentTypesTableColumn.Statistics ? (
+                          .map((column) =>
+                            column.id.toString() ===
+                            ContentTypesTableColumn.Statistics ? (
+                              <Table.TD className="vertical-align--middle" key={column.id}>
                                 <StatisticsCell statistics={row.statistics} />
-                              ) : (
-                                row[column.id]
-                              )}
-                            </Table.TD>
-                          ))}
+                              </Table.TD>
+                            ) : (
+                              <Table.TD key={column.id}>
+                                {row[column.id]}
+                              </Table.TD>
+                            )
+                          )}
                         <Table.TD verticalAlign="middle">
                           <Dropdown
                             activator={

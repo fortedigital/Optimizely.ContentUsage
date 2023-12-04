@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Forte.Optimizely.ContentUsage.Api.Common;
 using Forte.Optimizely.ContentUsage.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -80,15 +79,15 @@ public class ContentTypeController : ControllerBase
 
         const int itemsPerPage = 25;
         var contentTypeDtos = contentTypeWithDtos
-            .Paginate(query?.Page ?? 0, itemsPerPage)
+            // .Paginate(query?.Page ?? 0, itemsPerPage)
             .Select(type =>
         {
             var usages = _contentUsageService.GetContentUsages(type.ContentType);
 
-            type.Dto.Statistics = usages.SelectMany(usage => _contentUsageService.GetUsagePages(usage)
+            type.Dto.Statistics = usages.SelectMany(usage => _contentUsageService.GetUsagePages(usage))
                 .GroupBy(page => page.PageTypeName)
                 .Select(group => new UsageStatisticDto { PageTypeName = group.Key, UsageCount = group.Count() })
-                .OrderByDescending(statistic => statistic.UsageCount));
+                .OrderByDescending(statistic => statistic.UsageCount);
 
             return type.Dto;
         });
