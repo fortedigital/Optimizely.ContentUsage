@@ -13,12 +13,15 @@ const StatisticsCell = ({ statistics }: PageUrlCellProps) => {
     0
   );
 
+  const isMultiStatistic = statistics.length > 1;
+
   return (
     <ol>
       {statistics.map((statistic, index) => (
         <li key={index}>
-          {statistic.pageTypeName}: {statistic.usageCount} (
-          {Math.round((statistic.usageCount / total) * 100)}%)
+          {statistic.pageTypeName}: {statistic.usageCount}
+          {isMultiStatistic &&
+            ` (${Math.round((statistic.usageCount / total) * 100)}%)`}
         </li>
       ))}
     </ol>
