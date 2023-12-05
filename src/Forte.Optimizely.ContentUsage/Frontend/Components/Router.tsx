@@ -27,9 +27,15 @@ interface LoadDataFunction {
   ): Promise<any> | Response;
 }
 
-const contentTypesLoader: LoadDataFunction = (api) => {
+const contentTypesLoader: LoadDataFunction = (
+  api,
+  initialLoad,
+  { request }
+) => {
   const contentTypeBases = api.getContentTypeBases();
-  const contentTypes = api.getContentTypes();
+
+  const query = Object.fromEntries(new URL(request.url).searchParams.entries());
+  const contentTypes = api.getContentTypes(query);
 
   return Promise.all([contentTypeBases, contentTypes]);
 };

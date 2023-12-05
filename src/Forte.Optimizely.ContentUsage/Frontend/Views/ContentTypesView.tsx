@@ -12,7 +12,11 @@ import { useLoaderData, useNavigate } from "react-router-dom";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import Layout from "../Components/Layout";
 import { viewContentTypeUsages } from "../routes";
-import { ContentTypeBaseDto, ContentTypeDto } from "../dtos";
+import {
+  ContentTypeBaseDto,
+  ContentTypeDto,
+  ContentTypesResponse,
+} from "../dtos";
 import Header from "../Components/Header";
 import Filters from "../Components/Filters/Filters";
 import { APIResponse } from "../Lib/ContentUsageAPIClient";
@@ -113,23 +117,26 @@ const ContentTypesView = () => {
     onContentTypeBaseChange,
     tableColumns,
     onTableColumnChange,
-    selectedRowsPerPage,
-    onRowsPerPageChange,
     sortDirection,
     onSortChange,
-    totalPages,
     currentPage,
     goToPage,
   } = useFilteredTableData({
     rows: contentTypes,
     initialTableColumns,
     initialContentTypeBases,
+    disableFrontendFiltering: true,
+    disableFrontendPagination: true,
+    disableFrontendSorting: true,
     defaultVisiableColumn: "displayName",
   });
+
+  const [totalPages, setTotalPages] = useState<number>();
 
   const handlePageChange = useCallback(
     (page: number) => {
       goToPage(page);
+      setDataLoaded(false);
       scrollTo(gridContainerRef.current);
     },
     [goToPage]
@@ -137,7 +144,7 @@ const ContentTypesView = () => {
 
   const response = useLoaderData() as [
     APIResponse<ContentTypeBaseDto[]>,
-    APIResponse<ContentTypeDto[]>
+    APIResponse<ContentTypesResponse>
   ];
 
   useEffect(() => {
@@ -157,7 +164,8 @@ const ContentTypesView = () => {
       }
 
       if (!contentTypesResponse.hasErrors && contentTypesResponse.data) {
-        setContentTypes(contentTypesResponse.data);
+        setContentTypes(contentTypesResponse.data.contentTypes);
+        setTotalPages(contentTypesResponse.data.totalPages);
       }
 
       setDataLoaded(true);
@@ -181,8 +189,6 @@ const ContentTypesView = () => {
               onContentTypeBaseChange={onContentTypeBaseChange}
               columns={tableColumns}
               onTableColumnChange={onTableColumnChange}
-              selectedRowsPerPage={selectedRowsPerPage}
-              onRowsPerPageChange={onRowsPerPageChange}
             />
           </GridCell>
 
@@ -285,7 +291,7 @@ const ContentTypesView = () => {
             </div>
           </GridCell>
 
-          {totalPages > 1 && (
+          {totalPages > 1 && dataLoaded && (
             <GridCell large={12} medium={8} small={4}>
               <PaginationControls
                 currentPage={currentPage}
