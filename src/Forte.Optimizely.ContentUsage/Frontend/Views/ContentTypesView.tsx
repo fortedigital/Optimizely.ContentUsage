@@ -170,7 +170,7 @@ const ContentTypesView = () => {
 
       setDataLoaded(true);
     }
-  }, [response, dataLoaded]);
+  }, [response]);
 
   return (
     <Layout>
