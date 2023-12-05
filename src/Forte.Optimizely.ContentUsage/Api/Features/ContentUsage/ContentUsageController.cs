@@ -47,12 +47,10 @@ public class ContentUsageController : ControllerBase
 
         var contentUsages = contentUsagesQuery.ToArray();
 
-        var currentPage = queryData.Page - 1;
-
         const int itemsPerPage = 25;
         var contentUsagesDto = contentUsages
             .Sort(queryData)
-            .Paginate(currentPage, itemsPerPage)
+            .PaginateFromPage1(queryData.Page, itemsPerPage)
             .Select(contentUsage => new ContentUsageDto
             {
                 Id = contentUsage.ContentLink.ID,

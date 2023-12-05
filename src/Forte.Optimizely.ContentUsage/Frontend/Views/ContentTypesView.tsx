@@ -148,7 +148,7 @@ const ContentTypesView = () => {
   ];
 
   useEffect(() => {
-    if (!dataLoaded && response && Array.isArray(response)) {
+    if (response) {
       const [contentTypeBasesResponse, contentTypesResponse] = response;
 
       if (
