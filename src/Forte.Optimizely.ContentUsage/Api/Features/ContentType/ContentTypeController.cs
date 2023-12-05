@@ -52,7 +52,7 @@ public class ContentTypeController : ControllerBase
     public async Task<ActionResult> GetContentTypes([FromQuery] GetContentTypesQuery? query,
         CancellationToken cancellationToken)
     {
-        var contentTypesFilterCriteria = new ContentTypesFilterCriteria { Name = query?.Name, Type = query?.Type };
+        var contentTypesFilterCriteria = new ContentTypesFilterCriteria { Name = query?.NamePhrase, Type = query?.Type };
 
         var contentTypes =
             _contentTypeService.GetAll(contentTypesFilterCriteria).ToArray();
