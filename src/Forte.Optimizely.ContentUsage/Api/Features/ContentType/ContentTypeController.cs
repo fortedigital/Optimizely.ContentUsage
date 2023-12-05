@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Forte.Optimizely.ContentUsage.Api.Common;
 using Forte.Optimizely.ContentUsage.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -20,16 +21,13 @@ public class ContentTypeController : ControllerBase
     public const string GetContentTypeRouteName = "ContentType";
     public const string GetContentTypesRouteName = "ContentTypes";
 
-    private readonly ContentTypeMapper _contentTypeMapper;
+    private readonly ContentTypeDtoBuilder _contentTypeDtoBuilder;
     private readonly ContentTypeService _contentTypeService;
-    private readonly ContentUsageService _contentUsageService;
 
-    public ContentTypeController(ContentTypeService contentTypeService, ContentTypeMapper contentTypeMapper,
-        ContentUsageService contentUsageService)
+    public ContentTypeController(ContentTypeService contentTypeService, ContentTypeDtoBuilder contentTypeDtoBuilder)
     {
         _contentTypeService = contentTypeService;
-        _contentTypeMapper = contentTypeMapper;
-        _contentUsageService = contentUsageService;
+        _contentTypeDtoBuilder = contentTypeDtoBuilder;
     }
 
     [HttpGet]
@@ -43,7 +41,7 @@ public class ContentTypeController : ControllerBase
         if (contentType == null)
             return NotFound();
 
-        var contentTypeDto = _contentTypeMapper.Map(contentType);
+        var contentTypeDto = _contentTypeDtoBuilder.Build(contentType);
 
         return Ok(contentTypeDto);
     }
@@ -57,41 +55,37 @@ public class ContentTypeController : ControllerBase
         var contentTypesFilterCriteria = new ContentTypesFilterCriteria { Name = query?.Name, Type = query?.Type };
 
         var contentTypes =
-            _contentTypeService.GetAll(contentTypesFilterCriteria);
-
-        var contentTypeWithDtos = contentTypes.Select(contentType =>
-            new { ContentType = contentType, Dto = _contentTypeMapper.Map(contentType) });
+            _contentTypeService.GetAll(contentTypesFilterCriteria).ToArray();
 
         var contentTypesUsageCounters = await _contentTypeService.GetAllCounters(cancellationToken);
-        contentTypeWithDtos = contentTypeWithDtos.Join(contentTypesUsageCounters, type => type.ContentType.ID,
-            counter => counter.ContentTypeId, (type, counter) =>
-            {
-                type.Dto.UsageCount = counter.Count;
-                return type;
-            });
+        var contentTypeWithCounters = contentTypes.Join(contentTypesUsageCounters, type => type.ID,
+            counter => counter.ContentTypeId,
+            (contentType, usageCount) => new { ContentType = contentType, UsageCount = usageCount.Count });
 
-        contentTypeWithDtos = query?.SortBy switch
+        contentTypeWithCounters = query?.SortBy switch
         {
-            ContentTypesSorting.Name => contentTypeWithDtos.OrderBy(type => type.Dto.DisplayName ?? type.Dto.Name),
-            ContentTypesSorting.UsageCount => contentTypeWithDtos.OrderBy(dto => dto.Dto.UsageCount),
-            _ => contentTypeWithDtos
+            ContentTypesSorting.Name => contentTypeWithCounters.OrderBy(type =>
+                type.ContentType.DisplayName ?? type.ContentType.Name),
+            ContentTypesSorting.UsageCount => contentTypeWithCounters.OrderBy(type => type.UsageCount),
+            _ => contentTypeWithCounters
         };
 
         const int itemsPerPage = 25;
-        var contentTypeDtos = contentTypeWithDtos
-            // .Paginate(query?.Page ?? 0, itemsPerPage)
+
+        var contentTypeDtos = contentTypeWithCounters
+            .Paginate(query?.Page ?? 0, itemsPerPage)
             .Select(type =>
+            {
+                var dto = _contentTypeDtoBuilder.Build(type.ContentType);
+                dto.UsageCount = type.UsageCount;
+
+                return dto;
+            });
+
+        return Ok(new ContentTypesResponse
         {
-            var usages = _contentUsageService.GetContentUsages(type.ContentType);
-
-            type.Dto.Statistics = usages.SelectMany(usage => _contentUsageService.GetUsagePages(usage))
-                .GroupBy(page => page.PageTypeName)
-                .Select(group => new UsageStatisticDto { PageTypeName = group.Key, UsageCount = group.Count() })
-                .OrderByDescending(statistic => statistic.UsageCount);
-
-            return type.Dto;
+            ContentTypes = contentTypeDtos,
+            TotalPages = contentTypes.GetPageCount(itemsPerPage)
         });
-
-        return Ok(contentTypeDtos);
     }
 }
