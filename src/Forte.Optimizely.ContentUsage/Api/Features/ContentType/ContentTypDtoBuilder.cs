@@ -26,7 +26,7 @@ public class ContentTypeDtoBuilder
         var usages = _contentUsageService.GetContentUsages(contentType);
 
         dto.Statistics = usages.SelectMany(usage => _contentUsageService.GetUsagePages(usage))
-            .GroupBy(page => page.PageTypeName)
+            .GroupBy(usagePage => usagePage.Page.PageTypeName)
             .Select(group => new UsageStatisticDto { PageTypeName = group.Key, UsageCount = group.Count() })
             .OrderByDescending(statistic => statistic.UsageCount);
 

@@ -29,34 +29,26 @@ public class ContentUsageService
         _publishedStateAssessor = publishedStateAssessor;
     }
 
-    public IEnumerable<string> GetPageUrls(EPiServerContentUsage contentUsage)
+    public IEnumerable<UsagePage> GetUsagePages(EPiServerContentUsage contentUsage)
     {
-        var contentLink = contentUsage.ContentLink;
-     
-        var pageUrls = SearchForPageUrls(contentLink, contentUsage.LanguageBranch);
+        var usagePages = SearchForUsagePages(contentUsage.ContentLink, contentUsage.LanguageBranch);
 
-        return pageUrls;
-    }
-    
-    public IEnumerable<PageData> GetUsagePages(EPiServerContentUsage contentUsage)
-    {
-        var usagePageLinks = SearchUsagePages(contentUsage.ContentLink);
-
-        var pages = usagePageLinks.Select(usagePageLink =>
-        {
-            _contentLoader.TryGet<PageData>(usagePageLink, out var page);
-            return page;
-        }).Where(page => page != null);
-        
-        return pages;
+        return usagePages;
     }
 
-    private IEnumerable<string> SearchForPageUrls(ContentReference contentLink, string languageBranch)
+    private IEnumerable<UsagePage> SearchForUsagePages(ContentReference contentLink, string languageBranch)
     {
         var url = _urlResolver.GetUrl(contentLink, languageBranch);
 
-        if (!string.IsNullOrEmpty(url)) 
-            return CheckIsPublished(contentLink) ? new[] { url } : new string[] { };
+        if (!string.IsNullOrEmpty(url))
+        {
+            _contentLoader.TryGet<PageData>(contentLink, out var page);
+
+            if (page == null || !CheckIsPublished(page))
+                return new UsagePage[] { };
+
+            return new[] { new UsagePage { Url = url, Page = page } };
+        }
 
         var softLinks = _contentSoftLinkRepository.Load(contentLink, true);
         var pageLinks = softLinks
@@ -64,21 +56,10 @@ public class ContentUsageService
             .Select(softLink => softLink.OwnerContentLink)
             .Where(ownerContentLink => ownerContentLink != null && CheckIsPublished(ownerContentLink));
 
-        var pageUrls = pageLinks.SelectMany(pageLink => SearchForPageUrls(pageLink, languageBranch));
-        
+        var pageUrls = pageLinks.SelectMany(pageLink => SearchForUsagePages(pageLink, languageBranch));
+
         return pageUrls;
     }
-
-    private IEnumerable<ContentReference> SearchUsagePages(ContentReference contentLink)
-    {
-        var softLinks = _contentSoftLinkRepository.Load(contentLink, true);
-        var pageLinks = softLinks
-            .Where(softLink => softLink.SoftLinkType == ReferenceType.PageLinkReference)
-            .Select(softLink => softLink.OwnerContentLink)
-            .Where(ownerContentLink => ownerContentLink != null && CheckIsPublished(ownerContentLink));
-
-        return pageLinks;
-    } 
 
     public string GetEditUrl(EPiServerContentUsage contentUsage)
     {
@@ -101,6 +82,17 @@ public class ContentUsageService
     {
         var content = _contentLoader.Get<IContent>(contentLink);
 
+        return CheckIsPublished(content);
+    }
+
+    private bool CheckIsPublished(IContent content)
+    {
         return _publishedStateAssessor.IsPublished(content);
     }
+}
+
+public class UsagePage
+{
+    public string Url { get; set; }
+    public PageData Page { get; set; }
 }
