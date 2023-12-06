@@ -248,7 +248,7 @@ const ContentTypesView = () => {
                               </Table.TD>
                             )
                           )}
-                        <Table.TD verticalAlign="middle">
+                        <Table.TD>
                           <Dropdown
                             activator={
                               <ButtonIcon
