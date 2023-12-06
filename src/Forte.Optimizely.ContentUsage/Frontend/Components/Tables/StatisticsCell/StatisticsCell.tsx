@@ -16,7 +16,7 @@ const StatisticsCell = ({ statistics }: PageUrlCellProps) => {
   const isMultiStatistic = statistics.length > 1;
 
   return (
-    <ol>
+    <ol className="pointer-events--none">
       {statistics.map((statistic, index) => (
         <li key={index}>
           {statistic.pageTypeName}: {statistic.usageCount}
