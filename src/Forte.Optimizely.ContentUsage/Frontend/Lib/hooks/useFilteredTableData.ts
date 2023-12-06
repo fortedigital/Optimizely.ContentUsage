@@ -622,7 +622,7 @@ export function useFilteredTableData<TableDataType>({
       );
     }
     setDatasetChanged(true);
-  }, [rows, initialContentTypeBases]);
+  }, [initialContentTypeBases]);
 
   useEffect(() => {
     if (datasetChanged && rows.length > 0 && totalPages > 0) {
