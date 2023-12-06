@@ -14,13 +14,17 @@ const PageUrlCell = ({ pages, urlHoveredHandlers }: PageUrlCellProps) => {
 
   return isManyUrls ? (
     <Disclose title="Many usages">
-      {pages.map((page, index) => (
-        <PageUrlLink
-          key={index}
-          page={page}
-          urlHoveredHandlers={urlHoveredHandlers}
-        />
-      ))}
+      <ul>
+        {pages.map((page, index) => (
+          <li>
+            <PageUrlLink
+              key={index}
+              page={page}
+              urlHoveredHandlers={urlHoveredHandlers}
+            />
+          </li>
+        ))}
+      </ul>
     </Disclose>
   ) : (
     <>
