@@ -68,7 +68,7 @@ public class ContentTypeController : ControllerBase
         const int itemsPerPage = 25;
 
         var contentTypeDtos = contentTypeWithCounters
-            .PaginateFromPage1(query?.Page ?? 1, itemsPerPage)
+            .Paginate(query?.Page ?? 1, itemsPerPage)
             .Select(type =>
             {
                 var dto = _contentTypeDtoBuilder.Build(type.ContentType);

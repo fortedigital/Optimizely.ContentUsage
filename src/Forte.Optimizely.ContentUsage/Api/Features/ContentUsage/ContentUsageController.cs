@@ -50,7 +50,7 @@ public class ContentUsageController : ControllerBase
         const int itemsPerPage = 25;
         var contentUsagesDto = contentUsages
             .Sort(queryData)
-            .PaginateFromPage1(queryData.Page, itemsPerPage)
+            .Paginate(queryData.Page, itemsPerPage)
             .Select(contentUsage => new ContentUsageDto
             {
                 Id = contentUsage.ContentLink.ID,
