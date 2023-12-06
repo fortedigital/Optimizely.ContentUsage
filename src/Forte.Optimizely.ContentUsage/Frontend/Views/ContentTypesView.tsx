@@ -61,36 +61,42 @@ const ContentTypesView = () => {
       name: columns.guid,
       visible: false,
       filter: true,
+      sorting: false,
     },
     {
       id: ContentTypesTableColumn.Name,
       name: columns.name,
       visible: true,
       filter: true,
+      sorting: true,
     },
     {
       id: ContentTypesTableColumn.DisplayName,
       name: columns.displayName,
       visible: true,
       filter: true,
+      sorting: false,
     },
     {
       id: ContentTypesTableColumn.Type,
       name: columns.type,
       visible: true,
       filter: true,
+      sorting: false,
     },
     {
       id: ContentTypesTableColumn.UsageCount,
       name: columns.usageCount,
       visible: true,
       filter: true,
+      sorting: true,
     },
     {
       id: ContentTypesTableColumn.Statistics,
       name: columns.statistics,
       visible: true,
       filter: false,
+      sorting: false,
     },
   ] as TableColumn<ContentTypeDto>[];
 
@@ -205,7 +211,7 @@ const ContentTypesView = () => {
                       .map((column) => (
                         <Table.TH
                           sorting={{
-                            canSort: true,
+                            canSort: column.sorting,
                             handleSort: () => onSortChange(column),
                             order: sortDirection,
                           }}

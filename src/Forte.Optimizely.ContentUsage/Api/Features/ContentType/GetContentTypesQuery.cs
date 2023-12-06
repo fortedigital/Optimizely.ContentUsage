@@ -1,4 +1,5 @@
-﻿using Forte.Optimizely.ContentUsage.Api.Common;
+﻿using Forte.EpiContentUsage.Api.Common;
+using Forte.Optimizely.ContentUsage.Api.Common;
 using Microsoft.AspNetCore.Mvc;
 using Reinforced.Typings.Attributes;
 
@@ -14,4 +15,5 @@ public class GetContentTypesQuery
 
     public int Page { get; set; }
     public ContentTypesSorting? SortBy { get; set; }
+    public SortDirection Order { get; set; }
 }

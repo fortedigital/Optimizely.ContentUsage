@@ -52,23 +52,18 @@ public class ContentTypeController : ControllerBase
     public async Task<ActionResult> GetContentTypes([FromQuery] GetContentTypesQuery? query,
         CancellationToken cancellationToken)
     {
-        var contentTypesFilterCriteria = new ContentTypesFilterCriteria { Name = query?.NamePhrase, Types = query?.Types };
+        var contentTypesFilterCriteria = new ContentTypesFilterCriteria
+            { Name = query?.NamePhrase, Types = query?.Types };
 
         var contentTypes =
             _contentTypeService.GetAll(contentTypesFilterCriteria).ToArray();
 
         var contentTypesUsageCounters = await _contentTypeService.GetAllCounters(cancellationToken);
+
         var contentTypeWithCounters = contentTypes.Join(contentTypesUsageCounters, type => type.ID,
             counter => counter.ContentTypeId,
-            (contentType, usageCount) => new { ContentType = contentType, UsageCount = usageCount.Count });
-
-        contentTypeWithCounters = query?.SortBy switch
-        {
-            ContentTypesSorting.Name => contentTypeWithCounters.OrderBy(type =>
-                type.ContentType.DisplayName ?? type.ContentType.Name),
-            ContentTypesSorting.UsageCount => contentTypeWithCounters.OrderBy(type => type.UsageCount),
-            _ => contentTypeWithCounters
-        };
+            (contentType, usageCount) => new ContentTypeWithCounter
+                { ContentType = contentType, UsageCount = usageCount.Count }).Sort(query);
 
         const int itemsPerPage = 25;
 
