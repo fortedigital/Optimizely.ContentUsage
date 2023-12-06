@@ -14,7 +14,7 @@ const PageUrlCell = ({ pages, urlHoveredHandlers }: PageUrlCellProps) => {
 
   return isManyUrls ? (
     <Disclose title="Many usages">
-      <ul>
+      <ul className="forte-optimizely-content-usage-page-urls">
         {pages.map((page, index) => (
           <li>
             <PageUrlLink
