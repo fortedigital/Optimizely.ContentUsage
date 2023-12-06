@@ -56,7 +56,7 @@ public class ContentTypeService
                  t.DisplayName.Contains(filterCriteria.Name, StringComparison.InvariantCultureIgnoreCase)) ||
                 t.Name.Contains(filterCriteria.Name, StringComparison.InvariantCultureIgnoreCase));
 
-        if (filterCriteria?.Types?.Any(type => !string.IsNullOrEmpty(type)) ?? false)
+        if (filterCriteria?.Types != null)
             filteredContentTypes = filteredContentTypes.Where(t =>
                 !string.IsNullOrEmpty(t.Base.ToString()) && filterCriteria.Types.Any(filterType =>
                     t.Base.ToString().Equals(filterType, StringComparison.InvariantCultureIgnoreCase))

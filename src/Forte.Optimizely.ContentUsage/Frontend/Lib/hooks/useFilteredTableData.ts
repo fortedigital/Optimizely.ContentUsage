@@ -164,14 +164,23 @@ export function useFilteredTableData<TableDataType>({
       //Content type bases
       if (changesTracker.contentTypeBases) {
         prevSearchParams.delete(FilteredTableDataQueryParam.ContentTypeBase);
-        contentTypeBases
-          .filter((contentTypeBase) => contentTypeBase.visible)
-          .forEach((contentTypeBase) =>
+        const visibleContentTypeBases = contentTypeBases.filter(
+          (contentTypeBase) => contentTypeBase.visible
+        );
+
+        if (!visibleContentTypeBases.length) {
+          prevSearchParams.append(
+            FilteredTableDataQueryParam.ContentTypeBase,
+            ""
+          );
+        } else if (visibleContentTypeBases.length < contentTypeBases.length) {
+          visibleContentTypeBases.forEach((contentTypeBase) =>
             prevSearchParams.append(
               FilteredTableDataQueryParam.ContentTypeBase,
               contentTypeBase.name
             )
           );
+        }
       }
 
       triggerUpdate.current = false;
