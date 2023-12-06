@@ -1,4 +1,6 @@
-﻿using Reinforced.Typings.Attributes;
+﻿using Forte.Optimizely.ContentUsage.Api.Common;
+using Microsoft.AspNetCore.Mvc;
+using Reinforced.Typings.Attributes;
 
 namespace Forte.Optimizely.ContentUsage.Api.Features.ContentType;
 
@@ -6,7 +8,10 @@ namespace Forte.Optimizely.ContentUsage.Api.Features.ContentType;
 public class GetContentTypesQuery
 {
     public string? NamePhrase { get; set; }
-    public string? Type { get; set; }
+
+    [ModelBinder(BinderType = typeof(CommaSeparatedModelBinder))]
+    public string[] Types { get; set; }
+
     public int Page { get; set; }
     public ContentTypesSorting? SortBy { get; set; }
 }

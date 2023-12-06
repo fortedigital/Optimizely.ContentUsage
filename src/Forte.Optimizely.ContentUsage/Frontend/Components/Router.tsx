@@ -14,6 +14,7 @@ import ContentTypesView from "../Views/ContentTypesView";
 import ContentTypeUsageView from "../Views/ContentTypeUsageView";
 import PageLoader from "./PageLoader/PageLoader";
 import { useAPI } from "../Contexts/ApiProvider";
+import { GetContentTypesQuery } from "../dtos";
 
 interface RouterProps {
   baseUrl: string;
@@ -34,7 +35,16 @@ const contentTypesLoader: LoadDataFunction = (
 ) => {
   const contentTypeBases = api.getContentTypeBases();
 
-  const query = Object.fromEntries(new URL(request.url).searchParams.entries());
+  const typeRouteParamKey = "type";
+  const searchParams = new URL(request.url).searchParams;
+  const queryTypes = searchParams.getAll(typeRouteParamKey);
+  searchParams.delete(typeRouteParamKey);
+  const query = Object.fromEntries(
+    searchParams
+  ) as Partial<GetContentTypesQuery>;
+
+  if (queryTypes.length) query.types = queryTypes;
+
   const contentTypes = api.getContentTypes(query);
 
   return Promise.all([contentTypeBases, contentTypes]);

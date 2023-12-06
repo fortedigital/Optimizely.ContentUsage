@@ -344,6 +344,12 @@ export function useFilteredTableData<TableDataType>({
         newContentTypeBases[contentTypeBaseIndex].visible = !visible;
       }
 
+      setChangesTracker({
+        ...changesTracker,
+        contentTypeBases: true,
+        currentPage: true,
+      });
+      triggerUpdate.current = false;
       setPageToStart();
       setContentTypeBases(newContentTypeBases);
     },
@@ -517,6 +523,8 @@ export function useFilteredTableData<TableDataType>({
           });
 
           return newContentTypeBases;
+
+
         });
       } else {
         setContentTypeBases(initialContentTypeBases);
