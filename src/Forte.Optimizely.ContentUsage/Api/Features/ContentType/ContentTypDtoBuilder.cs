@@ -1,18 +1,21 @@
 ﻿using System.Linq;
-using Forte.Optimizely.ContentUsage.Api.Services;
+using System.Threading;
+using System.Threading.Tasks;
+using EPiServer.DataAbstraction;
 
 namespace Forte.Optimizely.ContentUsage.Api.Features.ContentType;
 
 public class ContentTypeDtoBuilder
 {
-    private readonly ContentUsageService _contentUsageService;
+    private readonly ContentTypeUsagesRepository _contentTypeUsagesRepository;
 
-    public ContentTypeDtoBuilder(ContentUsageService contentUsageService)
+    public ContentTypeDtoBuilder(ContentTypeUsagesRepository contentTypeUsagesRepository)
     {
-        _contentUsageService = contentUsageService;
+        _contentTypeUsagesRepository = contentTypeUsagesRepository;
     }
 
-    public ContentTypeDto Build(EPiServer.DataAbstraction.ContentType contentType)
+    public async Task<ContentTypeDto> Build(EPiServer.DataAbstraction.ContentType contentType,
+        CancellationToken cancellationToken)
     {
         var dto = new ContentTypeDto
         {
@@ -20,15 +23,19 @@ public class ContentTypeDtoBuilder
             DisplayName = contentType.DisplayName,
             Name = contentType.Name,
             Guid = contentType.GUID,
-            Type = contentType.Base.ToString()
+            Type = contentType.Base.ToString(),
+            Statistics = new UsageStatisticDto[] { }
         };
 
-        var usages = _contentUsageService.GetContentUsages(contentType);
+        if (contentType is not BlockType blockType)
+            return dto;
 
-        dto.Statistics = usages.SelectMany(usage => _contentUsageService.GetUsagePages(usage))
-            .GroupBy(usagePage => usagePage.Page.PageTypeName)
+        var usagePages = await _contentTypeUsagesRepository.GetUsagePages(blockType, cancellationToken);
+
+        dto.Statistics = usagePages
+            .GroupBy(usagePage => usagePage.PageType)
             .Select(group => new UsageStatisticDto { PageTypeName = group.Key, UsageCount = group.Count() })
-            .OrderByDescending(statistic => statistic.UsageCount);
+            .OrderByDescending(statistic => statistic.UsageCount).ToArray();
 
         return dto;
     }
