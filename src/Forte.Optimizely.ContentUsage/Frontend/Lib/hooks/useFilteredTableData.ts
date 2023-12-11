@@ -4,7 +4,7 @@ import { ROWS_PER_PAGE_DEFAULT_OPTIONS } from "../../Components/Filters/NumberOf
 import { ContentTypeBase, SortDirection, TableColumn } from "../../types";
 import { useDebounce } from "./useDebounce";
 
-enum FilteredTableDataQueryParam {
+export enum FilteredTableDataQueryParam {
   SortBy = "sortBy",
   Order = "order",
   NamePhrase = "namePhrase",

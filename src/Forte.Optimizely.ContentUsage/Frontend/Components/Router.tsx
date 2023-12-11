@@ -15,6 +15,7 @@ import ContentTypeUsageView from "../Views/ContentTypeUsageView";
 import PageLoader from "./PageLoader/PageLoader";
 import { useAPI } from "../Contexts/ApiProvider";
 import { GetContentTypesQuery } from "../dtos";
+import { FilteredTableDataQueryParam } from "../Lib/hooks/useFilteredTableData";
 
 interface RouterProps {
   baseUrl: string;
@@ -35,7 +36,7 @@ const contentTypesLoader: LoadDataFunction = (
 ) => {
   const contentTypeBases = api.getContentTypeBases();
 
-  const typeRouteParamKey = "type";
+  const typeRouteParamKey = FilteredTableDataQueryParam.ContentTypeBase;
   const searchParams = new URL(request.url).searchParams;
   const queryTypes = searchParams.getAll(typeRouteParamKey);
   searchParams.delete(typeRouteParamKey);
