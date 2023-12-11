@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Forte.EpiContentUsage.Api.Common;
+using Forte.Optimizely.ContentUsage.Api.Extensions;
 
 namespace Forte.Optimizely.ContentUsage.Api.Features.ContentType;
 

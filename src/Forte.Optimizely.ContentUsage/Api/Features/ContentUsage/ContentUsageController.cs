@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using EPiServer.DataAbstraction;
-using Forte.Optimizely.ContentUsage.Api.Common;
+using Forte.Optimizely.ContentUsage.Api.Extensions;
 using Forte.Optimizely.ContentUsage.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
