@@ -104,10 +104,10 @@ GROUP BY cT.ID, ContentTypeUsageTable.ContentTypeId";
         }));
     }
 
-    public async Task<IEnumerable<UsagePage>> GetUsagePages(BlockType contentType, CancellationToken cancellationToken)
+    public IEnumerable<UsagePageReference> GetUsagePages(BlockType contentType)
     {
         var executor = _dataExecutorAccessor();
-        return await executor.ExecuteAsync(async () =>
+        return executor.Execute(() =>
         {
             var command = executor.CreateCommand();
             command.CommandText = @"
@@ -144,11 +144,11 @@ AND (tblWorkContent.StopPublish IS NULL OR tblWorkContent.StopPublish > @NowTime
             command.Parameters.Add(executor.CreateParameter("NowTime",
                 _databaseDateTimeHandler.ConvertToDatabase(DateTime.Now)));
 
-            var usagePages = new List<UsagePage>();
-            await using var dbDataReader = await command.ExecuteReaderAsync(cancellationToken);
-            while (await dbDataReader.ReadAsync(cancellationToken))
+            var usagePages = new List<UsagePageReference>();
+            using var dbDataReader = command.ExecuteReader();
+            while (dbDataReader.Read())
             {
-                var contentTypeUsageCounter = new UsagePage
+                var contentTypeUsageCounter = new UsagePageReference
                 {
                     ContentLink = new ContentReference((int)dbDataReader["OwnerContentID"]),
                     PageType = (string)dbDataReader["OwnerContentName"]
@@ -160,10 +160,4 @@ AND (tblWorkContent.StopPublish IS NULL OR tblWorkContent.StopPublish > @NowTime
             return usagePages;
         });
     }
-}
-
-public class UsagePage
-{
-    public ContentReference ContentLink { get; set; }
-    public string PageType { get; set; }
 }

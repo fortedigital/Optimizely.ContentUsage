@@ -34,15 +34,14 @@ public class ContentTypeController : ControllerBase
     [Route("[action]", Name = GetContentTypeRouteName)]
     [SwaggerResponse(StatusCodes.Status200OK, null, typeof(ContentTypeDto))]
     [SwaggerResponse(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult> GetContentType([FromQuery] [BindRequired] Guid guid,
-        CancellationToken cancellationToken)
+    public ActionResult GetContentType([FromQuery] [BindRequired] Guid guid)
     {
         var contentType = _contentTypeService.Get(guid);
 
         if (contentType == null)
             return NotFound();
 
-        var contentTypeDto = await _contentTypeDtoBuilder.Build(contentType, cancellationToken);
+        var contentTypeDto = _contentTypeDtoBuilder.Build(contentType);
 
         return Ok(contentTypeDto);
     }
@@ -68,15 +67,15 @@ public class ContentTypeController : ControllerBase
 
         const int itemsPerPage = 25;
 
-        var contentTypeDtos = await Task.WhenAll(contentTypeWithCounters
+        var contentTypeDtos = contentTypeWithCounters
             .Paginate(query?.Page ?? 1, itemsPerPage)
-            .Select(async type =>
+            .Select(type =>
             {
-                var dto = await _contentTypeDtoBuilder.Build(type.ContentType, cancellationToken);
+                var dto = _contentTypeDtoBuilder.Build(type.ContentType);
                 dto.UsageCount = type.UsageCount;
 
                 return dto;
-            }));
+            });
 
         return Ok(new ContentTypesResponse
         {

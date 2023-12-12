@@ -1,6 +1,5 @@
-﻿using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System;
+using System.Linq;
 using EPiServer.DataAbstraction;
 
 namespace Forte.Optimizely.ContentUsage.Api.Features.ContentType;
@@ -14,8 +13,7 @@ public class ContentTypeDtoBuilder
         _contentTypeUsagesRepository = contentTypeUsagesRepository;
     }
 
-    public async Task<ContentTypeDto> Build(EPiServer.DataAbstraction.ContentType contentType,
-        CancellationToken cancellationToken)
+    public ContentTypeDto Build(EPiServer.DataAbstraction.ContentType contentType)
     {
         var dto = new ContentTypeDto
         {
@@ -24,18 +22,18 @@ public class ContentTypeDtoBuilder
             Name = contentType.Name,
             Guid = contentType.GUID,
             Type = contentType.Base.ToString(),
-            Statistics = new UsageStatisticDto[] { }
+            Statistics = Array.Empty<UsageStatisticDto>()
         };
 
         if (contentType is not BlockType blockType)
             return dto;
 
-        var usagePages = await _contentTypeUsagesRepository.GetUsagePages(blockType, cancellationToken);
-
+        var usagePages = _contentTypeUsagesRepository.GetUsagePages(blockType);
+        
         dto.Statistics = usagePages
             .GroupBy(usagePage => usagePage.PageType)
             .Select(group => new UsageStatisticDto { PageTypeName = group.Key, UsageCount = group.Count() })
-            .OrderByDescending(statistic => statistic.UsageCount).ToArray();
+            .OrderByDescending(statistic => statistic.UsageCount);
 
         return dto;
     }
