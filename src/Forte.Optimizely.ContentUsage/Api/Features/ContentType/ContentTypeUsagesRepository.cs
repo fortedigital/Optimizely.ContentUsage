@@ -2,22 +2,27 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using EPiServer.Core;
 using EPiServer.Data;
+using EPiServer.DataAbstraction;
 using EPiServer.ServiceLocation;
 
 namespace Forte.Optimizely.ContentUsage.Api.Features.ContentType;
 
-public class ContentTypeUsagesRepository 
+public class ContentTypeUsagesRepository
 {
-	private readonly ServiceAccessor<IAsyncDatabaseExecutor> _dataExecutorAccessor;
+    private readonly DatabaseDateTimeHandler _databaseDateTimeHandler;
+    private readonly ServiceAccessor<IAsyncDatabaseExecutor> _dataExecutorAccessor;
 
-    public ContentTypeUsagesRepository(ServiceAccessor<IAsyncDatabaseExecutor> dataExecutorAccessor)
+    public ContentTypeUsagesRepository(ServiceAccessor<IAsyncDatabaseExecutor> dataExecutorAccessor,
+        DatabaseDateTimeHandler databaseDateTimeHandler)
     {
-	    _dataExecutorAccessor = dataExecutorAccessor;
+        _dataExecutorAccessor = dataExecutorAccessor;
+        _databaseDateTimeHandler = databaseDateTimeHandler;
     }
 
     public async Task<IEnumerable<ContentTypeUsageCounter>> ListContentTypesUsagesCounters(
-	    CancellationToken cancellationToken)
+        CancellationToken cancellationToken)
     {
         var executor = _dataExecutorAccessor();
         return await executor.ExecuteAsync((Func<Task<IEnumerable<ContentTypeUsageCounter>>>)(async () =>
@@ -86,17 +91,73 @@ GROUP BY cT.ID, ContentTypeUsageTable.ContentTypeId";
             await using var dbDataReader = await command1.ExecuteReaderAsync(cancellationToken);
             while (await dbDataReader.ReadAsync(cancellationToken))
             {
-	            var contentTypeUsageCounter = new ContentTypeUsageCounter
-	            {
+                var contentTypeUsageCounter = new ContentTypeUsageCounter
+                {
+                    ContentTypeId = (int)dbDataReader["ContentTypeId"],
+                    Count = (int)dbDataReader["Count"]
+                };
 
-		            ContentTypeId = (int)dbDataReader["ContentTypeId"],
-		            Count = (int)dbDataReader["Count"]
-	            };
-
-	            contentTypeUsageCounters.Add(contentTypeUsageCounter);
+                contentTypeUsageCounters.Add(contentTypeUsageCounter);
             }
 
             return contentTypeUsageCounters;
         }));
+    }
+
+    public IEnumerable<UsagePageReference> GetUsagePages(BlockType contentType)
+    {
+        var executor = _dataExecutorAccessor();
+        return executor.Execute(() =>
+        {
+            var command = executor.CreateCommand();
+            command.CommandText = @"
+DECLARE @Usages TABLE (ContentID int, WorkID int, [Name] nvarchar(255), LanguageBranch nchar(17))
+INSERT @Usages EXEC netPageTypeGetUsage @PageTypeID,@OnlyPublished=1
+
+;WITH OwnerContent_CTE AS (
+	SELECT U.ContentID, tblContentSoftlink.fkOwnerContentID AS OwnerContentId
+	FROM @Usages U
+	INNER JOIN tblContent ON tblContent.pkID = U.ContentId
+	INNER JOIN tblContentSoftlink ON tblContentSoftlink.fkReferencedContentGUID = tblContent.ContentGUID
+	WHERE tblContentSoftlink.LinkType=1
+
+	UNION ALL
+
+	SELECT OwnerContent_CTE.ContentID, tblContentSoftlink.fkOwnerContentID AS OwnerContentId
+	FROM OwnerContent_CTE
+	INNER JOIN tblContent ON tblContent.pkID = OwnerContent_CTE.OwnerContentID
+	INNER JOIN tblContentSoftlink ON tblContentSoftlink.fkReferencedContentGUID = tblContent.ContentGUID
+	WHERE tblContentSoftlink.LinkType=1
+		AND tblContent.ContentType=1
+)
+SELECT OwnerContent_CTE.ContentID, OwnerContent_CTE.OwnerContentID, tblContentType.Name AS OwnerContentName
+FROM OwnerContent_CTE
+INNER JOIN tblContent ON tblContent.pkID = OwnerContent_CTE.OwnerContentId
+INNER JOIN tblContentType ON tblContentType.pkID = tblContent.fkContentTypeID
+INNER JOIN tblWorkContent ON tblWorkContent.fkContentID = OwnerContent_CTE.OwnerContentId
+WHERE tblContent.ContentType = 0
+AND tblWorkContent.Status=4
+AND (tblWorkContent.StopPublish IS NULL OR tblWorkContent.StopPublish > @NowTime)
+";
+
+            command.Parameters.Add(executor.CreateParameter("PageTypeID", contentType.ID));
+            command.Parameters.Add(executor.CreateParameter("NowTime",
+                _databaseDateTimeHandler.ConvertToDatabase(DateTime.Now)));
+
+            var usagePages = new List<UsagePageReference>();
+            using var dbDataReader = command.ExecuteReader();
+            while (dbDataReader.Read())
+            {
+                var contentTypeUsageCounter = new UsagePageReference
+                {
+                    ContentLink = new ContentReference((int)dbDataReader["OwnerContentID"]),
+                    PageType = (string)dbDataReader["OwnerContentName"]
+                };
+
+                usagePages.Add(contentTypeUsageCounter);
+            }
+
+            return usagePages;
+        });
     }
 }

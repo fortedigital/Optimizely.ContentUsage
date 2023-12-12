@@ -14,6 +14,8 @@ import ContentTypesView from "../Views/ContentTypesView";
 import ContentTypeUsageView from "../Views/ContentTypeUsageView";
 import PageLoader from "./PageLoader/PageLoader";
 import { useAPI } from "../Contexts/ApiProvider";
+import { GetContentTypesQuery } from "../dtos";
+import { FilteredTableDataQueryParam } from "../Lib/hooks/useFilteredTableData";
 
 interface RouterProps {
   baseUrl: string;
@@ -27,9 +29,24 @@ interface LoadDataFunction {
   ): Promise<any> | Response;
 }
 
-const contentTypesLoader: LoadDataFunction = (api) => {
+const contentTypesLoader: LoadDataFunction = (
+  api,
+  initialLoad,
+  { request }
+) => {
   const contentTypeBases = api.getContentTypeBases();
-  const contentTypes = api.getContentTypes();
+
+  const typeRouteParamKey = FilteredTableDataQueryParam.ContentTypeBase;
+  const searchParams = new URL(request.url).searchParams;
+  const queryTypes = searchParams.getAll(typeRouteParamKey);
+  searchParams.delete(typeRouteParamKey);
+  const query = Object.fromEntries(
+    searchParams
+  ) as Partial<GetContentTypesQuery>;
+
+  if (queryTypes.length) query.types = queryTypes;
+
+  const contentTypes = api.getContentTypes(query);
 
   return Promise.all([contentTypeBases, contentTypes]);
 };

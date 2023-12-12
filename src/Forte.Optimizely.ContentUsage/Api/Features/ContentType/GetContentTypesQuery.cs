@@ -1,9 +1,19 @@
-﻿
+﻿using Forte.EpiContentUsage.Api.Common;
+using Forte.Optimizely.ContentUsage.Api.Common;
+using Microsoft.AspNetCore.Mvc;
+using Reinforced.Typings.Attributes;
+
 namespace Forte.Optimizely.ContentUsage.Api.Features.ContentType;
 
+[TsInterface]
 public class GetContentTypesQuery
 {
-    public string? Name { get; set; }
-    public string? Type { get; set; }
+    public string? NamePhrase { get; set; }
+
+    [ModelBinder(BinderType = typeof(CommaSeparatedModelBinder))]
+    public string[] Types { get; set; }
+
+    public int Page { get; set; }
     public ContentTypesSorting? SortBy { get; set; }
+    public SortDirection Order { get; set; }
 }

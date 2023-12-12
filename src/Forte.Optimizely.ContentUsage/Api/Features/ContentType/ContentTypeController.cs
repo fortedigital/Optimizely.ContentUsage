@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Forte.Optimizely.ContentUsage.Api.Extensions;
 using Forte.Optimizely.ContentUsage.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -20,13 +21,13 @@ public class ContentTypeController : ControllerBase
     public const string GetContentTypeRouteName = "ContentType";
     public const string GetContentTypesRouteName = "ContentTypes";
 
-    private readonly ContentTypeMapper _contentTypeMapper;
+    private readonly ContentTypeDtoBuilder _contentTypeDtoBuilder;
     private readonly ContentTypeService _contentTypeService;
 
-    public ContentTypeController(ContentTypeService contentTypeService, ContentTypeMapper contentTypeMapper)
+    public ContentTypeController(ContentTypeService contentTypeService, ContentTypeDtoBuilder contentTypeDtoBuilder)
     {
         _contentTypeService = contentTypeService;
-        _contentTypeMapper = contentTypeMapper;
+        _contentTypeDtoBuilder = contentTypeDtoBuilder;
     }
 
     [HttpGet]
@@ -39,8 +40,8 @@ public class ContentTypeController : ControllerBase
 
         if (contentType == null)
             return NotFound();
-            
-        var contentTypeDto = _contentTypeMapper.Map(contentType);
+
+        var contentTypeDto = _contentTypeDtoBuilder.Build(contentType);
 
         return Ok(contentTypeDto);
     }
@@ -48,32 +49,38 @@ public class ContentTypeController : ControllerBase
     [HttpGet]
     [Route("[action]", Name = GetContentTypesRouteName)]
     [SwaggerResponse(StatusCodes.Status200OK, null, typeof(IEnumerable<ContentTypeDto>))]
-    public async Task<ActionResult> GetContentTypes([FromQuery] GetContentTypesQuery? query, CancellationToken cancellationToken)
+    public async Task<ActionResult> GetContentTypes([FromQuery] GetContentTypesQuery? query,
+        CancellationToken cancellationToken)
     {
-        var contentTypesFilterCriteria = new ContentTypesFilterCriteria { Name = query?.Name, Type = query?.Type };
-        
+        var contentTypesFilterCriteria = new ContentTypesFilterCriteria
+            { Name = query?.NamePhrase, Types = query?.Types };
+
         var contentTypes =
-            _contentTypeService.GetAll(contentTypesFilterCriteria);
+            _contentTypeService.GetAll(contentTypesFilterCriteria).ToArray();
 
         var contentTypesUsageCounters = await _contentTypeService.GetAllCounters(cancellationToken);
-        var contentTypeDtos = contentTypes.Select(_contentTypeMapper.Map);
 
-        contentTypeDtos = contentTypeDtos.Join(contentTypesUsageCounters, type => type.ID, counter => counter.ContentTypeId, (type, counter) =>
+        var contentTypeWithCounters = contentTypes.Join(contentTypesUsageCounters, type => type.ID,
+            counter => counter.ContentTypeId,
+            (contentType, usageCount) => new ContentTypeWithCounter
+                { ContentType = contentType, UsageCount = usageCount.Count }).Sort(query);
+
+        const int itemsPerPage = 25;
+
+        var contentTypeDtos = contentTypeWithCounters
+            .Paginate(query?.Page ?? 1, itemsPerPage)
+            .Select(type =>
+            {
+                var dto = _contentTypeDtoBuilder.Build(type.ContentType);
+                dto.UsageCount = type.UsageCount;
+
+                return dto;
+            });
+
+        return Ok(new ContentTypesResponse
         {
-            type.UsageCount = counter.Count;
-            return type;
+            ContentTypes = contentTypeDtos,
+            TotalPages = contentTypes.GetPageCount(itemsPerPage)
         });
-
-
-        contentTypeDtos = query?.SortBy switch
-        {
-            ContentTypesSorting.Name => contentTypeDtos.OrderBy(dto => dto.DisplayName ?? dto.Name),
-            ContentTypesSorting.UsageCount => contentTypeDtos.OrderBy(dto => dto.UsageCount),
-            _ => contentTypeDtos
-        };
-        
-        
-
-        return Ok(contentTypeDtos);
     }
 }
