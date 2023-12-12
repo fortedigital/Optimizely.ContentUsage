@@ -4,7 +4,7 @@ import { ROWS_PER_PAGE_DEFAULT_OPTIONS } from "../../Components/Filters/NumberOf
 import { ContentTypeBase, SortDirection, TableColumn } from "../../types";
 import { useDebounce } from "./useDebounce";
 
-enum FilteredTableDataQueryParam {
+export enum FilteredTableDataQueryParam {
   SortBy = "sortBy",
   Order = "order",
   NamePhrase = "namePhrase",
@@ -164,14 +164,23 @@ export function useFilteredTableData<TableDataType>({
       //Content type bases
       if (changesTracker.contentTypeBases) {
         prevSearchParams.delete(FilteredTableDataQueryParam.ContentTypeBase);
-        contentTypeBases
-          .filter((contentTypeBase) => contentTypeBase.visible)
-          .forEach((contentTypeBase) =>
+        const visibleContentTypeBases = contentTypeBases.filter(
+          (contentTypeBase) => contentTypeBase.visible
+        );
+
+        if (!visibleContentTypeBases.length) {
+          prevSearchParams.append(
+            FilteredTableDataQueryParam.ContentTypeBase,
+            ""
+          );
+        } else if (visibleContentTypeBases.length < contentTypeBases.length) {
+          visibleContentTypeBases.forEach((contentTypeBase) =>
             prevSearchParams.append(
               FilteredTableDataQueryParam.ContentTypeBase,
               contentTypeBase.name
             )
           );
+        }
       }
 
       triggerUpdate.current = false;
@@ -344,6 +353,12 @@ export function useFilteredTableData<TableDataType>({
         newContentTypeBases[contentTypeBaseIndex].visible = !visible;
       }
 
+      setChangesTracker({
+        ...changesTracker,
+        contentTypeBases: true,
+        currentPage: true,
+      });
+      triggerUpdate.current = false;
       setPageToStart();
       setContentTypeBases(newContentTypeBases);
     },
@@ -517,6 +532,8 @@ export function useFilteredTableData<TableDataType>({
           });
 
           return newContentTypeBases;
+
+
         });
       } else {
         setContentTypeBases(initialContentTypeBases);
@@ -605,7 +622,7 @@ export function useFilteredTableData<TableDataType>({
       );
     }
     setDatasetChanged(true);
-  }, [rows, initialContentTypeBases]);
+  }, [initialContentTypeBases]);
 
   useEffect(() => {
     if (datasetChanged && rows.length > 0 && totalPages > 0) {

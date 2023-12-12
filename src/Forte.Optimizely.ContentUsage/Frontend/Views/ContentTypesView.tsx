@@ -1,9 +1,4 @@
-import React, {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ButtonIcon,
   Dropdown,
@@ -17,7 +12,11 @@ import { useLoaderData, useNavigate } from "react-router-dom";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import Layout from "../Components/Layout";
 import { viewContentTypeUsages } from "../routes";
-import { ContentTypeBaseDto, ContentTypeDto } from "../dtos";
+import {
+  ContentTypeBaseDto,
+  ContentTypeDto,
+  ContentTypesResponse,
+} from "../dtos";
 import Header from "../Components/Header";
 import Filters from "../Components/Filters/Filters";
 import { APIResponse } from "../Lib/ContentUsageAPIClient";
@@ -25,6 +24,7 @@ import { useTranslations } from "../Contexts/TranslationsProvider";
 import { useFilteredTableData } from "../Lib/hooks/useFilteredTableData";
 import { TableColumn } from "../types";
 import { useScroll } from "../Lib/hooks/useScroll";
+import StatisticsCell from "../Components/Tables/StatisticsCell/StatisticsCell";
 
 enum ContentTypesTableColumn {
   GUID = "guid",
@@ -32,6 +32,7 @@ enum ContentTypesTableColumn {
   Name = "name",
   Type = "type",
   UsageCount = "usageCount",
+  Statistics = "statistics",
   Actions = "actions",
 }
 
@@ -60,30 +61,42 @@ const ContentTypesView = () => {
       name: columns.guid,
       visible: false,
       filter: true,
+      sorting: false,
     },
     {
       id: ContentTypesTableColumn.Name,
       name: columns.name,
       visible: true,
       filter: true,
+      sorting: true,
     },
     {
       id: ContentTypesTableColumn.DisplayName,
       name: columns.displayName,
       visible: true,
       filter: true,
+      sorting: false,
     },
     {
       id: ContentTypesTableColumn.Type,
       name: columns.type,
       visible: true,
       filter: true,
+      sorting: false,
     },
     {
       id: ContentTypesTableColumn.UsageCount,
       name: columns.usageCount,
       visible: true,
       filter: true,
+      sorting: true,
+    },
+    {
+      id: ContentTypesTableColumn.Statistics,
+      name: columns.statistics,
+      visible: true,
+      filter: false,
+      sorting: false,
     },
   ] as TableColumn<ContentTypeDto>[];
 
@@ -110,23 +123,26 @@ const ContentTypesView = () => {
     onContentTypeBaseChange,
     tableColumns,
     onTableColumnChange,
-    selectedRowsPerPage,
-    onRowsPerPageChange,
     sortDirection,
     onSortChange,
-    totalPages,
     currentPage,
     goToPage,
   } = useFilteredTableData({
     rows: contentTypes,
     initialTableColumns,
     initialContentTypeBases,
-    defaultVisiableColumn: "displayName"
+    disableFrontendFiltering: true,
+    disableFrontendPagination: true,
+    disableFrontendSorting: true,
+    defaultVisiableColumn: "displayName",
   });
+
+  const [totalPages, setTotalPages] = useState<number>();
 
   const handlePageChange = useCallback(
     (page: number) => {
       goToPage(page);
+      setDataLoaded(false);
       scrollTo(gridContainerRef.current);
     },
     [goToPage]
@@ -134,11 +150,11 @@ const ContentTypesView = () => {
 
   const response = useLoaderData() as [
     APIResponse<ContentTypeBaseDto[]>,
-    APIResponse<ContentTypeDto[]>
+    APIResponse<ContentTypesResponse>
   ];
 
   useEffect(() => {
-    if (!dataLoaded && response && Array.isArray(response)) {
+    if (response) {
       const [contentTypeBasesResponse, contentTypesResponse] = response;
 
       if (
@@ -154,12 +170,13 @@ const ContentTypesView = () => {
       }
 
       if (!contentTypesResponse.hasErrors && contentTypesResponse.data) {
-        setContentTypes(contentTypesResponse.data);
+        setContentTypes(contentTypesResponse.data.contentTypes);
+        setTotalPages(contentTypesResponse.data.totalPages);
       }
 
       setDataLoaded(true);
     }
-  }, [response, dataLoaded]);
+  }, [response]);
 
   return (
     <Layout>
@@ -178,8 +195,6 @@ const ContentTypesView = () => {
               onContentTypeBaseChange={onContentTypeBaseChange}
               columns={tableColumns}
               onTableColumnChange={onTableColumnChange}
-              selectedRowsPerPage={selectedRowsPerPage}
-              onRowsPerPageChange={onRowsPerPageChange}
             />
           </GridCell>
 
@@ -196,7 +211,7 @@ const ContentTypesView = () => {
                       .map((column) => (
                         <Table.TH
                           sorting={{
-                            canSort: true,
+                            canSort: column.sorting,
                             handleSort: () => onSortChange(column),
                             order: sortDirection,
                           }}
@@ -221,12 +236,19 @@ const ContentTypesView = () => {
                       >
                         {tableColumns
                           .filter((column) => column.visible)
-                          .map((column) => (
-                            <Table.TD key={column.id}>
-                              {row[column.id]}
-                            </Table.TD>
-                          ))}
-                        <Table.TD verticalAlign="middle">
+                          .map((column) =>
+                            column.id.toString() ===
+                            ContentTypesTableColumn.Statistics ? (
+                              <Table.TD className="vertical-align--middle" key={column.id}>
+                                <StatisticsCell statistics={row.statistics} />
+                              </Table.TD>
+                            ) : (
+                              <Table.TD key={column.id}>
+                                {row[column.id]}
+                              </Table.TD>
+                            )
+                          )}
+                        <Table.TD>
                           <Dropdown
                             activator={
                               <ButtonIcon
@@ -275,7 +297,7 @@ const ContentTypesView = () => {
             </div>
           </GridCell>
 
-          {totalPages > 1 && (
+          {totalPages > 1 && dataLoaded && (
             <GridCell large={12} medium={8} small={4}>
               <PaginationControls
                 currentPage={currentPage}

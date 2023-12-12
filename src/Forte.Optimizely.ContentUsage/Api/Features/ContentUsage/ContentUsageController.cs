@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using EPiServer.DataAbstraction;
-using Forte.Optimizely.ContentUsage.Api.Common;
+using Forte.Optimizely.ContentUsage.Api.Extensions;
 using Forte.Optimizely.ContentUsage.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -42,27 +42,27 @@ public class ContentUsageController : ControllerBase
 
         contentUsagesQuery = string.IsNullOrEmpty(queryData.NamePhrase)
             ? contentUsagesQuery
-            : contentUsagesQuery.Where(x => x.Name.Contains(queryData.NamePhrase, StringComparison.InvariantCultureIgnoreCase));
-        
+            : contentUsagesQuery.Where(x =>
+                x.Name.Contains(queryData.NamePhrase, StringComparison.InvariantCultureIgnoreCase));
+
         var contentUsages = contentUsagesQuery.ToArray();
-        
-        var currentPage = queryData.Page - 1;
-        
+
         const int itemsPerPage = 25;
         var contentUsagesDto = contentUsages
             .Sort(queryData)
-            .Paginate(currentPage, itemsPerPage)
+            .Paginate(queryData.Page, itemsPerPage)
             .Select(contentUsage => new ContentUsageDto
-        {
-            Id = contentUsage.ContentLink.ID,
-            ContentTypeGuid = queryData.Guid,
-            Name = contentUsage.Name,
-            LanguageBranch = contentUsage.LanguageBranch,
-            PageUrls = _contentUsageService.GetPageUrls(contentUsage),
-            EditUrl = _contentUsageService.GetEditUrl(contentUsage)
-        });
+            {
+                Id = contentUsage.ContentLink.ID,
+                ContentTypeGuid = queryData.Guid,
+                Name = contentUsage.Name,
+                LanguageBranch = contentUsage.LanguageBranch,
+                Pages = _contentUsageService.GetUsagePages(contentUsage).Select(usagePage =>
+                    new UsagePageDto { PageType = usagePage.Page.PageTypeName, Url = usagePage.Url }),
+                EditUrl = _contentUsageService.GetEditUrl(contentUsage)
+            });
 
-        var totalPages = (int) Math.Ceiling(contentUsages.Length / (itemsPerPage * 1.0));
+        var totalPages = (int)Math.Ceiling(contentUsages.Length / (itemsPerPage * 1.0));
         return Ok(new GetContentUsagesResponse
         {
             ContentUsages = contentUsagesDto,

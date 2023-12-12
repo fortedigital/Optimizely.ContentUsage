@@ -18,7 +18,7 @@ public static class ServiceCollectionExtensions
         
         services.AddTransient<ContentUsageService>();
 
-        services.AddTransient<ContentTypeMapper>();
+        services.AddTransient<ContentTypeDtoBuilder>();
         
         services.AddTransient<IPathsResolver, DefaultPathsResolver>();
 

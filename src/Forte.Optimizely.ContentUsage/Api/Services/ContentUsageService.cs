@@ -29,21 +29,26 @@ public class ContentUsageService
         _publishedStateAssessor = publishedStateAssessor;
     }
 
-    public IEnumerable<string> GetPageUrls(EPiServerContentUsage contentUsage)
+    public IEnumerable<UsagePage> GetUsagePages(EPiServerContentUsage contentUsage)
     {
-        var contentLink = contentUsage.ContentLink;
-     
-        var pageUrls = SearchForPageUrls(contentLink, contentUsage.LanguageBranch);
+        var usagePages = SearchForUsagePages(contentUsage.ContentLink, contentUsage.LanguageBranch);
 
-        return pageUrls;
+        return usagePages;
     }
 
-    private IEnumerable<string> SearchForPageUrls(ContentReference contentLink, string languageBranch)
+    private IEnumerable<UsagePage> SearchForUsagePages(ContentReference contentLink, string languageBranch)
     {
         var url = _urlResolver.GetUrl(contentLink, languageBranch);
 
-        if (!string.IsNullOrEmpty(url)) 
-            return CheckIsPublished(contentLink) ? new[] { url } : new string[] { };
+        if (!string.IsNullOrEmpty(url))
+        {
+            _contentLoader.TryGet<PageData>(contentLink, out var page);
+
+            if (page == null || !CheckIsPublished(page))
+                return new UsagePage[] { };
+
+            return new[] { new UsagePage { Url = url, Page = page } };
+        }
 
         var softLinks = _contentSoftLinkRepository.Load(contentLink, true);
         var pageLinks = softLinks
@@ -51,8 +56,8 @@ public class ContentUsageService
             .Select(softLink => softLink.OwnerContentLink)
             .Where(ownerContentLink => ownerContentLink != null && CheckIsPublished(ownerContentLink));
 
-        var pageUrls = pageLinks.SelectMany(pageLink => SearchForPageUrls(pageLink, languageBranch));
-        
+        var pageUrls = pageLinks.SelectMany(pageLink => SearchForUsagePages(pageLink, languageBranch));
+
         return pageUrls;
     }
 
@@ -77,6 +82,11 @@ public class ContentUsageService
     {
         var content = _contentLoader.Get<IContent>(contentLink);
 
+        return CheckIsPublished(content);
+    }
+
+    private bool CheckIsPublished(IContent content)
+    {
         return _publishedStateAssessor.IsPublished(content);
     }
 }

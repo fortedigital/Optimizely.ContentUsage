@@ -19,6 +19,7 @@ export const translations = {
           name: "Name",
           type: "Type",
           usageCount: "Usage count",
+          statistics: "Statistics",
         },
         actions: {
           title: "Actions",

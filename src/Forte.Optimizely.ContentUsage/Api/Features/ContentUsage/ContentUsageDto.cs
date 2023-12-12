@@ -11,6 +11,13 @@ public class ContentUsageDto
     public Guid ContentTypeGuid { get; set; }
     public string Name { get; set; }
     public string LanguageBranch{ get; set; }
-    public IEnumerable<string> PageUrls { get; set; }
+    public IEnumerable<UsagePageDto> Pages { get; set; }
     public string EditUrl { get; set; }
+}
+
+[TsInterface]
+public class UsagePageDto
+{
+    public string Url { get; set; }
+    public string PageType { get; set; }
 }

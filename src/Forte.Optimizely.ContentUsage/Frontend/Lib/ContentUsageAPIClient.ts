@@ -3,8 +3,10 @@ import axios from "axios";
 import {
   ContentTypeDto,
   ContentTypeBaseDto,
+  GetContentTypesQuery,
   GetContentUsagesQuery,
   GetContentUsagesResponse,
+  ContentTypesResponse,
 } from "../dtos";
 
 export interface ContentUsageAPIEndpoints {
@@ -59,8 +61,11 @@ export default class ContentUsageAPIClient {
     return this.get<ContentTypeBaseDto[]>(this.endpoints.contentTypeBases);
   }
 
-  public async getContentTypes() {
-    return this.get<ContentTypeDto[]>(this.endpoints.contentTypes);
+  public async getContentTypes(query: Partial<GetContentTypesQuery>) {
+    return this.getWithQuerySchema<
+      Partial<GetContentTypesQuery>,
+      ContentTypesResponse
+    >(`${this.endpoints.contentTypes}`, query);
   }
 
   public async getContentType(guid: string) {

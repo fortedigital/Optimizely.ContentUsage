@@ -28,13 +28,13 @@ const ContentTypeUsagesTable = ({
   sortDirection,
 }: ContentTypeUsagesTableProps) => {
   const onTableRowClick = useCallback(
-    (url?: string | null, alwaysTriggerClick = false) =>
+    (url?: string | null) =>
       (event: React.PointerEvent) => {
         if (!url) return;
 
         const target = event.target as HTMLTableCellElement | undefined;
 
-        if ((target && target.tagName === "TD") || alwaysTriggerClick) {
+        if (target) {
           navigateTo(url, true);
         }
       },
