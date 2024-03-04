@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useLocation, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigation, useSearchParams } from "react-router-dom";
 import { ROWS_PER_PAGE_DEFAULT_OPTIONS } from "../../Components/Filters/NumberOfRowsFilter";
 import { ContentTypeBase, SortDirection, TableColumn } from "../../types";
 import { useDebounce } from "./useDebounce";
@@ -46,6 +46,7 @@ export function useFilteredTableData<TableDataType>({
   disableFrontendSorting = false,
   defaultVisiableColumn,
 }: FilteredTableDataHookOptions<TableDataType>): {
+  dataLoaded: boolean;
   rows: TableDataType[];
   searchValue: string;
   onSearchChange: React.KeyboardEventHandler<HTMLInputElement>;
@@ -85,6 +86,7 @@ export function useFilteredTableData<TableDataType>({
   );
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
+  const navigation = useNavigation();
 
   const debouncedSetSearchParams = useDebounce<
     (prev: URLSearchParams) => URLSearchParams
@@ -233,7 +235,7 @@ export function useFilteredTableData<TableDataType>({
       setPageToStart();
       setSearchQuery(value);
     },
-    300,
+    500,
     []
   );
 
@@ -641,6 +643,7 @@ export function useFilteredTableData<TableDataType>({
   }, [datasetChanged, location]);
 
   return {
+    dataLoaded: navigation.state === "idle",
     rows: tableRows,
     searchValue: searchFieldValue,
     onSearchChange: onSearchValueChange,
