@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState, KeyboardEvent } from "react";
 import {
   ButtonIcon,
   Dropdown,
@@ -7,6 +7,7 @@ import {
   GridContainer,
   PaginationControls,
   Table,
+  Spinner,
 } from "optimizely-oui";
 import { useLoaderData, useNavigate } from "react-router-dom";
 import { CopyToClipboard } from "react-copy-to-clipboard";
@@ -37,7 +38,6 @@ enum ContentTypesTableColumn {
 }
 
 const ContentTypesView = () => {
-  const [dataLoaded, setDataLoaded] = useState<boolean>(false);
   const translations = useTranslations();
   const [initialContentTypeBases, setInitialContentTypeBases] = useState<
     ContentTypeBaseDto[]
@@ -115,6 +115,7 @@ const ContentTypesView = () => {
   );
 
   const {
+    dataLoaded,
     rows,
     searchValue,
     onSearchChange,
@@ -142,7 +143,6 @@ const ContentTypesView = () => {
   const handlePageChange = useCallback(
     (page: number) => {
       goToPage(page);
-      setDataLoaded(false);
       scrollTo(gridContainerRef.current);
     },
     [goToPage]
@@ -173,8 +173,6 @@ const ContentTypesView = () => {
         setContentTypes(contentTypesResponse.data.contentTypes);
         setTotalPages(contentTypesResponse.data.totalPages);
       }
-
-      setDataLoaded(true);
     }
   }, [response]);
 
@@ -195,10 +193,12 @@ const ContentTypesView = () => {
               onContentTypeBaseChange={onContentTypeBaseChange}
               columns={tableColumns}
               onTableColumnChange={onTableColumnChange}
+              isLoading={!dataLoaded}
             />
           </GridCell>
 
           <GridCell large={12} medium={8} small={4}>
+            {dataLoaded ?
             <div className="forte-optimizely-content-usage-table-container">
               <Table
                 className="forte-optimizely-content-usage-table"
@@ -295,6 +295,8 @@ const ContentTypesView = () => {
                 </Table.TBody>
               </Table>
             </div>
+            : <Spinner/>
+            }
           </GridCell>
 
           {totalPages > 1 && dataLoaded && (

@@ -46,6 +46,7 @@ export function useFilteredTableData<TableDataType>({
   disableFrontendSorting = false,
   defaultVisiableColumn,
 }: FilteredTableDataHookOptions<TableDataType>): {
+  dataLoaded: boolean;
   rows: TableDataType[];
   searchValue: string;
   onSearchChange: React.KeyboardEventHandler<HTMLInputElement>;
@@ -232,7 +233,7 @@ export function useFilteredTableData<TableDataType>({
       setPageToStart();
       setSearchQuery(value);
     },
-    300,
+    500,
     []
   );
 
@@ -639,6 +640,7 @@ export function useFilteredTableData<TableDataType>({
   }, [datasetChanged]);
 
   return {
+    dataLoaded: true,
     rows: tableRows,
     searchValue: searchFieldValue,
     onSearchChange: onSearchValueChange,
