@@ -215,7 +215,6 @@ const ContentTypeUsageView = () => {
               onClearButtonClick={onClearButtonClick}
               columns={tableColumns}
               onTableColumnChange={onTableColumnChange}
-              isLoading={!dataLoaded}
             />
           </GridCell>
 
