@@ -22,7 +22,11 @@ export interface APIResponse<ResponseSchema> {
 }
 
 export default class ContentUsageAPIClient {
-  endpoints: ContentUsageAPIEndpoints = {
+  public isPending = false;
+
+  protected abortController: AbortController;
+
+  protected endpoints: ContentUsageAPIEndpoints = {
     contentTypeBases: null,
     contentType: null,
     contentTypes: null,
@@ -30,6 +34,7 @@ export default class ContentUsageAPIClient {
   };
 
   public constructor(endpoints: ContentUsageAPIEndpoints) {
+    this.abortController = new AbortController();
     this.endpoints = endpoints;
   }
 
@@ -44,12 +49,19 @@ export default class ContentUsageAPIClient {
     if (params) queryParams = new URLSearchParams(params).toString();
 
     try {
+      this.isPending = true;
+
       response = await axios.get<ResponseSchema>(
-        queryParams ? `${url}?${queryParams}` : url
+        queryParams ? `${url}?${queryParams}` : url,
+        {
+          signal: this.abortController.signal
+        }
       );
     } catch (error) {
       hasErrors = true;
     }
+
+    this.isPending = false;
 
     return {
       data: response.data,
@@ -90,5 +102,10 @@ export default class ContentUsageAPIClient {
       Partial<GetContentUsagesQuery>,
       GetContentUsagesResponse
     >(`${this.endpoints.contentUsages}`, query);
+  }
+
+  public abort() {
+    this.abortController.abort();
+    this.isPending = false;
   }
 }
