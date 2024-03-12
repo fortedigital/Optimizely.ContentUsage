@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useLocation, useNavigation, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import { ROWS_PER_PAGE_DEFAULT_OPTIONS } from "../../Components/Filters/NumberOfRowsFilter";
 import { ContentTypeBase, SortDirection, TableColumn } from "../../types";
 import { useDebounce } from "./useDebounce";
@@ -85,8 +85,6 @@ export function useFilteredTableData<TableDataType>({
     }))
   );
   const [searchParams, setSearchParams] = useSearchParams();
-  const location = useLocation();
-  const navigation = useNavigation();
 
   const debouncedSetSearchParams = useDebounce<
     (prev: URLSearchParams) => URLSearchParams
@@ -94,7 +92,7 @@ export function useFilteredTableData<TableDataType>({
     (callback) => {
       setSearchParams(callback);
     },
-    300,
+    0,
     []
   );
 
@@ -624,12 +622,11 @@ export function useFilteredTableData<TableDataType>({
       );
     }
     setDatasetChanged(true);
-  }, [initialContentTypeBases]);
+  }, []);
 
   useEffect(() => {
     if (datasetChanged && rows.length > 0 && totalPages > 0) {
       setDatasetChanged(false);
-      handleUpdateQueryParams(searchParams);
       triggerUpdate.current = true;
     }
   }, [datasetChanged, rows]);
@@ -640,10 +637,10 @@ export function useFilteredTableData<TableDataType>({
     } else {
       triggerUpdate.current = true;
     }
-  }, [datasetChanged, location]);
+  }, [datasetChanged]);
 
   return {
-    dataLoaded: navigation.state === "idle",
+    dataLoaded: true,
     rows: tableRows,
     searchValue: searchFieldValue,
     onSearchChange: onSearchValueChange,
