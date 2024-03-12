@@ -6,13 +6,11 @@ import { useTranslations } from "../../Contexts/TranslationsProvider";
 interface ContentTypeBasesFilterProps {
   contentTypeBases: ContentTypeBase[];
   onChange?: (contentTypeBase: ContentTypeBase, selectAll?: boolean) => void;
-  disabled?: boolean;
 }
 
 function ContentTypeBasesFilter({
   contentTypeBases,
   onChange,
-  disabled,
 }: ContentTypeBasesFilterProps) {
   const translations = useTranslations();
 
@@ -41,7 +39,6 @@ function ContentTypeBasesFilter({
       }}
       style="plain"
       shouldHideChildrenOnClick={false}
-      isDisabled={disabled}
     >
       <Dropdown.Contents>
         <Dropdown.ListItem key="All/None">

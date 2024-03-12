@@ -17,7 +17,6 @@ interface FiltersProps<TableDataType> {
   rowsPerPageOptions?: number[];
   selectedRowsPerPage?: number;
   onRowsPerPageChange?: (option: number) => void;
-  isLoading?: boolean;
 }
 
 function Filters<TableDataType>({
@@ -31,7 +30,6 @@ function Filters<TableDataType>({
   rowsPerPageOptions,
   selectedRowsPerPage,
   onRowsPerPageChange,
-  isLoading,
 }: FiltersProps<TableDataType>) {
   return (
     <div className="forte-optimizely-content-usage-filters">
@@ -39,14 +37,12 @@ function Filters<TableDataType>({
         value={searchValue}
         onChange={onSearchChange}
         onClearButtonClick={onClearButtonClick}
-        disabled={isLoading}
       />
 
       {contentTypeBases?.length > 0 && (
         <ContentTypeBasesFilter
           contentTypeBases={contentTypeBases}
           onChange={onContentTypeBaseChange}
-          disabled={isLoading}
         />
       )}
 
