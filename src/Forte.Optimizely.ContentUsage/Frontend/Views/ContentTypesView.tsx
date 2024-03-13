@@ -25,6 +25,7 @@ import { useFilteredTableData } from "../Lib/hooks/useFilteredTableData";
 import { TableColumn } from "../types";
 import { useScroll } from "../Lib/hooks/useScroll";
 import StatisticsCell from "../Components/Tables/StatisticsCell/StatisticsCell";
+import PageLoader from "../Components/PageLoader/PageLoader";
 
 enum ContentTypesTableColumn {
   GUID = "guid",
@@ -37,7 +38,6 @@ enum ContentTypesTableColumn {
 }
 
 const ContentTypesView = () => {
-  const [dataLoaded, setDataLoaded] = useState<boolean>(false);
   const translations = useTranslations();
   const [initialContentTypeBases, setInitialContentTypeBases] = useState<
     ContentTypeBaseDto[]
@@ -115,6 +115,7 @@ const ContentTypesView = () => {
   );
 
   const {
+    dataLoaded,
     rows,
     searchValue,
     onSearchChange,
@@ -142,7 +143,6 @@ const ContentTypesView = () => {
   const handlePageChange = useCallback(
     (page: number) => {
       goToPage(page);
-      setDataLoaded(false);
       scrollTo(gridContainerRef.current);
     },
     [goToPage]
@@ -173,8 +173,6 @@ const ContentTypesView = () => {
         setContentTypes(contentTypesResponse.data.contentTypes);
         setTotalPages(contentTypesResponse.data.totalPages);
       }
-
-      setDataLoaded(true);
     }
   }, [response]);
 
@@ -199,102 +197,106 @@ const ContentTypesView = () => {
           </GridCell>
 
           <GridCell large={12} medium={8} small={4}>
-            <div className="forte-optimizely-content-usage-table-container">
-              <Table
-                className="forte-optimizely-content-usage-table"
-                shouldAddHover={rows.length > 0}
-              >
-                <Table.THead>
-                  <Table.TR>
-                    {tableColumns
-                      .filter((column) => column.visible)
-                      .map((column) => (
-                        <Table.TH
-                          sorting={{
-                            canSort: column.sorting,
-                            handleSort: () => onSortChange(column),
-                            order: sortDirection,
-                          }}
-                          key={column.id}
-                        >
-                          {column.name}
-                        </Table.TH>
-                      ))}
-                    <Table.TH width={100} />
-                  </Table.TR>
-                </Table.THead>
-
-                <Table.TBody>
-                  {rows.length > 0 ? (
-                    rows.map((row) => (
-                      <Table.TR
-                        key={row.guid}
-                        onRowClick={onTableRowClick(
-                          row.guid,
-                          row.displayName || row.name
-                        )}
-                      >
-                        {tableColumns
-                          .filter((column) => column.visible)
-                          .map((column) =>
-                            column.id.toString() ===
-                            ContentTypesTableColumn.Statistics ? (
-                              <Table.TD className="vertical-align--middle" key={column.id}>
-                                <StatisticsCell statistics={row.statistics} />
-                              </Table.TD>
-                            ) : (
-                              <Table.TD key={column.id}>
-                                {row[column.id]}
-                              </Table.TD>
-                            )
-                          )}
-                        <Table.TD>
-                          <Dropdown
-                            activator={
-                              <ButtonIcon
-                                iconName="ellipsis"
-                                size="small"
-                                style="plain"
-                                title={actions.title}
-                              />
-                            }
+            {dataLoaded ? (
+              <div className="forte-optimizely-content-usage-table-container">
+                <Table
+                  className="forte-optimizely-content-usage-table"
+                  shouldAddHover={rows.length > 0}
+                >
+                  <Table.THead>
+                    <Table.TR>
+                      {tableColumns
+                        .filter((column) => column.visible)
+                        .map((column) => (
+                          <Table.TH
+                            sorting={{
+                              canSort: column.sorting,
+                              handleSort: () => onSortChange(column),
+                              order: sortDirection,
+                            }}
+                            key={column.id}
                           >
-                            <Dropdown.Contents>
-                              <Dropdown.ListItem
-                                onClick={onTableRowClick(
-                                  row.guid,
-                                  row.displayName || row.name,
-                                  true
-                                )}
-                              >
-                                <Dropdown.BlockLink>
-                                  <Dropdown.BlockLinkText
-                                    text={actions.viewUsages}
-                                  />
-                                </Dropdown.BlockLink>
-                              </Dropdown.ListItem>
-                              <Dropdown.ListItem>
-                                <CopyToClipboard text={row.guid}>
+                            {column.name}
+                          </Table.TH>
+                        ))}
+                      <Table.TH width={100} />
+                    </Table.TR>
+                  </Table.THead>
+
+                  <Table.TBody>
+                    {rows.length > 0 ? (
+                      rows.map((row) => (
+                        <Table.TR
+                          key={row.guid}
+                          onRowClick={onTableRowClick(
+                            row.guid,
+                            row.displayName || row.name
+                          )}
+                        >
+                          {tableColumns
+                            .filter((column) => column.visible)
+                            .map((column) =>
+                              column.id.toString() ===
+                              ContentTypesTableColumn.Statistics ? (
+                                <Table.TD className="vertical-align--middle" key={column.id}>
+                                  <StatisticsCell statistics={row.statistics} />
+                                </Table.TD>
+                              ) : (
+                                <Table.TD key={column.id}>
+                                  {row[column.id]}
+                                </Table.TD>
+                              )
+                            )}
+                          <Table.TD>
+                            <Dropdown
+                              activator={
+                                <ButtonIcon
+                                  iconName="ellipsis"
+                                  size="small"
+                                  style="plain"
+                                  title={actions.title}
+                                />
+                              }
+                            >
+                              <Dropdown.Contents>
+                                <Dropdown.ListItem
+                                  onClick={onTableRowClick(
+                                    row.guid,
+                                    row.displayName || row.name,
+                                    true
+                                  )}
+                                >
                                   <Dropdown.BlockLink>
                                     <Dropdown.BlockLinkText
-                                      text={actions.copyGuid}
+                                      text={actions.viewUsages}
                                     />
                                   </Dropdown.BlockLink>
-                                </CopyToClipboard>
-                              </Dropdown.ListItem>
-                            </Dropdown.Contents>
-                          </Dropdown>
-                        </Table.TD>
+                                </Dropdown.ListItem>
+                                <Dropdown.ListItem>
+                                  <CopyToClipboard text={row.guid}>
+                                    <Dropdown.BlockLink>
+                                      <Dropdown.BlockLinkText
+                                        text={actions.copyGuid}
+                                      />
+                                    </Dropdown.BlockLink>
+                                  </CopyToClipboard>
+                                </Dropdown.ListItem>
+                              </Dropdown.Contents>
+                            </Dropdown>
+                          </Table.TD>
+                        </Table.TR>
+                      ))
+                    ) : (
+                      <Table.TR noHover>
+                        <Table.TD colSpan={6}>{translations.noResults}</Table.TD>
                       </Table.TR>
-                    ))
-                  ) : (
-                    <Table.TR noHover>
-                      <Table.TD colSpan={6}>{translations.noResults}</Table.TD>
-                    </Table.TR>
-                  )}
-                </Table.TBody>
-              </Table>
-            </div>
+                    )}
+                  </Table.TBody>
+                </Table>
+              </div>
+            ) : (
+              <PageLoader />
+            )}
           </GridCell>
 
           {totalPages > 1 && dataLoaded && (

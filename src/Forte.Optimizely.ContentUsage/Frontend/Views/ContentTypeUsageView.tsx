@@ -8,21 +8,14 @@ import React, {
 import { Breadcrumb } from "@episerver/ui-framework";
 import { TableColumn } from "../types";
 import {
-  ButtonIcon,
-  Disclose,
-  DiscloseTable,
-  Dropdown,
   Grid,
   GridCell,
   GridContainer,
-  Link,
   PaginationControls,
-  Spinner,
-  Table,
 } from "optimizely-oui";
 import { useLoaderData, useLocation } from "react-router-dom";
 import Layout from "../Components/Layout";
-import { getRoutePath, navigateTo, viewContentTypes } from "../routes";
+import { getRoutePath, viewContentTypes } from "../routes";
 import {
   ContentTypeDto,
   ContentUsageDto,
@@ -37,6 +30,7 @@ import { useScroll } from "../Lib/hooks/useScroll";
 
 import "./ContentTypeUsageView.scss";
 import ContentTypeUsagesTable, { ContentTypeUsageTableColumn } from "../Components/Tables/ContentTypeUsagesTable/ContentTypeUsageTable";
+import PageLoader from "../Components/PageLoader/PageLoader";
 
 type ContentTypeUsageViewResponse =
   | APIResponse<GetContentUsagesResponse>
@@ -49,7 +43,6 @@ type ContentTypeUsageViewInitialResponse = [
 
 
 const ContentTypeUsageView = () => {
-  const [dataLoaded, setDataLoaded] = useState<boolean>(false);
   const translations = useTranslations();
   const [contentTypeDisplayName, setContentTypeDisplayName] =
     useState<string>();
@@ -103,6 +96,7 @@ const ContentTypeUsageView = () => {
   ] as TableColumn<ContentUsageDto>[];
 
   const {
+    dataLoaded,
     rows,
     searchValue,
     onSearchChange,
@@ -127,7 +121,6 @@ const ContentTypeUsageView = () => {
   const handlePageChange = useCallback(
     (page: number) => {
       goToPage(page);
-      setDataLoaded(false);
       scrollTo(gridContainerRef.current);
     },
     [goToPage]
@@ -183,14 +176,12 @@ const ContentTypeUsageView = () => {
         if (!contentTypeDisplayName)
           setContentTypeDisplayName(location.state?.contentType?.displayName);
       }
-      setDataLoaded(true);
     }
   }, [response]);
 
   const handleSortChange = useCallback((column: TableColumn<ContentUsageDto>) => {
-    setDataLoaded(false);
     onSortChange(column);
-  }, [setDataLoaded, onSortChange]);
+  }, [onSortChange]);
 
   return (
     <Layout>
@@ -227,9 +218,7 @@ const ContentTypeUsageView = () => {
                                         onSortChange={handleSortChange}/>
               </div>
             ) : (
-              <div className="forte-optimizely-content-usage-spinner__center">
-                <Spinner />
-              </div>
+              <PageLoader />
             )}
           </GridCell>
 
