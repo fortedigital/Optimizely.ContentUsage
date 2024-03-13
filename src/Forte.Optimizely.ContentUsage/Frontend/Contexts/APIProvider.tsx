@@ -2,7 +2,14 @@ import React, { createContext, useContext } from "react";
 import { AppModel } from "../dtos";
 import ContentUsageAPIClient from "../Lib/ContentUsageAPIClient";
 
-const APIContext = createContext<ContentUsageAPIClient>(null);
+const APIContext = createContext<ContentUsageAPIClient>(
+  new ContentUsageAPIClient({
+    contentTypeBases: null,
+    contentType: null,
+    contentTypes: null,
+    contentUsages: null,
+  })
+);
 
 interface APIProviderProps extends Omit<AppModel, "moduleBaseUrl"> {
   children?: React.ReactNode;
