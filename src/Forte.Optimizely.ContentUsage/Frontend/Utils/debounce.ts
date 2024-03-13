@@ -2,15 +2,18 @@ export function debounce<Args extends unknown[]>(
   func: (...args: Args) => void,
   duration: number
 ) {
-  let timeout: NodeJS.Timeout;
+  let timeout: NodeJS.Timeout | null;
 
-  return function (...args: Args) {
+  return function (this: void, ...args: Args) {
     const effect = () => {
       timeout = null;
       return func.apply(this, args);
     };
 
-    clearTimeout(timeout);
+    if (timeout) {
+      clearTimeout(timeout);
+    }
+
     timeout = setTimeout(effect, duration);
   };
 }

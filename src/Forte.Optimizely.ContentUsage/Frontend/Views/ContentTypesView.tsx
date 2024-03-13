@@ -44,7 +44,7 @@ const ContentTypesView = () => {
   >([]);
   const [contentTypes, setContentTypes] = useState<ContentTypeDto[]>([]);
   const navigate = useNavigate();
-  const gridContainerRef = useRef<HTMLElement | null>();
+  const gridContainerRef = useRef<HTMLElement>(null);
   const { scrollTo } = useScroll();
 
   const {
@@ -143,7 +143,10 @@ const ContentTypesView = () => {
   const handlePageChange = useCallback(
     (page: number) => {
       goToPage(page);
-      scrollTo(gridContainerRef.current);
+
+      if (gridContainerRef.current) {
+        scrollTo(gridContainerRef.current);
+      }
     },
     [goToPage]
   );
@@ -178,7 +181,10 @@ const ContentTypesView = () => {
 
   return (
     <Layout>
-      <GridContainer ref={gridContainerRef} className="forte-optimizely-content-usage-grid">
+      <GridContainer
+        ref={gridContainerRef}
+        className="forte-optimizely-content-usage-grid"
+      >
         <Grid>
           <GridCell large={12} medium={8} small={4}>
             <Header title={translations.title} />
@@ -238,7 +244,10 @@ const ContentTypesView = () => {
                             .map((column) =>
                               column.id.toString() ===
                               ContentTypesTableColumn.Statistics ? (
-                                <Table.TD className="vertical-align--middle" key={column.id}>
+                                <Table.TD
+                                  className="vertical-align--middle"
+                                  key={column.id}
+                                >
                                   <StatisticsCell statistics={row.statistics} />
                                 </Table.TD>
                               ) : (
@@ -288,7 +297,9 @@ const ContentTypesView = () => {
                       ))
                     ) : (
                       <Table.TR noHover>
-                        <Table.TD colSpan={6}>{translations.noResults}</Table.TD>
+                        <Table.TD colSpan={6}>
+                          {translations.noResults}
+                        </Table.TD>
                       </Table.TR>
                     )}
                   </Table.TBody>
@@ -299,7 +310,7 @@ const ContentTypesView = () => {
             )}
           </GridCell>
 
-          {totalPages > 1 && dataLoaded && (
+          {totalPages && totalPages > 1 && dataLoaded && (
             <GridCell large={12} medium={8} small={4}>
               <PaginationControls
                 currentPage={currentPage}

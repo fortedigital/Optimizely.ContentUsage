@@ -29,7 +29,9 @@ import Filters from "../Components/Filters/Filters";
 import { useScroll } from "../Lib/hooks/useScroll";
 
 import "./ContentTypeUsageView.scss";
-import ContentTypeUsagesTable, { ContentTypeUsageTableColumn } from "../Components/Tables/ContentTypeUsagesTable/ContentTypeUsageTable";
+import ContentTypeUsagesTable, {
+  ContentTypeUsageTableColumn,
+} from "../Components/Tables/ContentTypeUsagesTable/ContentTypeUsageTable";
 import PageLoader from "../Components/PageLoader/PageLoader";
 
 type ContentTypeUsageViewResponse =
@@ -41,7 +43,6 @@ type ContentTypeUsageViewInitialResponse = [
   APIResponse<GetContentUsagesResponse>
 ];
 
-
 const ContentTypeUsageView = () => {
   const translations = useTranslations();
   const [contentTypeDisplayName, setContentTypeDisplayName] =
@@ -50,7 +51,7 @@ const ContentTypeUsageView = () => {
     []
   );
   const location = useLocation();
-  const gridContainerRef = useRef<HTMLElement | null>();
+  const gridContainerRef = useRef<HTMLElement>(null);
   const { scrollTo } = useScroll();
 
   const {
@@ -113,7 +114,7 @@ const ContentTypeUsageView = () => {
     disableFrontendFiltering: true,
     disableFrontendPagination: true,
     disableFrontendSorting: true,
-    defaultVisiableColumn: "name"
+    defaultVisiableColumn: "name",
   });
 
   const [totalPages, setTotalPages] = useState<number>();
@@ -121,7 +122,10 @@ const ContentTypeUsageView = () => {
   const handlePageChange = useCallback(
     (page: number) => {
       goToPage(page);
-      scrollTo(gridContainerRef.current);
+
+      if (gridContainerRef.current) {
+        scrollTo(gridContainerRef.current);
+      }
     },
     [goToPage]
   );
@@ -134,7 +138,7 @@ const ContentTypeUsageView = () => {
         level: 1,
       },
       {
-        title: contentTypeDisplayName,
+        title: contentTypeDisplayName || "",
         link: getRoutePath(location.pathname),
         level: 2,
         active: true,
@@ -180,8 +184,10 @@ const ContentTypeUsageView = () => {
   }, [response]);
 
   const handleSortChange = useCallback((column: TableColumn<ContentUsageDto>) => {
-    onSortChange(column);
-  }, [onSortChange]);
+      onSortChange(column);
+    },
+    [onSortChange]
+  );
 
   return (
     <Layout>
@@ -212,17 +218,19 @@ const ContentTypeUsageView = () => {
           <GridCell large={12}>
             {dataLoaded ? (
               <div className="forte-optimizely-content-usage-table-container">
-                <ContentTypeUsagesTable rows={rows}
-                                        tableColumns={tableColumns}
-                                        sortDirection={sortDirection.toLowerCase()}
-                                        onSortChange={handleSortChange}/>
+                <ContentTypeUsagesTable
+                  rows={rows}
+                  tableColumns={tableColumns}
+                  sortDirection={sortDirection.toLowerCase()}
+                  onSortChange={handleSortChange}
+                />
               </div>
             ) : (
               <PageLoader />
             )}
           </GridCell>
 
-          {totalPages > 1 && dataLoaded && (
+          {totalPages && totalPages > 1 && dataLoaded && (
             <GridCell large={12} medium={8} small={4}>
               <PaginationControls
                 currentPage={currentPage}

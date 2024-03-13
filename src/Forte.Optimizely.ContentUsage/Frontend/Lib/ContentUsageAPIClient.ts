@@ -54,7 +54,7 @@ export default class ContentUsageAPIClient {
       response = await axios.get<ResponseSchema>(
         queryParams ? `${url}?${queryParams}` : url,
         {
-          signal: this.abortController.signal
+          signal: this.abortController.signal,
         }
       );
     } catch (error) {
@@ -64,12 +64,14 @@ export default class ContentUsageAPIClient {
     this.isPending = false;
 
     return {
-      data: response.data,
+      data: response?.data,
       hasErrors,
     } as APIResponse<ResponseSchema>;
   }
 
   public async getContentTypeBases() {
+    if (!this.endpoints.contentTypeBases) return;
+
     return this.get<ContentTypeBaseDto[]>(this.endpoints.contentTypeBases);
   }
 
@@ -81,23 +83,29 @@ export default class ContentUsageAPIClient {
   }
 
   public async getContentType(guid: string) {
+    if (!this.endpoints.contentType) return;
+
     return this.get<ContentTypeDto>(this.endpoints.contentType, { guid });
   }
 
-  private async getWithQuerySchema<Query, ResponseSchema>(
-    url: string,
-    query: Query
-  ): Promise<APIResponse<ResponseSchema>> {
+  private async getWithQuerySchema<
+    Query extends Record<string, unknown>,
+    ResponseSchema
+  >(url: string, query: Query): Promise<APIResponse<ResponseSchema>> {
     const params = {} as Record<string, string>;
 
     for (const [key, value] of Object.entries(query)) {
-      params[key] = value.toString();
+      if (typeof value === `string`) {
+        params[key] = value.toString();
+      }
     }
 
     return await this.get<ResponseSchema>(url, params);
   }
 
   public async getContentTypeUsages(query: Partial<GetContentUsagesQuery>) {
+    if (!this.endpoints.contentUsages) return;
+
     return this.getWithQuerySchema<
       Partial<GetContentUsagesQuery>,
       GetContentUsagesResponse
