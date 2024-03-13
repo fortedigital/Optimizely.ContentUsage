@@ -230,7 +230,7 @@ const ContentTypeUsageView = () => {
             )}
           </GridCell>
 
-          {totalPages && totalPages > 1 && dataLoaded && (
+          {!!totalPages && totalPages > 1 && dataLoaded && (
             <GridCell large={12} medium={8} small={4}>
               <PaginationControls
                 currentPage={currentPage}
