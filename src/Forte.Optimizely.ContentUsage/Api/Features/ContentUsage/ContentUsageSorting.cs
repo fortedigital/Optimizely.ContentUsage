@@ -4,5 +4,6 @@ public enum ContentUsageSorting
 {
     Id,
     Name,
-    LanguageBranch
+    LanguageBranch,
+    UsageCount
 }
