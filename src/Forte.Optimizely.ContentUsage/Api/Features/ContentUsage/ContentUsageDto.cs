@@ -22,8 +22,3 @@ public class UsagePageDto
     public string Url { get; set; }
     public string PageType { get; set; }
 }
-
-public class ContentUsageWithCount : EPiServer.DataAbstraction.ContentUsage
-{
-    public int UsageCount { get; set; }
-}
