@@ -62,7 +62,6 @@ public class ContentUsageController : ControllerBase
         });
 
         const int itemsPerPage = 25;
-
         var contentUsagesDto = contentUsageWithCount
             .Sort(queryData)
             .Paginate(queryData.Page, itemsPerPage)
