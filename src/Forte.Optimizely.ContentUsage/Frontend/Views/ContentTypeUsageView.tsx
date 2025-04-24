@@ -100,6 +100,13 @@ const ContentTypeUsageView = () => {
       sorting: false,
       columnSpanWidth: 5,
     },
+    {
+      id: ContentTypeUsageTableColumn.UsageCount,
+      name: columns.usageCount,
+      visible: true,
+      sorting: true,
+      columnSpanWidth: 5,
+    }
   ] as TableColumn<ContentUsageDto>[];
 
   const {

@@ -36,6 +36,7 @@ export const translations = {
           name: "Name",
           languageBranch: "Language",
           pageUrl: "URL",
+          usageCount: "Usage count"
         },
         actions: {
           title: "Actions",
