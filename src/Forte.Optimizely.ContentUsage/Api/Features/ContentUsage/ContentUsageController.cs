@@ -57,8 +57,8 @@ public class ContentUsageController : ControllerBase
             LanguageBranch = x.LanguageBranch,
             Name = x.Name,
             UsageCount = !string.IsNullOrEmpty(x.LanguageBranch)
-                    ? _contentRepository.GetReferencesToContent(x.ContentLink, true).Where(y => y.OwnerLanguage.TwoLetterISOLanguageName.Equals(x.LanguageBranch)).Count()
-                    : _contentRepository.GetReferencesToContent(x.ContentLink, true).Count()
+            ? _contentRepository.GetReferencesToContent(x.ContentLink, true).Where(y => y.OwnerLanguage.TwoLetterISOLanguageName.Equals(x.LanguageBranch)).Count()
+            : _contentRepository.GetReferencesToContent(x.ContentLink, true).Count()
         });
 
         const int itemsPerPage = 25;
