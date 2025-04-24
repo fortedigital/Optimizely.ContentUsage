@@ -51,19 +51,8 @@ public class ContentUsageController : ControllerBase
 
         var contentUsages = contentUsagesQuery.ToArray();
 
-        var contentUsageWithCount = contentUsages.Select(x => new ContentUsageWithCount()
-        {
-            ContentLink = x.ContentLink,
-            LanguageBranch = x.LanguageBranch,
-            Name = x.Name,
-            UsageCount = !string.IsNullOrEmpty(x.LanguageBranch)
-                    ? _contentRepository.GetReferencesToContent(x.ContentLink, true).Where(y => y.OwnerLanguage.TwoLetterISOLanguageName.Equals(x.LanguageBranch)).Count()
-                    : _contentRepository.GetReferencesToContent(x.ContentLink, true).Count()
-        });
-
         const int itemsPerPage = 25;
-
-        var contentUsagesDto = contentUsageWithCount
+        var contentUsagesDto = contentUsages
             .Sort(queryData)
             .Paginate(queryData.Page, itemsPerPage)
             .Select(contentUsage => new ContentUsageDto
@@ -75,7 +64,9 @@ public class ContentUsageController : ControllerBase
                 Pages = _contentUsageService.GetUsagePages(contentUsage).Select(usagePage =>
                     new UsagePageDto { PageType = usagePage.Page.PageTypeName, Url = usagePage.Url }),
                 EditUrl = _contentUsageService.GetEditUrl(contentUsage),
-                UsageCount = contentUsage.UsageCount
+                UsageCount = !string.IsNullOrEmpty(contentUsage.LanguageBranch)
+                    ? _contentRepository.GetReferencesToContent(contentUsage.ContentLink, true).Where(y => y.OwnerLanguage.TwoLetterISOLanguageName.Equals(contentUsage.LanguageBranch)).Count()
+                    : _contentRepository.GetReferencesToContent(contentUsage.ContentLink, true).Count()
             });
 
         var totalPages = (int)Math.Ceiling(contentUsages.Length / (itemsPerPage * 1.0));
