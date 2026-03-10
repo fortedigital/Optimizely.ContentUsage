@@ -1,15 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Forte.Optimizely.ContentUsage.Api.Extensions;
 using Forte.Optimizely.ContentUsage.Api.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Swashbuckle.AspNetCore.Annotations;
 
 namespace Forte.Optimizely.ContentUsage.Api.Features.ContentType;
 
@@ -32,8 +29,6 @@ public class ContentTypeController : ControllerBase
 
     [HttpGet]
     [Route("[action]", Name = GetContentTypeRouteName)]
-    [SwaggerResponse(StatusCodes.Status200OK, null, typeof(ContentTypeDto))]
-    [SwaggerResponse(StatusCodes.Status404NotFound)]
     public ActionResult GetContentType([FromQuery] [BindRequired] Guid guid)
     {
         var contentType = _contentTypeService.Get(guid);
@@ -48,7 +43,6 @@ public class ContentTypeController : ControllerBase
 
     [HttpGet]
     [Route("[action]", Name = GetContentTypesRouteName)]
-    [SwaggerResponse(StatusCodes.Status200OK, null, typeof(IEnumerable<ContentTypeDto>))]
     public async Task<ActionResult> GetContentTypes([FromQuery] GetContentTypesQuery? query,
         CancellationToken cancellationToken)
     {

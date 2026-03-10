@@ -1,10 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using Forte.Optimizely.ContentUsage.Api.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Swashbuckle.AspNetCore.Annotations;
 
 namespace Forte.Optimizely.ContentUsage.Api.Features.ContentTypeBase;
 
@@ -23,7 +20,6 @@ public class ContentTypeBaseController : ControllerBase
     }
 
     [HttpGet]
-    [SwaggerResponse(StatusCodes.Status200OK, null, typeof(IEnumerable<ContentTypeBaseDto>))]
     [Route("[action]", Name = GetContentTypeBasesRouteName)]
     public ActionResult GetContentTypeBases()
     {
