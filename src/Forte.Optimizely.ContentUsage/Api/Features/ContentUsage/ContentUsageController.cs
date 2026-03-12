@@ -5,10 +5,8 @@ using EPiServer.DataAbstraction;
 using Forte.Optimizely.ContentUsage.Api.Extensions;
 using Forte.Optimizely.ContentUsage.Api.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Reinforced.Typings.Attributes;
-using Swashbuckle.AspNetCore.Annotations;
 
 namespace Forte.Optimizely.ContentUsage.Api.Features.ContentUsage;
 
@@ -29,8 +27,6 @@ public class ContentUsageController : ControllerBase
     }
 
     [HttpGet]
-    [SwaggerResponse(StatusCodes.Status200OK, null, typeof(IEnumerable<ContentUsageDto>))]
-    [SwaggerResponse(StatusCodes.Status404NotFound)]
     [Route("[action]", Name = GetContentUsagesRouteName)]
     public ActionResult GetContentUsages([FromQuery] GetContentUsagesQuery queryData)
     {
