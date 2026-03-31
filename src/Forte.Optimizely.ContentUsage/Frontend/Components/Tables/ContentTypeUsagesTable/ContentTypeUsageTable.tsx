@@ -12,6 +12,7 @@ enum ContentTypeUsageTableColumn {
   LanguageBranch = "languageBranch",
   PageUrl = "pageUrl",
   Actions = "actions",
+  UsageCount = "usageCount"
 }
 
 interface ContentTypeUsagesTableProps {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using EPiServer;
 using EPiServer.DataAbstraction;
 using Forte.Optimizely.ContentUsage.Api.Extensions;
 using Forte.Optimizely.ContentUsage.Api.Services;
@@ -19,11 +20,13 @@ public class ContentUsageController : ControllerBase
 
     private readonly IContentTypeRepository _contentTypeRepository;
     private readonly ContentUsageService _contentUsageService;
+    private readonly IContentRepository _contentRepository;
 
-    public ContentUsageController(IContentTypeRepository contentTypeRepository, ContentUsageService contentUsageService)
+    public ContentUsageController(IContentTypeRepository contentTypeRepository, ContentUsageService contentUsageService, IContentRepository contentRepository)
     {
         _contentTypeRepository = contentTypeRepository;
         _contentUsageService = contentUsageService;
+        _contentRepository = contentRepository;
     }
 
     [HttpGet]
@@ -32,7 +35,8 @@ public class ContentUsageController : ControllerBase
     {
         var contentType = _contentTypeRepository.Load(queryData.Guid);
 
-        if (contentType == null) return NotFound();
+        if (contentType == null) 
+            return NotFound();
 
         var contentUsagesQuery = _contentUsageService.GetContentUsages(contentType);
 
@@ -43,8 +47,18 @@ public class ContentUsageController : ControllerBase
 
         var contentUsages = contentUsagesQuery.ToArray();
 
+        var contentUsageWithCount = contentUsages.Select(x => new ContentUsageWithCount()
+        {
+            ContentLink = x.ContentLink,
+            LanguageBranch = x.LanguageBranch,
+            Name = x.Name,
+            UsageCount = !string.IsNullOrEmpty(x.LanguageBranch)
+            ? _contentRepository.GetReferencesToContent(x.ContentLink, true).Where(y => y.OwnerLanguage.TwoLetterISOLanguageName.Equals(x.LanguageBranch)).Count()
+            : _contentRepository.GetReferencesToContent(x.ContentLink, true).Count()
+        });
+
         const int itemsPerPage = 25;
-        var contentUsagesDto = contentUsages
+        var contentUsagesDto = contentUsageWithCount
             .Sort(queryData)
             .Paginate(queryData.Page, itemsPerPage)
             .Select(contentUsage => new ContentUsageDto
@@ -55,10 +69,12 @@ public class ContentUsageController : ControllerBase
                 LanguageBranch = contentUsage.LanguageBranch,
                 Pages = _contentUsageService.GetUsagePages(contentUsage).Select(usagePage =>
                     new UsagePageDto { PageType = usagePage.Page.PageTypeName, Url = usagePage.Url }),
-                EditUrl = _contentUsageService.GetEditUrl(contentUsage)
+                EditUrl = _contentUsageService.GetEditUrl(contentUsage),
+                UsageCount = contentUsage.UsageCount
             });
 
         var totalPages = (int)Math.Ceiling(contentUsages.Length / (itemsPerPage * 1.0));
+
         return Ok(new GetContentUsagesResponse
         {
             ContentUsages = contentUsagesDto,

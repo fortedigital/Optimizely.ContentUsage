@@ -13,6 +13,7 @@ public class ContentUsageDto
     public string LanguageBranch{ get; set; }
     public IEnumerable<UsagePageDto> Pages { get; set; }
     public string EditUrl { get; set; }
+    public int UsageCount { get; set; }
 }
 
 [TsInterface]
@@ -20,4 +21,9 @@ public class UsagePageDto
 {
     public string Url { get; set; }
     public string PageType { get; set; }
+}
+
+public class ContentUsageWithCount : EPiServer.DataAbstraction.ContentUsage
+{
+    public int UsageCount { get; set; }
 }
