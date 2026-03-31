@@ -39,14 +39,14 @@ function Filters<TableDataType>({
         onClearButtonClick={onClearButtonClick}
       />
 
-      {contentTypeBases?.length > 0 && (
+      {contentTypeBases && contentTypeBases.length > 0 && (
         <ContentTypeBasesFilter
           contentTypeBases={contentTypeBases}
           onChange={onContentTypeBaseChange}
         />
       )}
 
-      {columns?.length > 0 && (
+      {columns && columns.length > 0 && (
         <ColumnsFilter columns={columns} onChange={onTableColumnChange} />
       )}
 

@@ -6,7 +6,7 @@ export const ROWS_PER_PAGE_DEFAULT_OPTIONS = [25, 50, 100];
 
 interface NumberOfRowsFilterProps {
   selected: number;
-  rowsPerPageOptions: number[];
+  rowsPerPageOptions?: number[];
   onChange?: (numberOfRows: number) => void;
 }
 

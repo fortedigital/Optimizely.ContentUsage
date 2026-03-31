@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useLocation, useSearchParams } from "react-router-dom";
+import { useNavigation, useSearchParams } from "react-router-dom";
 import { ROWS_PER_PAGE_DEFAULT_OPTIONS } from "../../Components/Filters/NumberOfRowsFilter";
 import { ContentTypeBase, SortDirection, TableColumn } from "../../types";
 import { useDebounce } from "./useDebounce";
@@ -46,6 +46,7 @@ export function useFilteredTableData<TableDataType>({
   disableFrontendSorting = false,
   defaultVisiableColumn,
 }: FilteredTableDataHookOptions<TableDataType>): {
+  dataLoaded: boolean;
   rows: TableDataType[];
   searchValue: string;
   onSearchChange: React.KeyboardEventHandler<HTMLInputElement>;
@@ -71,9 +72,9 @@ export function useFilteredTableData<TableDataType>({
     useState<SortDirection>(initialSortDirection);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [rowsPerPage, setRowsPerPage] = useState<number>(rowsPerPageOptions[0]);
-  const [contentTypeBases, setContentTypeBases] = useState<
-    ContentTypeBase[] | null
-  >(null);
+  const [contentTypeBases, setContentTypeBases] = useState<ContentTypeBase[]>(
+    []
+  );
   const [tableColumns, setTableColumns] = useState<
     TableColumn<TableDataType>[]
   >(
@@ -84,7 +85,7 @@ export function useFilteredTableData<TableDataType>({
     }))
   );
   const [searchParams, setSearchParams] = useSearchParams();
-  const location = useLocation();
+  const navigation = useNavigation();
 
   const debouncedSetSearchParams = useDebounce<
     (prev: URLSearchParams) => URLSearchParams
@@ -92,7 +93,7 @@ export function useFilteredTableData<TableDataType>({
     (callback) => {
       setSearchParams(callback);
     },
-    300,
+    0,
     []
   );
 
@@ -125,7 +126,10 @@ export function useFilteredTableData<TableDataType>({
       //Search query
       if (changesTracker.searchQuery) {
         if (searchQuery)
-          prevSearchParams.set(FilteredTableDataQueryParam.NamePhrase, searchQuery);
+          prevSearchParams.set(
+            FilteredTableDataQueryParam.NamePhrase,
+            searchQuery
+          );
         else prevSearchParams.delete(FilteredTableDataQueryParam.NamePhrase);
       }
 
@@ -143,7 +147,7 @@ export function useFilteredTableData<TableDataType>({
       }
 
       //SortBy + SortDirection
-      if (changesTracker.sortBy) {
+      if (changesTracker.sortBy && sortBy) {
         prevSearchParams.set(
           FilteredTableDataQueryParam.SortBy,
           sortBy.toString()
@@ -164,16 +168,19 @@ export function useFilteredTableData<TableDataType>({
       //Content type bases
       if (changesTracker.contentTypeBases) {
         prevSearchParams.delete(FilteredTableDataQueryParam.ContentTypeBase);
-        const visibleContentTypeBases = contentTypeBases.filter(
+        const visibleContentTypeBases = contentTypeBases?.filter(
           (contentTypeBase) => contentTypeBase.visible
         );
 
-        if (!visibleContentTypeBases.length) {
+        if (!visibleContentTypeBases || !visibleContentTypeBases.length) {
           prevSearchParams.append(
             FilteredTableDataQueryParam.ContentTypeBase,
             ""
           );
-        } else if (visibleContentTypeBases.length < contentTypeBases.length) {
+        } else if (
+          contentTypeBases &&
+          visibleContentTypeBases.length < contentTypeBases.length
+        ) {
           visibleContentTypeBases.forEach((contentTypeBase) =>
             prevSearchParams.append(
               FilteredTableDataQueryParam.ContentTypeBase,
@@ -233,7 +240,7 @@ export function useFilteredTableData<TableDataType>({
       setPageToStart();
       setSearchQuery(value);
     },
-    300,
+    500,
     []
   );
 
@@ -285,8 +292,10 @@ export function useFilteredTableData<TableDataType>({
           (c) => c.id === defaultVisiableColumn
         );
 
-        changeColumnVisibility(id, visible);
-        changeColumnVisibility(displayNameColumn.id as string, true);
+        if (displayNameColumn) {
+          changeColumnVisibility(id, visible);
+          changeColumnVisibility(displayNameColumn.id as string, true);
+        }
       }
     },
     [tableColumns, changeColumnVisibility]
@@ -342,6 +351,8 @@ export function useFilteredTableData<TableDataType>({
 
   const onContentTypeBaseChange = useCallback(
     ({ name, visible }: ContentTypeBase, valueForAll?: boolean) => {
+      if (!contentTypeBases) return;
+
       const newContentTypeBases = contentTypeBases.slice(0);
 
       if (valueForAll) {
@@ -365,86 +376,95 @@ export function useFilteredTableData<TableDataType>({
     [contentTypeBases, handlePageChange]
   );
 
-  const filterItems = useCallback((rows: TableDataType[]) => {
-    if (disableFrontendFiltering) return rows;
+  const filterItems = useCallback(
+    (rows: TableDataType[]) => {
+      if (disableFrontendFiltering) return rows;
 
-    if (filterFn) {
-      return rows.filter((row) => {
-        return filterFn(row, searchQuery);
-      });
-    }
-
-    return rows.filter((row) => {
-      if (contentTypeBases && contentTypeBaseColumnId) {
-        const allSelected = contentTypeBases.every(
-          (contentTypeBase) => contentTypeBase.visible
-        );
-
-        if (allSelected) {
-          return true;
-        }
-        const type = row[
-          contentTypeBaseColumnId as keyof TableDataType
-        ] as unknown;
-
-        const allDeselected = contentTypeBases.every(
-          (contentTypeBase) => !contentTypeBase.visible
-        );
-
-        if (allDeselected) {
-          if (type && contentTypeBases.some((t) => t.name === type))
-            return false;
-          return true;
-        }
-
-        const contentTypeBase = contentTypeBases
-          .filter((contentTypeBase) => contentTypeBase.visible)
-          .find((contentTypeBase) => contentTypeBase.name === type);
-
-        if (!contentTypeBase) return false;
-      }
-      return true;
-    })
-    .filter((row) => {
-      for (const column in row) {
-        const parsedSearchValue = searchQuery.toLocaleLowerCase().trim();
-        const tableColumn = tableColumns.find(({ id }) => id === column);
-
-        if (tableColumn && tableColumn.filter && tableColumn.visible) {
-          const value = row[column];
-
-          if (
-            value &&
-            value
-              .toString()
-              .toLocaleLowerCase()
-              .includes(parsedSearchValue.toLocaleLowerCase())
-          )
-            return true;
-        }
+      if (filterFn) {
+        return rows.filter((row) => {
+          return filterFn(row, searchQuery);
+        });
       }
 
-      return false;
-    })
-  }, [disableFrontendFiltering, contentTypeBases, filterFn, searchQuery, tableColumns])
+      return rows
+        .filter((row) => {
+          if (contentTypeBases && contentTypeBaseColumnId) {
+            const allSelected = contentTypeBases.every(
+              (contentTypeBase) => contentTypeBase.visible
+            );
+
+            if (allSelected) {
+              return true;
+            }
+            const type = row[
+              contentTypeBaseColumnId as keyof TableDataType
+            ] as unknown;
+
+            const allDeselected = contentTypeBases.every(
+              (contentTypeBase) => !contentTypeBase.visible
+            );
+
+            if (allDeselected) {
+              if (type && contentTypeBases.some((t) => t.name === type))
+                return false;
+              return true;
+            }
+
+            const contentTypeBase = contentTypeBases
+              .filter((contentTypeBase) => contentTypeBase.visible)
+              .find((contentTypeBase) => contentTypeBase.name === type);
+
+            if (!contentTypeBase) return false;
+          }
+          return true;
+        })
+        .filter((row) => {
+          for (const column in row) {
+            const parsedSearchValue = searchQuery.toLocaleLowerCase().trim();
+            const tableColumn = tableColumns.find(({ id }) => id === column);
+
+            if (tableColumn && tableColumn.filter && tableColumn.visible) {
+              const value = row[column];
+
+              if (
+                typeof value === `string` &&
+                value
+                  .toString()
+                  .toLocaleLowerCase()
+                  .includes(parsedSearchValue.toLocaleLowerCase())
+              )
+                return true;
+            }
+          }
+
+          return false;
+        });
+    },
+    [
+      disableFrontendFiltering,
+      contentTypeBases,
+      filterFn,
+      searchQuery,
+      tableColumns,
+    ]
+  );
 
   const filteredItems = useMemo(() => {
-    return filterItems(rows)
-      .sort((prevValue, nextValue) => {
-        if (disableFrontendSorting) return 0;
+    return filterItems(rows).sort((prevValue, nextValue) => {
+      if (disableFrontendSorting) return 0;
 
-        if (!sortBy) return 0;
+      if (!sortBy) return 0;
 
-        if (sortCompareFn) return sortCompareFn(prevValue, nextValue);
+      if (sortCompareFn) return sortCompareFn(prevValue, nextValue);
 
-        if (!prevValue[sortBy]) return 1;
+      if (!prevValue[sortBy]) return 1;
 
-        if (sortDirection === SortDirection.Descending)
-          return prevValue[sortBy] > nextValue[sortBy] ? -1 : 1;
-        else if (sortDirection === SortDirection.Ascending)
-          return prevValue[sortBy] > nextValue[sortBy] ? 1 : -1;
-        else return 0;
-      });
+      if (sortDirection === SortDirection.Descending)
+        return prevValue[sortBy] > nextValue[sortBy] ? -1 : 1;
+      else if (sortDirection === SortDirection.Ascending)
+        return prevValue[sortBy] > nextValue[sortBy] ? 1 : -1;
+      else return 0;
+    });
   }, [
     contentTypeBases,
     contentTypeBaseColumnId,
@@ -502,9 +522,12 @@ export function useFilteredTableData<TableDataType>({
 
       if (queryParams.has(FilteredTableDataQueryParam.NamePhrase)) {
         const param = queryParams.get(FilteredTableDataQueryParam.NamePhrase);
-        const value = decodeURIComponent(param);
-        setSearchFieldValue(value);
-        setSearchQuery(encodeURIComponent(value));
+
+        if (param) {
+          const value = decodeURIComponent(param);
+          setSearchFieldValue(value);
+          setSearchQuery(encodeURIComponent(value));
+        }
       } else {
         setSearchFieldValue("");
         setSearchQuery("");
@@ -532,11 +555,9 @@ export function useFilteredTableData<TableDataType>({
           });
 
           return newContentTypeBases;
-
-
         });
       } else {
-        setContentTypeBases(initialContentTypeBases);
+        setContentTypeBases(initialContentTypeBases ?? []);
       }
 
       if (queryParams.has(FilteredTableDataQueryParam.ShowColumn)) {
@@ -566,9 +587,12 @@ export function useFilteredTableData<TableDataType>({
 
       if (queryParams.has(FilteredTableDataQueryParam.RowsPerPage)) {
         const param = queryParams.get(FilteredTableDataQueryParam.RowsPerPage);
-        const number = parseInt(param);
-        if (!Number.isNaN(number) && rowsPerPageOptions.includes(number)) {
-          setRowsPerPage(number);
+
+        if (param) {
+          const number = parseInt(param);
+          if (!Number.isNaN(number) && rowsPerPageOptions.includes(number)) {
+            setRowsPerPage(number);
+          }
         }
       } else {
         setRowsPerPage(rowsPerPageOptions[0]);
@@ -576,10 +600,13 @@ export function useFilteredTableData<TableDataType>({
 
       if (queryParams.has(FilteredTableDataQueryParam.Page)) {
         const param = queryParams.get(FilteredTableDataQueryParam.Page);
-        const number = parseInt(param);
 
-        if (!Number.isNaN(number)) {
-          setCurrentPage(number);
+        if (param) {
+          const number = parseInt(param);
+
+          if (!Number.isNaN(number)) {
+            setCurrentPage(number);
+          }
         }
       } else {
         setPageToStart();
@@ -622,12 +649,11 @@ export function useFilteredTableData<TableDataType>({
       );
     }
     setDatasetChanged(true);
-  }, [initialContentTypeBases]);
+  }, []);
 
   useEffect(() => {
     if (datasetChanged && rows.length > 0 && totalPages > 0) {
       setDatasetChanged(false);
-      handleUpdateQueryParams(searchParams);
       triggerUpdate.current = true;
     }
   }, [datasetChanged, rows]);
@@ -638,9 +664,10 @@ export function useFilteredTableData<TableDataType>({
     } else {
       triggerUpdate.current = true;
     }
-  }, [datasetChanged, location]);
+  }, [datasetChanged]);
 
   return {
+    dataLoaded: navigation.state === "idle",
     rows: tableRows,
     searchValue: searchFieldValue,
     onSearchChange: onSearchValueChange,

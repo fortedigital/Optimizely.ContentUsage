@@ -1,7 +1,7 @@
 import React, { createContext, useContext } from "react";
 import { translations } from "./../translations";
 
-const TranslationsContext = createContext<typeof translations>(null);
+const TranslationsContext = createContext<typeof translations>(translations);
 
 interface TranslationsProviderProps {
   children?: React.ReactNode;
