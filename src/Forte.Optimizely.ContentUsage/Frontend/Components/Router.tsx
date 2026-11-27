@@ -46,7 +46,8 @@ const contentTypesLoader: LoadDataFunction = (
 
   if (queryTypes.length) query.types = queryTypes;
 
-  const contentTypes = api.getContentTypes(query);
+  // Abort the request when a newer navigation (e.g. next search keystroke) supersedes this one.
+  const contentTypes = api.getContentTypes(query, request.signal);
 
   return Promise.all([contentTypeBases, contentTypes]);
 };

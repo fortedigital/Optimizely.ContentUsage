@@ -38,6 +38,12 @@ public class ContentTypeService
         return await _contentTypeUsagesRepository.ListContentTypesUsagesCounters(cancellationToken);
     }
 
+    public async Task<IEnumerable<BlockTypeUsageStatistic>> GetBlockTypesUsageStatistics(
+        IReadOnlyCollection<int> blockTypeIds, CancellationToken cancellationToken)
+    {
+        return await _contentTypeUsagesRepository.ListBlockTypesUsageStatistics(blockTypeIds, cancellationToken);
+    }
+
     public ContentType? Get(Guid guid)
     {
         var contentType = _contentTypeRepository.Load(guid);
