@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using EPiServer.DataAbstraction;
 using Forte.Optimizely.ContentUsage.Api.Extensions;
 using Forte.Optimizely.ContentUsage.Api.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -61,15 +62,30 @@ public class ContentTypeController : ControllerBase
 
         const int itemsPerPage = 25;
 
-        var contentTypeDtos = contentTypeWithCounters
+        var pageItems = contentTypeWithCounters
             .Paginate(query?.Page ?? 1, itemsPerPage)
+            .ToArray();
+
+        // One query for the statistics of all block types on this page instead of one query per block type.
+        var blockTypeIds = pageItems
+            .Where(type => type.ContentType is BlockType)
+            .Select(type => type.ContentType.ID)
+            .ToArray();
+
+        var statisticsByBlockType =
+            (await _contentTypeService.GetBlockTypesUsageStatistics(blockTypeIds, cancellationToken))
+            .ToLookup(statistic => statistic.BlockTypeId);
+
+        var contentTypeDtos = pageItems
             .Select(type =>
             {
-                var dto = _contentTypeDtoBuilder.Build(type.ContentType);
+                var dto = _contentTypeDtoBuilder.Build(type.ContentType,
+                    statisticsByBlockType[type.ContentType.ID]);
                 dto.UsageCount = type.UsageCount;
 
                 return dto;
-            });
+            })
+            .ToArray();
 
         return Ok(new ContentTypesResponse
         {

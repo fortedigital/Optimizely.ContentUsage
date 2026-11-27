@@ -35,37 +35,38 @@ export default class ContentUsageAPIClient {
 
   private async get<ResponseSchema>(
     url: string,
-    params?: Record<string, string>
+    params?: Record<string, string>,
+    signal?: AbortSignal
   ): Promise<APIResponse<ResponseSchema>> {
-    let response,
-      queryParams,
-      hasErrors = false;
+    let queryParams;
 
     if (params) queryParams = new URLSearchParams(params).toString();
 
     try {
-      response = await axios.get<ResponseSchema>(
-        queryParams ? `${url}?${queryParams}` : url
+      const response = await axios.get<ResponseSchema>(
+        queryParams ? `${url}?${queryParams}` : url,
+        { signal }
       );
-    } catch (error) {
-      hasErrors = true;
-    }
 
-    return {
-      data: response.data,
-      hasErrors,
-    } as APIResponse<ResponseSchema>;
+      return { data: response.data, hasErrors: false };
+    } catch (error) {
+      // A failed or aborted request has no response; never dereference it.
+      return { data: null, hasErrors: true };
+    }
   }
 
   public async getContentTypeBases() {
     return this.get<ContentTypeBaseDto[]>(this.endpoints.contentTypeBases);
   }
 
-  public async getContentTypes(query: Partial<GetContentTypesQuery>) {
+  public async getContentTypes(
+    query: Partial<GetContentTypesQuery>,
+    signal?: AbortSignal
+  ) {
     return this.getWithQuerySchema<
       Partial<GetContentTypesQuery>,
       ContentTypesResponse
-    >(`${this.endpoints.contentTypes}`, query);
+    >(`${this.endpoints.contentTypes}`, query, signal);
   }
 
   public async getContentType(guid: string) {
@@ -74,7 +75,8 @@ export default class ContentUsageAPIClient {
 
   private async getWithQuerySchema<Query, ResponseSchema>(
     url: string,
-    query: Query
+    query: Query,
+    signal?: AbortSignal
   ): Promise<APIResponse<ResponseSchema>> {
     const params = {} as Record<string, string>;
 
@@ -82,7 +84,7 @@ export default class ContentUsageAPIClient {
       params[key] = value.toString();
     }
 
-    return await this.get<ResponseSchema>(url, params);
+    return await this.get<ResponseSchema>(url, params, signal);
   }
 
   public async getContentTypeUsages(query: Partial<GetContentUsagesQuery>) {

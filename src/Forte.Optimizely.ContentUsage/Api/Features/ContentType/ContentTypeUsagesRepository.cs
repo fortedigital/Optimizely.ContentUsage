@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using EPiServer.Core;
 using EPiServer.Data;
-using EPiServer.DataAbstraction;
 using EPiServer.ServiceLocation;
 
 namespace Forte.Optimizely.ContentUsage.Api.Features.ContentType;
@@ -104,60 +103,129 @@ GROUP BY cT.ID, ContentTypeUsageTable.ContentTypeId";
         }));
     }
 
-    public IEnumerable<UsagePageReference> GetUsagePages(BlockType contentType)
+    /// <summary>
+    ///     For each given block type, counts on how many published pages (grouped by page type) its published
+    ///     instances are used, following soft links through nested blocks. Runs as a single round-trip for all
+    ///     block types; the traversal is de-duplicated and stops on circular block references.
+    /// </summary>
+    public async Task<IEnumerable<BlockTypeUsageStatistic>> ListBlockTypesUsageStatistics(
+        IReadOnlyCollection<int> blockTypeIds, CancellationToken cancellationToken)
     {
+        if (blockTypeIds.Count == 0)
+            return Array.Empty<BlockTypeUsageStatistic>();
+
         var executor = _dataExecutorAccessor();
-        return executor.Execute(() =>
+
+        return await executor.ExecuteAsync((Func<Task<IEnumerable<BlockTypeUsageStatistic>>>)(async () =>
         {
             var command = executor.CreateCommand();
-            command.CommandText = @"
-DECLARE @Usages TABLE (ContentID int, WorkID int, [Name] nvarchar(255), LanguageBranch nchar(17))
-INSERT @Usages EXEC netPageTypeGetUsage @PageTypeID,@OnlyPublished=1
 
-;WITH OwnerContent_CTE AS (
-	SELECT U.ContentID, tblContentSoftlink.fkOwnerContentID AS OwnerContentId
-	FROM @Usages U
-	INNER JOIN tblContent ON tblContent.pkID = U.ContentId
-	INNER JOIN tblContentSoftlink ON tblContentSoftlink.fkReferencedContentGUID = tblContent.ContentGUID
-	WHERE tblContentSoftlink.LinkType=1
+            var idParameterNames = new List<string>();
+            var index = 0;
+            foreach (var blockTypeId in blockTypeIds.Distinct())
+            {
+                var parameterName = $"BlockTypeId{index++}";
+                idParameterNames.Add($"(@{parameterName})");
+                command.Parameters.Add(executor.CreateParameter(parameterName, blockTypeId));
+            }
 
-	UNION ALL
-
-	SELECT OwnerContent_CTE.ContentID, tblContentSoftlink.fkOwnerContentID AS OwnerContentId
-	FROM OwnerContent_CTE
-	INNER JOIN tblContent ON tblContent.pkID = OwnerContent_CTE.OwnerContentID
-	INNER JOIN tblContentSoftlink ON tblContentSoftlink.fkReferencedContentGUID = tblContent.ContentGUID
-	WHERE tblContentSoftlink.LinkType=1
-		AND tblContent.ContentType=1
-)
-SELECT OwnerContent_CTE.ContentID, OwnerContent_CTE.OwnerContentID, tblContentType.Name AS OwnerContentName
-FROM OwnerContent_CTE
-INNER JOIN tblContent ON tblContent.pkID = OwnerContent_CTE.OwnerContentId
-INNER JOIN tblContentType ON tblContentType.pkID = tblContent.fkContentTypeID
-INNER JOIN tblWorkContent ON tblWorkContent.fkContentID = OwnerContent_CTE.OwnerContentId
-WHERE tblContent.ContentType = 0
-AND tblWorkContent.Status=4
-AND (tblWorkContent.StopPublish IS NULL OR tblWorkContent.StopPublish > @NowTime)
-";
-
-            command.Parameters.Add(executor.CreateParameter("PageTypeID", contentType.ID));
             command.Parameters.Add(executor.CreateParameter("NowTime",
                 _databaseDateTimeHandler.ConvertToDatabase(DateTime.Now)));
 
-            var usagePages = new List<UsagePageReference>();
-            using var dbDataReader = command.ExecuteReader();
-            while (dbDataReader.Read())
-            {
-                var contentTypeUsageCounter = new UsagePageReference
-                {
-                    ContentLink = new ContentReference((int)dbDataReader["OwnerContentID"]),
-                    PageType = (string)dbDataReader["OwnerContentName"]
-                };
+            command.CommandText = $@"
+                SET NOCOUNT ON
 
-                usagePages.Add(contentTypeUsageCounter);
+                DECLARE @BlockTypeIds TABLE (ContentTypeID int PRIMARY KEY)
+                INSERT @BlockTypeIds (ContentTypeID) VALUES {string.Join(", ", idParameterNames)}
+
+                -- Published instances of every requested block type
+                DECLARE @Usages TABLE (ContentID int, WorkID int, [Name] nvarchar(255), LanguageBranch nchar(17))
+                DECLARE @Blocks TABLE (ContentTypeID int, ContentID int, PRIMARY KEY (ContentTypeID, ContentID))
+                DECLARE @ContentTypeID int
+
+                DECLARE blockTypes CURSOR LOCAL FAST_FORWARD FOR SELECT ContentTypeID FROM @BlockTypeIds
+                OPEN blockTypes
+                FETCH NEXT FROM blockTypes INTO @ContentTypeID
+                WHILE @@FETCH_STATUS = 0
+                BEGIN
+                    DELETE FROM @Usages
+                    INSERT @Usages EXEC netPageTypeGetUsage @ContentTypeID, @OnlyPublished = 1
+
+                    INSERT @Blocks (ContentTypeID, ContentID)
+                    SELECT DISTINCT @ContentTypeID, ContentID FROM @Usages
+
+                    FETCH NEXT FROM blockTypes INTO @ContentTypeID
+                END
+                CLOSE blockTypes
+                DEALLOCATE blockTypes
+
+                -- Walk soft links upwards (through blocks only), level by level. The primary key keeps every
+                -- (block, owner) pair once, so shared/nested blocks don't multiply rows and cycles terminate.
+                DECLARE @Owners TABLE (
+                    ContentTypeID int,
+                    ContentID int,
+                    OwnerContentID int,
+                    Depth int,
+                    PRIMARY KEY (ContentTypeID, ContentID, OwnerContentID)
+                )
+                DECLARE @Depth int = 0
+                DECLARE @Added int
+
+                INSERT @Owners (ContentTypeID, ContentID, OwnerContentID, Depth)
+                SELECT DISTINCT B.ContentTypeID, B.ContentID, SL.fkOwnerContentID, 0
+                FROM @Blocks B
+                INNER JOIN tblContent C ON C.pkID = B.ContentID
+                INNER JOIN tblContentSoftlink SL ON SL.fkReferencedContentGUID = C.ContentGUID
+                WHERE SL.LinkType = 1
+                SET @Added = @@ROWCOUNT
+
+                WHILE @Added > 0
+                BEGIN
+                    SET @Depth = @Depth + 1
+
+                    INSERT @Owners (ContentTypeID, ContentID, OwnerContentID, Depth)
+                    SELECT DISTINCT O.ContentTypeID, O.ContentID, SL.fkOwnerContentID, @Depth
+                    FROM @Owners O
+                    INNER JOIN tblContent C ON C.pkID = O.OwnerContentID
+                    INNER JOIN tblContentSoftlink SL ON SL.fkReferencedContentGUID = C.ContentGUID
+                    WHERE O.Depth = @Depth - 1
+                        AND C.ContentType = 1
+                        AND SL.LinkType = 1
+                        AND NOT EXISTS (
+                            SELECT 1 FROM @Owners X
+                            WHERE X.ContentTypeID = O.ContentTypeID
+                                AND X.ContentID = O.ContentID
+                                AND X.OwnerContentID = SL.fkOwnerContentID)
+                    SET @Added = @@ROWCOUNT
+                END
+
+                -- Keep owners that are currently published pages; count distinct (block, page) pairs per page type
+                SELECT O.ContentTypeID AS BlockTypeID, CT.Name AS PageTypeName, COUNT(*) AS UsageCount
+                FROM @Owners O
+                INNER JOIN tblContent C ON C.pkID = O.OwnerContentID
+                INNER JOIN tblContentType CT ON CT.pkID = C.fkContentTypeID
+                WHERE C.ContentType = 0
+                    AND EXISTS (
+                        SELECT 1 FROM tblWorkContent WC
+                        WHERE WC.fkContentID = O.OwnerContentID
+                            AND WC.Status = 4
+                            AND (WC.StopPublish IS NULL OR WC.StopPublish > @NowTime))
+                GROUP BY O.ContentTypeID, CT.Name
+            ";
+
+            var statistics = new List<BlockTypeUsageStatistic>();
+            await using var dbDataReader = await command.ExecuteReaderAsync(cancellationToken);
+            while (await dbDataReader.ReadAsync(cancellationToken))
+            {
+                statistics.Add(new BlockTypeUsageStatistic
+                {
+                    BlockTypeId = (int)dbDataReader["BlockTypeID"],
+                    PageTypeName = (string)dbDataReader["PageTypeName"],
+                    UsageCount = (int)dbDataReader["UsageCount"]
+                });
             }
 
-            return usagePages;
-        });
+            return statistics;
+        }));
     }
 }
